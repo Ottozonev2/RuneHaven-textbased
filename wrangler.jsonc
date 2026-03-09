@@ -6,7 +6,13 @@
         "enabled": true
     },
     "assets": {
-        "directory": "."
+        "directory": ".",
+        "exclude": [
+            ".git",
+            ".github",
+            "node_modules",
+            "vendor"
+        ]
     },
     "compatibility_flags": [
         "nodejs_compat"

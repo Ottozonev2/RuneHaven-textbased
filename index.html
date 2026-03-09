@@ -2046,11 +2046,8 @@
 
   <!-- PARTY MENU MODAL -->
   <div class="modal-overlay" id="modal-party">
-    <div class="modal-content" style="max-width:440px;">
-      <div class="modal-header">
-        <div class="modal-title">⚔️ PARTY MANAGEMENT</div>
-        <button class="modal-close" onclick="UI.closeModal('modal-party')">×</button>
-      </div>
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-title">⚔️ PARTY MANAGEMENT</div>
       <div id="party-info-box"
         style="margin-bottom:15px; padding:12px; background:rgba(184, 144, 255, 0.05); border:1px solid var(--violet-dk); border-radius:4px;">
         <div style="font-size:11px; color:var(--violet-lt); margin-bottom:4px; font-family:'Cinzel',serif;">CURRENT
@@ -2456,7 +2453,7 @@
       apiKey: '$2a$10$q71P.RPpUWj.LnnZlDZN.O/vNa7iyygv15GYBvi4SFuqBmIjVEW8a',
       leaderboardId: '69ae1073ae596e708f6e58e3',
       notesId: '69ae1081ae596e708f6e591d',
-      factionWarId: '69ae108fd0ea881f40fdfcdd',
+      // factionWarId: '69ae108fd0ea881f40fdfcdd',
       chatId: '69ae1161d0ea881f40fe0037',
       guildId: '69ae1674ae596e708f6e6eeb',
       partyBinId: '69ae4068ae596e708f6eabc9', // DEDICATED PARTY BIN
@@ -5149,33 +5146,42 @@
        WORLD SERVER — Async Multiplayer via JSONBin.io
        ============================================================ */
     const WorldServer = {
-      _base: 'https://api.jsonbin.io/v3/b',
+      _base: '/api/world?bin=',
       _lbTab: 'level',
 
-      _ok() {
-        return WORLD_CONFIG.enabled &&
-          WORLD_CONFIG.apiKey !== 'YOUR_JSONBIN_MASTER_KEY';
+      _ok() { return WORLD_CONFIG.enabled; },
+
+      _headers() {
+        return { 'Content-Type': 'application/json' };
       },
 
-      _headers(write = false) {
-        const h = { 'Content-Type': 'application/json', 'X-Master-Key': WORLD_CONFIG.apiKey };
-        if (!write) h['X-Bin-Meta'] = 'false';
-        return h;
+      async _get(binId, tries = 2) {
+        for (let i = 0; i < tries; i++) {
+          try {
+            const r = await fetch(`${this._base}${binId}`, { headers: this._headers() });
+            if (!r.ok) throw new Error('Fetch failed');
+            return await r.json();
+          } catch (e) {
+            if (i === tries - 1) throw e;
+            await new Promise(res => setTimeout(res, 500));
+          }
+        }
       },
 
-      async _get(binId) {
-        const r = await fetch(`${this._base}/${binId}`, { headers: this._headers() });
-        if (!r.ok) throw new Error('Fetch failed');
-        return r.json();
-      },
-
-      async _put(binId, data) {
-        const r = await fetch(`${this._base}/${binId}`, {
-          method: 'PUT', headers: this._headers(true),
-          body: JSON.stringify(data)
-        });
-        if (!r.ok) throw new Error('Write failed');
-        return r.json();
+      async _put(binId, data, tries = 2) {
+        for (let i = 0; i < tries; i++) {
+          try {
+            const r = await fetch(`${this._base}${binId}`, {
+              method: 'POST', headers: this._headers(),
+              body: JSON.stringify(data)
+            });
+            if (!r.ok) throw new Error('Write failed');
+            return await r.json();
+          } catch (e) {
+            if (i === tries - 1) throw e;
+            await new Promise(res => setTimeout(res, 500));
+          }
+        }
       },
 
       // ── LEADERBOARD ──────────────────────────────────────────────
@@ -5222,8 +5228,10 @@
           const entries = (lbData.entries || []).slice();
           this._renderLeaderboard(entries);
           // Faction war
-          const fw = await this._get(WORLD_CONFIG.factionWarId);
-          this._renderFactionWar(fw);
+          if (WORLD_CONFIG.factionWarId) {
+            const fw = await this._get(WORLD_CONFIG.factionWarId);
+            this._renderFactionWar(fw);
+          }
           document.getElementById('lb-status').textContent =
             `Updated · ${entries.length} Outworlders recorded`;
         } catch (e) {
@@ -5274,7 +5282,7 @@
 
       // ── FACTION WAR ──────────────────────────────────────────────
       async recordKill(faction) {
-        if (!this._ok()) return;
+        if (!this._ok() || !WORLD_CONFIG.factionWarId) return;
         try {
           const fw = await this._get(WORLD_CONFIG.factionWarId);
           fw[faction] = (fw[faction] || 0) + 1;
@@ -5658,32 +5666,29 @@
       },
 
       _startPoll(secs) {
-        if (this._timer) clearInterval(this._timer);
-        // If in party, ALWAYS use partyPoll (5s) for responsiveness
+        if (this._timer) clearTimeout(this._timer);
         const interval = G.partyCode ? this._partyPoll : secs;
         this._countdown = interval;
-        this._timer = setInterval(() => {
+
+        const tick = async () => {
           this._countdown--;
           const el = document.getElementById('chat-countdown');
           if (el) el.textContent = this._countdown + 's';
+
           if (this._countdown <= 0) {
-            this._countdown = interval;
-            this.refresh();
+            await this.refresh();
+            this._countdown = G.partyCode ? this._partyPoll : secs;
           }
-        }, 1000);
+          this._timer = setTimeout(tick, 1000);
+        };
+        this._timer = setTimeout(tick, 1000);
       },
 
       _setDot(color) {
-        const map = { green: '#4ade80', gray: '#555', red: '#e08088', yellow: '#fbbf24' };
         const dot = document.getElementById('chat-status-dot');
-        if (dot) {
-          dot.style.background = map[color] || color;
-          // Subtly pulse yellow dot to show activity
-          if (color === 'yellow') {
-            dot.style.opacity = '0.5';
-            setTimeout(() => { if (dot.style.background.includes('251')) dot.style.opacity = '1'; }, 200);
-          } else { dot.style.opacity = '1'; }
-        }
+        if (!dot) return;
+        const map = { green: '#4ade80', gray: '#555', red: '#e08088', yellow: '#fbbf24' };
+        dot.style.background = map[color] || color;
       },
 
       async refresh() {
@@ -5696,15 +5701,15 @@
           this._cache = chatData.messages || [];
           this._renderMessages();
 
-          // 2. Fetch Party Sync State (Sync only)
+          // 2. Fetch Party Sync State (Sync only) — wrapped to protect main chat
           if (G.partyCode) {
-            await this._fetchPartyStore();
+            try { await this._fetchPartyStore(); } catch (pe) { /* Silent background fail */ }
           }
 
-          // 3. Send Heartbeat (if in party, every ~12s)
+          // 3. Hearbeat is now background-only
           const now = Date.now();
-          if (G.partyCode && (now - (G.lastPulse || 0) > 12000)) {
-            this._sendPulse();
+          if (G.partyCode && (now - (G.lastPulse || 0) > 25000)) {
+            this._sendPulse().catch(() => { });
             G.lastPulse = now;
           }
 
@@ -5720,18 +5725,11 @@
             if (filtered.length) this._lastTs[ch] = Math.max(...filtered.map(m => m.ts));
           });
 
-          // 5. Clear dead party members from UI cache (handled by _fetchPartyStore now)
-          // Object.keys(G.partyMembers).forEach(name => {
-          //   if (now - G.partyMembers[name].ts > 60000) delete G.partyMembers[name];
-          // });
-
           // 6. Parse invitations (from chat bin)
           if (G.player) {
             const myName = G.player.name.toLowerCase();
             this._cache.forEach(m => {
-              // Don't detect our own invitations
               if (m.author === G.player.name) return;
-
               const txt = (m.text || '').toLowerCase();
               const isForMe = txt.includes('/invite @' + myName) ||
                 txt.includes('/invite ' + myName) ||
@@ -5744,16 +5742,13 @@
                   if (!G.partyInvites.some(inv => inv.code === code)) {
                     G.partyInvites.push({ author: m.author, code: code, ts: m.ts });
                     Log.add(`📩 Party invite from <strong>${m.author}</strong>! (Check Party Menu)`, 'success');
-                    if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu();
+                    if (document.getElementById('modal-party').classList.contains('open')) this.refreshPartyMenu();
                   }
                 }
               }
             });
           }
           this._updateBadges();
-          // if (this._expanded) this._renderMessages(); // Already called after chat fetch
-          // if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu(); // Called by _fetchPartyStore
-          // UI.refreshCompanions(); // Called by _fetchPartyStore
           this._setDot('green');
         } catch (e) {
           console.error("Refresh Error", e);
