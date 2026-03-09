@@ -5348,13 +5348,13 @@
        All messages stored in one JSONBin with {ch, guild, party} fields
        ============================================================ */
     const GlobalChat = {
-      _slow: 60, _fast: 12, _partyPoll: 5,
+      _slow: 60, _fast: 12, _partyPoll: 8,
       _countdown: 0, _timer: null,
       _expanded: false,
-      _channel: 'global',   // 'global' | 'guild' | 'party'
+      _channel: 'global',
       _lastTs: { global: 0, guild: 0, party: 0 },
       _unread: { global: 0, guild: 0, party: 0 },
-      _selectedUser: null,
+      _cache: [], _partyCache: {},
       _sessionStart: 0,
       // _lastPartyCheck: 0, // Removed as party store is no longer separate
 
@@ -5378,6 +5378,7 @@
         if (savedCode) G.partyCode = savedCode;
         G.isPartyLeader = localStorage.getItem('runehaven_is_leader') === 'true';
         G.partyMembers = {};
+        G.partyState = { members: {}, commands: [] };
         G.lastTravelTs = 0;
         G.lastBattleTs = 0;
         G.lastDmgTs = 0;
@@ -5686,50 +5687,45 @@
       },
 
       async refresh() {
-        if (!this._ok()) return;
+        if (!this._ok() || !G.player) return;
         this._setDot('yellow');
-        try {
-          const data = await WorldServer._get(WORLD_CONFIG.chatId);
-          this._cache = data.messages || [];
 
-          // 1. Send Heartbeat (if in party, every ~12s)
+        try {
+          // 1. Fetch Chat Messages (Messages only)
+          const chatData = await WorldServer._get(WORLD_CONFIG.chatId);
+          this._cache = chatData.messages || [];
+          this._renderMessages();
+
+          // 2. Fetch Party Sync State (Sync only)
+          if (G.partyCode) {
+            await this._fetchPartyStore();
+          }
+
+          // 3. Send Heartbeat (if in party, every ~12s)
           const now = Date.now();
           if (G.partyCode && (now - (G.lastPulse || 0) > 12000)) {
             this._sendPulse();
             G.lastPulse = now;
           }
 
-          // 2. Count unread and Process Pulses
+          // 4. Count unread messages (from chat bin)
           ['global', 'guild', 'party'].forEach(ch => {
-            const filtered = this._filterFor(ch, true);
-            // SORT messages by timestamp to ensure order
+            const filtered = this._filterFor(ch, false); // Only text messages for unread count
             const newMsgs = filtered.filter(m => m.ts > this._lastTs[ch]).sort((a, b) => a.ts - b.ts);
 
-
-
-            const newNormalCount = newMsgs.filter(m => !m.text.startsWith('/')).length;
+            const newNormalCount = newMsgs.length;
             if (!this._expanded || this._channel !== ch) {
               if (newNormalCount > 0) this._unread[ch] += newNormalCount;
             }
             if (filtered.length) this._lastTs[ch] = Math.max(...filtered.map(m => m.ts));
           });
 
-          // 3. Process ALL recent party commands (Immune to clock skew/order)
-          if (G.partyCode) {
-            const partyHistory = this._filterFor('party', true).slice(-100); // Look at last 100 party messages
-            partyHistory.forEach(m => {
-              if (m.text && m.text.startsWith('/')) {
-                this._handlePartyCmd(m);
-              }
-            });
-          }
+          // 5. Clear dead party members from UI cache (handled by _fetchPartyStore now)
+          // Object.keys(G.partyMembers).forEach(name => {
+          //   if (now - G.partyMembers[name].ts > 60000) delete G.partyMembers[name];
+          // });
 
-          // 4. Clear dead party members from UI cache
-          Object.keys(G.partyMembers).forEach(name => {
-            if (now - G.partyMembers[name].ts > 60000) delete G.partyMembers[name];
-          });
-
-          // Parse invitations
+          // 6. Parse invitations (from chat bin)
           if (G.player) {
             const myName = G.player.name.toLowerCase();
             this._cache.forEach(m => {
@@ -5755,16 +5751,88 @@
             });
           }
           this._updateBadges();
-          if (this._expanded) this._renderMessages();
-          if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu();
-          UI.refreshCompanions(); // Update sidebar with new pulses
+          // if (this._expanded) this._renderMessages(); // Already called after chat fetch
+          // if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu(); // Called by _fetchPartyStore
+          // UI.refreshCompanions(); // Called by _fetchPartyStore
           this._setDot('green');
-        } catch (e) { this._setDot('red'); console.error(e); }
+        } catch (e) {
+          console.error("Refresh Error", e);
+          this._setDot('red');
+        }
+      },
+
+      async _updatePartyStore(updateFn) {
+        if (!G.partyCode || !WORLD_CONFIG.partyBinId) return;
+        try {
+          const data = await WorldServer._get(WORLD_CONFIG.partyBinId);
+          const state = data || {};
+          const partyKey = G.partyCode.toUpperCase();
+          if (!state[partyKey]) state[partyKey] = { members: {}, commands: [] };
+
+          updateFn(state[partyKey]);
+
+          // Cleanup old commands (keep last 20)
+          if (state[partyKey].commands.length > 20) {
+            state[partyKey].commands = state[partyKey].commands.slice(-20);
+          }
+
+          await WorldServer._put(WORLD_CONFIG.partyBinId, state);
+          G.partyState = state[partyKey]; // Update global state
+        } catch (e) { console.error("Party Update Error", e); }
+      },
+
+      async _fetchPartyStore() {
+        if (!G.partyCode || !WORLD_CONFIG.partyBinId) return;
+        try {
+          const data = await WorldServer._get(WORLD_CONFIG.partyBinId);
+          const partyKey = G.partyCode.toUpperCase();
+          const partyData = data?.[partyKey];
+          if (!partyData) {
+            G.partyState = { members: {}, commands: [] }; // Initialize if not found
+            G.partyMembers = {}; // Clear local members if party data is gone
+            return;
+          }
+
+          G.partyState = partyData; // Update global state
+
+          // Process Pulses
+          const now = Date.now();
+          const newPartyMembers = {};
+          Object.entries(partyData.members || {}).forEach(([name, mData]) => {
+            // Only update if the received pulse is newer or if it's a new member
+            if (mData.ts > (G.partyMembers[name]?.ts || 0)) {
+              newPartyMembers[name] = { ...mData, receivedAt: now };
+            } else if (G.partyMembers[name]) {
+              // Keep existing member data
+              newPartyMembers[name] = G.partyMembers[name];
+            }
+          });
+          // Clear dead party members from UI cache
+          Object.keys(newPartyMembers).forEach(name => {
+            if (now - (newPartyMembers[name].receivedAt || 0) > 60000) delete newPartyMembers[name];
+          });
+          G.partyMembers = newPartyMembers;
+
+
+          // Process Commands (Travel, Battle, etc)
+          // Filter out commands already processed based on G.lastProcessedPartyCmdTs
+          const newCommands = partyData.commands.filter(cmd => cmd.ts > (G.lastProcessedPartyCmdTs || 0));
+          newCommands.forEach(cmd => {
+            this._handlePartyCmd(cmd);
+            G.lastProcessedPartyCmdTs = Math.max(G.lastProcessedPartyCmdTs || 0, cmd.ts);
+          });
+
+          this.refreshPartyMenu();
+          UI.refreshCompanions();
+        } catch (e) { console.error("Party Fetch Error", e); }
       },
 
       _handlePartyCmd(m) {
         if (m.author === G.player.name) return; // Ignore self
         if (m.text.startsWith('/party_pulse')) {
+          // Pulses are now handled directly by _fetchPartyStore from the members object
+          // This block is effectively deprecated for pulses coming from the party bin
+          // but might catch old pulses from chat bin if any.
           try {
             const data = JSON.parse(m.text.replace('/party_pulse ', ''));
             // Pulses only update the roster if they are new (based on remote TS)
@@ -5845,35 +5913,33 @@
       },
 
       async _sendPulse() {
-        if (!G.partyCode) return;
-        const p = G.player;
-        const pulse = {
-          hp: p.hp, maxHp: effectiveMaxHp(), level: p.level,
-          icon: CLASSES[p.classKey].icon, isCombat: G.inCombat,
-          loc: G.location, ts: Date.now(),
-          isLeader: G.isPartyLeader // Boss status transmitted
-        };
-        await this._broadcastPartyCmd(`/party_pulse ${JSON.stringify(pulse)}`);
-      },
-
-      async _broadcastPartyCmd(txt) {
-        if (!G.partyCode) return;
+        if (!G.partyCode || !G.player) return;
         const p = G.player;
         const msg = {
-          ch: 'party', party: G.partyCode,
-          author: p.name, faction: p.faction, text: txt, ts: Date.now()
+          hp: p.hp, maxHp: effectiveMaxHp(),
+          level: p.level, class: p.classKey,
+          icon: CLASSES[p.classKey]?.icon || '❓',
+          isLeader: G.isPartyLeader,
+          isCombat: G.inCombat,
+          ts: Date.now()
         };
-        try {
-          const data = await WorldServer._get(WORLD_CONFIG.chatId);
-          const messages = data.messages || [];
-          messages.push(msg);
-          if (messages.length > 500) messages.splice(0, messages.length - 500);
-          await WorldServer._put(WORLD_CONFIG.chatId, { messages });
-          this._cache = messages;
-        } catch (e) { }
+
+        this._updatePartyStore(party => {
+          party.members[p.name] = msg;
+        });
       },
 
-      // Removed _updatePartyStore and _fetchPartyStore as per instructions.
+      async _broadcastPartyCmd(text) {
+        if (!G.partyCode) return;
+        const cmd = {
+          author: G.player.name,
+          text: text,
+          ts: Date.now()
+        };
+        this._updatePartyStore(party => {
+          party.commands.push(cmd);
+        });
+      },
 
       _filterFor(ch, includeCommands = false) {
         return this._cache.filter(m => {
