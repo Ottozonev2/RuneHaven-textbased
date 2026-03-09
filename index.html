@@ -1668,6 +1668,21 @@
           onkeydown="if(event.key==='Enter')GlobalChat.send()" autocomplete="off" autocorrect="off" spellcheck="false">
         <button class="btn btn-violet btn-sm" onclick="GlobalChat.send()" style="min-width:48px;">Send</button>
       </div>
+      <!-- Interaction Menu Overlay -->
+      <div id="chat-context-menu"
+        style="display:none;position:absolute;z-index:100;background:var(--bg-panel);border:1px solid var(--violet);border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,.5);min-width:140px;overflow:hidden;font-family:'Cinzel',serif;">
+        <div id="chat-menu-user"
+          style="padding:10px 12px;font-size:10px;color:var(--violet-lt);border-bottom:1px solid var(--border);background:rgba(139,92,246,.05);font-weight:600;letter-spacing:1px;">
+          PLAYER NAME</div>
+        <button onclick="GlobalChat.inviteToParty()"
+          style="width:100%;text-align:left;padding:10px 12px;background:none;border:none;color:var(--text-lt);cursor:pointer;font-size:11px;border-bottom:1px solid var(--border);transition:background .2s;"
+          onmouseenter="this.style.background='rgba(255,255,255,.05)'" onmouseleave="this.style.background='none'">🤝
+          Invite to Party</button>
+        <button onclick="GlobalChat.requestTrade()"
+          style="width:100%;text-align:left;padding:10px 12px;background:none;border:none;color:var(--text-lt);cursor:pointer;font-size:11px;transition:background .2s;"
+          onmouseenter="this.style.background='rgba(255,255,255,.05)'" onmouseleave="this.style.background='none'">🪙
+          Request Trade</button>
+      </div>
     </div>
 
     <div class="topbar">
@@ -1680,7 +1695,6 @@
       </div>
       <div class="topbar-btns">
         <button class="btn btn-sm btn-gold" onclick="Game.saveGame()">💾</button>
-        <button class="btn btn-sm" onclick="Game.loadGame()">📂</button>
         <button class="btn btn-sm btn-red" onclick="Game.showTitle()">✕</button>
       </div>
     </div>
@@ -2455,7 +2469,7 @@
       inCombat: false, currentEnemy: null,
       playerDefending: false, combatBuffs: {},
       turnCount: 0, canAct: true,
-      companion: null  // { type: 'skeleton'|'mercenary'|..., str, turnsLeft (null=permanent) }
+      companions: []  // Array of { type, name, icon, str, turnsLeft }
     };
 
     /* ============================================================
@@ -2706,7 +2720,8 @@
       },
 
       showTownActions() {
-        const compLabel = G.companion ? `👥 ${G.companion.name} (active)` : '🍺 Tavern';
+        const compCount = (G.companions && G.companions.length) || 0;
+        const compLabel = compCount > 0 ? `👥 Tavern (${compCount}/3)` : '🍺 Tavern';
         const gLabel = (G.player && G.player.guildName) ? `🏰 ${G.player.guildName}` : '🏰 Guild';
         UI.setActions([
           { label: '🏪 Market', fn: "Explore.openShop()", cls: 'btn-gold' },
@@ -2781,11 +2796,17 @@
         document.getElementById('tavern-gold-display').textContent = p.gold;
         // Companion status
         const compDiv = document.getElementById('tavern-companion-status');
-        if (G.companion) {
-          compDiv.innerHTML = `<div style="color:var(--violet-lt);margin-bottom:10px;">👥 Current companion: <strong>${G.companion.icon} ${G.companion.name}</strong> (STR ${G.companion.str})</div>
-          <button class="btn btn-red btn-sm" onclick="Explore.dismissCompanion()">Dismiss Companion</button>`;
+        if (G.companions && G.companions.length > 0) {
+          let html = `<div style="color:var(--violet-lt);margin-bottom:10px;font-family:'Cinzel',serif;font-size:11px;">ACTIVE COMPANIONS (${G.companions.length}/3)</div>`;
+          G.companions.forEach((c, idx) => {
+            html += `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:8px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:13px;">${c.icon} <strong>${c.name}</strong> <span style="color:var(--text-dim);font-size:11px;">(STR ${c.str})</span></div>
+              <button class="btn btn-red btn-sm" onclick="Explore.dismissCompanion(${idx})">Dismiss</button>
+            </div>`;
+          });
+          compDiv.innerHTML = html;
         } else {
-          compDiv.innerHTML = `<div style="color:var(--text-dim);font-style:italic;margin-bottom:8px;">No companion hired.</div>`;
+          compDiv.innerHTML = `<div style="color:var(--text-dim);font-style:italic;margin-bottom:8px;">No companions hired. (Max 3)</div>`;
         }
         UI.openModal('modal-tavern');
       },
@@ -2818,22 +2839,24 @@
         const p = G.player;
         const costs = { mercenary: 80, guardsman: 50, shadowBlade: 150 };
         const cost = costs[type];
-        if (G.companion) { Log.add('Dismiss your current companion first!', 'system'); return; }
+        if (!G.companions) G.companions = [];
+        if (G.companions.length >= 3) { Log.add('You already have 3 companions (maximum)!', 'system'); return; }
         if (p.gold < cost) { Log.add(`You need ${cost} gold to hire this companion.`, 'system'); return; }
         p.gold -= cost;
         const ct = COMPANION_TYPES[type];
-        G.companion = { type, name: ct.name, icon: ct.icon, str: ct.str + Math.floor(p.level / 5) };
-        Log.add(`⚔️ <strong>${ct.icon} ${ct.name}</strong> joins you as a companion!`, 'success');
+        G.companions.push({ type, name: ct.name, icon: ct.icon, str: ct.str + Math.floor(p.level / 5) });
+        Log.add(`⚔️ <strong>${ct.icon} ${ct.name}</strong> joins your party!`, 'success');
         UI.closeModal('modal-tavern');
-        UI.refresh(); Game.autosave();
+        UI.refresh(); this.showTownActions(); Game.autosave();
       },
 
-      dismissCompanion() {
-        if (!G.companion) return;
-        Log.add(`${G.companion.icon} ${G.companion.name} parts ways with you.`, 'system');
-        G.companion = null;
-        UI.closeModal('modal-tavern');
-        this.showTownActions();
+      dismissCompanion(idx) {
+        if (!G.companions || !G.companions[idx]) return;
+        const c = G.companions[idx];
+        Log.add(`${c.icon} ${c.name} parts ways with you.`, 'system');
+        G.companions.splice(idx, 1);
+        this.openTavern(); // Refresh tavern view
+        this.showTownActions(); // Update main button label
         UI.refresh();
       },
 
@@ -3012,11 +3035,14 @@
       },
 
       companionAttack() {
-        if (!G.companion || !G.currentEnemy || G.currentEnemy.hp <= 0) return;
-        const c = G.companion, enemy = G.currentEnemy;
-        const dmg = Math.max(1, c.str + Math.floor(Math.random() * 4) - Math.floor(enemy.def / 2));
-        enemy.hp -= dmg;
-        Log.add(`${c.icon} <strong>${c.name}</strong> strikes the ${enemy.name} for <strong>${dmg}</strong>!`, 'player');
+        if (!G.companions || !G.companions.length || !G.currentEnemy || G.currentEnemy.hp <= 0) return;
+        G.companions.forEach(c => {
+          if (!G.currentEnemy || G.currentEnemy.hp <= 0) return;
+          const enemy = G.currentEnemy;
+          const dmg = Math.max(1, c.str + Math.floor(Math.random() * 4) - Math.floor(enemy.def / 2));
+          enemy.hp -= dmg;
+          Log.add(`${c.icon} <strong>${c.name}</strong> strikes the ${enemy.name} for <strong>${dmg}</strong>!`, 'player');
+        });
       },
 
       // Scale enemy stats based on player level vs enemy base level
@@ -3241,7 +3267,7 @@
         const key = G.activeSaveSlot || 'runehaven_slot_0';
         const data = {
           player: G.player, location: G.location,
-          turnCount: G.turnCount, companion: G.companion
+          turnCount: G.turnCount, companions: G.companions || []
         };
         // Always backup to local
         localStorage.setItem(key, JSON.stringify(data));
@@ -3267,7 +3293,7 @@
           G.player = data.player; G.location = data.location || 'solmara';
           G.inCombat = false; G.currentEnemy = null;
           G.turnCount = data.turnCount || 0;
-          G.companion = data.companion || null;
+          G.companions = data.companions || (data.companion ? [data.companion] : []);
           this._show('screen-game');
           GlobalChat.init(); // start persistent chat polling
           Log.clear();
@@ -3305,6 +3331,18 @@
       permadeathEnd() {
         // Delete the save slot permanently from local and cloud
         const slot = G.activeSaveSlot || 'runehaven_slot_0';
+        const p = G.player;
+        if (p && p.guildName) {
+          // Remove from guild list silently before deleting everything
+          const gn = p.guildName;
+          GuildSystem.refresh().then(() => {
+            const g = GuildSystem._guilds.find(x => x.name === gn);
+            if (g) {
+              g.members = g.members.filter(m => m.name !== p.name);
+              GuildSystem._save();
+            }
+          });
+        }
         localStorage.removeItem(slot);
         CloudSave.deleteSlot(slot);
         G.player = null; G.location = 'solmara'; G.inCombat = false;
@@ -3723,6 +3761,7 @@
       _lastTs: { global: 0, guild: 0, party: 0 },
       _unread: { global: 0, guild: 0, party: 0 },
       _cache: [],
+      _selectedUser: null,
 
       // guild / party stored on G (session-only, not in player save)
       _guild() { return (G.player && G.player.guildName) || ''; },
@@ -3740,6 +3779,13 @@
         if (!this._ok()) return;
         this._startPoll(this._slow);
         this.refresh();
+        // Close chat menu on outside click
+        document.addEventListener('mousedown', (e) => {
+          const menu = document.getElementById('chat-context-menu');
+          if (menu && menu.style.display !== 'none' && !menu.contains(e.target)) {
+            menu.style.display = 'none';
+          }
+        });
       },
 
       clear() {
@@ -3877,6 +3923,50 @@
         this._renderMessages();
       },
 
+      showMenu(e, name) {
+        e.stopPropagation();
+        if (G.player && name === G.player.name) return;
+        this._selectedUser = name;
+        const menu = document.getElementById('chat-context-menu');
+        const userLabel = document.getElementById('chat-menu-user');
+        if (!menu || !userLabel) return;
+        userLabel.textContent = name.toUpperCase();
+        menu.style.display = 'block';
+        const panel = document.getElementById('chat-panel');
+        const rect = panel.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top - menu.offsetHeight;
+        if (x + 140 > rect.width) x = rect.width - 150;
+        if (y < 40) y = e.clientY - rect.top + 10;
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+      },
+
+      inviteToParty() {
+        const name = this._selectedUser;
+        if (!name) return;
+        const code = G.partyCode || '';
+        if (!code) {
+          Log.add('Create a party first to invite others!', 'system');
+        } else {
+          const input = document.getElementById('chat-input');
+          input.value = `/invite @${name} (Join my party! Code: ${code})`;
+          this.send();
+          Log.add(`Invitation sent to ${name}.`, 'success');
+        }
+        document.getElementById('chat-context-menu').style.display = 'none';
+      },
+
+      requestTrade() {
+        const name = this._selectedUser;
+        if (!name) return;
+        const input = document.getElementById('chat-input');
+        input.value = `/trade @${name}`;
+        this.send();
+        Log.add(`Trade request sent to ${name}.`, 'system');
+        document.getElementById('chat-context-menu').style.display = 'none';
+      },
+
       _startPoll(secs) {
         if (this._timer) clearInterval(this._timer);
         this._countdown = secs;
@@ -3956,7 +4046,8 @@
           const fi = m.faction === 'saints' ? '\u2600' : '\uD83D\uDC80';
           const time = new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           return `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);">`
-            + `<span style="color:${fc};font-weight:600;font-size:11px;">${fi} ${this._e(m.author)}</span>`
+            + `<span onclick="GlobalChat.showMenu(event, '${m.author}')" style="color:${fc};font-weight:600;font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(255,255,255,.1);">`
+            + `${fi} ${this._e(m.author)}</span>`
             + `<span style="color:var(--text-dim);font-size:10px;"> Lv${m.level || '?'} ${this._e(m.cls || m.class || '')} &middot; ${time}</span>`
             + `<br><span style="color:var(--text-lt);font-size:12px;">${this._e(m.text)}</span>`
             + `</div>`;
