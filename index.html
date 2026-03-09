@@ -5144,13 +5144,13 @@
        WORLD SERVER — Async Multiplayer via JSONBin.io
        ============================================================ */
     const WorldServer = {
-      // Auto-detect server: Use our new Cloudflare API if on Cloudflare/localhost, fallback to JSONBin (only for notes/leaderboard)
-      _base: (window.location.hostname.includes('pages.dev') || window.location.port === '8788')
-        ? '/api/world?bin='
-        : 'https://api.jsonbin.io/v3/b/',
+      // Use Cloudflare API if hosted anywhere online, fallback to JSONBin only for local file:// testing
+      _base: (window.location.protocol === 'file:')
+        ? 'https://api.jsonbin.io/v3/b/'
+        : '/api/world?bin=',
       _lbTab: 'level',
 
-      _isCloudflare: (window.location.hostname.includes('pages.dev') || window.location.hostname === 'localhost'),
+      _isCloudflare: (window.location.protocol !== 'file:'),
 
       _ok() { return WORLD_CONFIG.enabled; },
 
