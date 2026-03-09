@@ -2169,43 +2169,36 @@
         <div style="margin-bottom:24px;">
           <div
             style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-            <span>v3.5 - The Stash & Hoarder Update</span>
+            <span>v3.6 - The Chronicles & Discovery Update</span>
             <span style="font-size:10px; opacity:0.6;">Mar 9, 2026</span>
+          </div>
+          <ul style="padding-left:18px; margin:0;">
+            <li><strong>Quest System</strong>: Embark on main story arcs and faction-specific missions via the Quest
+              Log.</li>
+            <li><strong>Random Discoveries</strong>: Find lost travelers, overturned carriages, and hidden chests in the
+              wilds.</li>
+            <li><strong>Mimics & Ambushes</strong>: Beware! Some discovery chests are alive and hungry.</li>
+          </ul>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
+            <span>v3.6 - The Stash & Hoarder Update</span>
           </div>
           <ul style="padding-left:18px; margin:0;">
             <li><strong>Player Stash</strong>: New 200-slot chest in Solmara for storing gear and gold.</li>
             <li><strong>Jewelry Slot</strong>: Rings, amulets, and gems can now be equipped for powerful scaling
               bonuses.</li>
-            <li><strong>Level Requirements</strong>: Gear now requires specific levels to equip. Outworlders must grow
-              their power appropriately.</li>
           </ul>
         </div>
 
         <div style="margin-bottom:24px;">
-          <div
-            style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-            <span>v3.4 - Dungeons & Legends</span>
-            <span style="font-size:10px; opacity:0.6;">Mar 9, 2026</span>
+          <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
+            <span>v3.6 - Dungeons & Legends</span>
           </div>
           <ul style="padding-left:18px; margin:0;">
-            <li><strong>World Dungeons</strong>: Travel to the Ancient Catacombs (Lv.5), Iron Garrison (Lv.20), and
-              more.</li>
+            <li><strong>World Dungeons</strong>: Travel to the Ancient Catacombs, Iron Garrison, and more.</li>
             <li><strong>Boss Loot</strong>: Legendary items are now exclusively guarded by dungeon bosses.</li>
-            <li><strong>80+ New Weapons</strong>: Massive arsenal expansion across all classes.</li>
-          </ul>
-        </div>
-
-        <div style="margin-bottom:24px;">
-          <div
-            style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-            <span>v3.3 - Combat & Rarity System</span>
-            <span style="font-size:10px; opacity:0.6;">Mar 9, 2026</span>
-          </div>
-          <ul style="padding-left:18px; margin:0;">
-            <li><strong>Rarity Tiers</strong>: Gear now drops in 6 rarity tiers (Common to Legendary) with random stat
-              rolls.</li>
-            <li><strong>Combat UI</strong>: Rebuilt the attack menu for better skill flow and tooltips.</li>
-            <li><strong>Party Scaling</strong>: Summons and party members now scale dynamically with level.</li>
           </ul>
         </div>
       </div>
@@ -2213,6 +2206,31 @@
       <div style="padding:12px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
         <button class="btn btn-violet" style="width:100%;" onclick="UI.closeModal('modal-updates')">Back to
           Title</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quest Log Modal -->
+  <div class="modal-overlay" id="modal-quests">
+    <div class="modal"
+      style="max-width:520px; max-height:80vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+      <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
+        <div class="modal-title">⚔️ Chronicle of Quests</div>
+        <div id="quest-available-info"
+          style="color:var(--gold); font-size:10px; font-family:'Cinzel',serif; margin-top:4px;">PENDING CHALLENGES
+        </div>
+      </div>
+
+      <div style="flex:1; overflow-y:auto; padding:20px;">
+        <div id="quest-active-list" style="margin-bottom:24px;"></div>
+        <div
+          style="font-family:'Cinzel',serif; font-size:10px; color:var(--text-dim); border-top:1px solid var(--border); padding-top:10px; margin-bottom:10px;">
+          AVAILABLE TASKS</div>
+        <div id="quest-offer-list"></div>
+      </div>
+
+      <div style="padding:12px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
+        <button class="btn btn-violet" style="width:100%;" onclick="UI.closeModal('modal-quests')">Close Log</button>
       </div>
     </div>
   </div>
@@ -2625,16 +2643,17 @@
       saintlyPlate: { id: 'saintlyPlate', name: "Saint's Aegis", icon: '✨', type: 'equipment', slot: 'armor', defBonus: 20, vitBonus: 10, buyPrice: 800, sellPrice: 350, desc: 'The ultimate protection. +20 DEF, +10 VIT.' },
 
       // --- Jewelry (10 Total) ---
-      copperRing: { id: 'copperRing', name: 'Copper Ring', icon: '💍', type: 'equipment', slot: 'jewelry', strBonus: 1, buyPrice: 40, sellPrice: 15, desc: 'Simple copper band. +1 STR.' },
-      sagePendant: { id: 'sagePendant', name: 'Sage Pendant', icon: '📿', type: 'equipment', slot: 'jewelry', intBonus: 2, buyPrice: 60, sellPrice: 25, desc: 'Increases mana focus. +2 INT.' },
-      vitalityGem: { id: 'vitalityGem', name: 'Vitality Gem', icon: '💎', type: 'equipment', slot: 'jewelry', vitBonus: 3, buyPrice: 80, sellPrice: 35, desc: 'Pulsing with life. +3 VIT.' },
-      windEarring: { id: 'windEarring', name: 'Wind Earring', icon: '👂', type: 'equipment', slot: 'jewelry', agiBonus: 2, buyPrice: 70, sellPrice: 30, desc: 'Light as a breeze. +2 AGI.' },
-      holyRosary: { id: 'holyRosary', name: 'Holy Rosary', icon: '⛪', type: 'equipment', slot: 'jewelry', wisBonus: 4, buyPrice: 120, sellPrice: 50, desc: 'Solmaran prayer beads. +4 WIS.' },
-      bloodAmulet: { id: 'bloodAmulet', name: 'Blood Amulet', icon: '🩸', type: 'equipment', slot: 'jewelry', strBonus: 4, buyPrice: 150, sellPrice: 65, desc: 'Ashen Dominion relic. +4 STR.' },
-      arcaneLoop: { id: 'arcaneLoop', name: 'Arcane Loop', icon: '💫', type: 'equipment', slot: 'jewelry', intBonus: 5, buyPrice: 200, sellPrice: 90, desc: 'Loop of pure energy. +5 INT.' },
-      shadowRing: { id: 'shadowRing', name: 'Shadow Ring', icon: '🌑', type: 'equipment', slot: 'jewelry', agiBonus: 6, buyPrice: 250, sellPrice: 110, desc: 'Fades into the darkness. +6 AGI.' },
-      dragonTear: { id: 'dragonTear', name: 'Dragon Tear', icon: '💧', type: 'equipment', slot: 'jewelry', vitBonus: 8, buyPrice: 400, sellPrice: 180, desc: 'A crystallized drake tear. +8 VIT.' },
-      kingsMedal: { id: 'kingsMedal', name: "King's Medal", icon: '🥇', type: 'equipment', slot: 'jewelry', strBonus: 5, intBonus: 5, buyPrice: 600, sellPrice: 280, desc: 'Relic of an ancient king. +5 STR, +5 INT.' },
+      // --- Jewelry (Split into Neck, Ring, Earrings) ---
+      copperRing: { id: 'copperRing', name: 'Copper Ring', icon: '💍', type: 'equipment', slot: 'ring', strBonus: 1, buyPrice: 40, sellPrice: 15, desc: 'Simple copper band. +1 STR.' },
+      sagePendant: { id: 'sagePendant', name: 'Sage Pendant', icon: '📿', type: 'equipment', slot: 'neck', intBonus: 2, buyPrice: 60, sellPrice: 25, desc: 'Increases mana focus. +2 INT.' },
+      vitalityGem: { id: 'vitalityGem', name: 'Vitality Earrings', icon: '💎', type: 'equipment', slot: 'earrings', vitBonus: 3, buyPrice: 80, sellPrice: 35, desc: 'Pulsing with life. +3 VIT.' },
+      windEarring: { id: 'windEarring', name: 'Wind Earring', icon: '👂', type: 'equipment', slot: 'earrings', agiBonus: 2, buyPrice: 70, sellPrice: 30, desc: 'Light as a breeze. +2 AGI.' },
+      holyRosary: { id: 'holyRosary', name: 'Holy Rosary', icon: '⛪', type: 'equipment', slot: 'neck', wisBonus: 4, buyPrice: 120, sellPrice: 50, desc: 'Solmaran prayer beads. +4 WIS.' },
+      bloodAmulet: { id: 'bloodAmulet', name: 'Blood Amulet', icon: '🩸', type: 'equipment', slot: 'neck', strBonus: 4, buyPrice: 150, sellPrice: 65, desc: 'Ashen Dominion relic. +4 STR.' },
+      arcaneLoop: { id: 'arcaneLoop', name: 'Arcane Loop', icon: '💫', type: 'equipment', slot: 'ring', intBonus: 5, buyPrice: 200, sellPrice: 90, desc: 'Loop of pure energy. +5 INT.' },
+      shadowRing: { id: 'shadowRing', name: 'Shadow Ring', icon: '🌑', type: 'equipment', slot: 'ring', agiBonus: 6, buyPrice: 250, sellPrice: 110, desc: 'Fades into the darkness. +6 AGI.' },
+      dragonTear: { id: 'dragonTear', name: 'Dragon Tear Earrings', icon: '💧', type: 'equipment', slot: 'earrings', vitBonus: 8, buyPrice: 400, sellPrice: 180, desc: 'Crystallized drake tears. +8 VIT.' },
+      kingsMedal: { id: 'kingsMedal', name: "King's Medal", icon: '🥇', type: 'equipment', slot: 'neck', strBonus: 5, intBonus: 5, buyPrice: 600, sellPrice: 280, desc: 'Relic of an ancient king. +5 STR, +5 INT.' },
 
       // --- Weapons: Paladin/Inquisitor (Holy) ---
       hallowedMace: { id: 'hallowedMace', name: 'Hallowed Mace', icon: '🪓', type: 'equipment', slot: 'weapon', strBonus: 6, wisBonus: 2, buyPrice: 120, sellPrice: 50, desc: 'Blessed iron mace. +6 STR, +2 WIS.' },
@@ -2694,10 +2713,10 @@
       masterRapier: { id: 'masterRapier', name: "Duelist's Rapier", icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 10, agiBonus: 22, buyPrice: 900, sellPrice: 400, desc: 'Perfect balance. +10 STR, +22 AGI.' },
 
       // --- Jewelry Expansion (Totaling ~20 Jewelry now) ---
-      sapphireRing: { id: 'sapphireRing', name: 'Sapphire Ring', icon: '💍', type: 'equipment', slot: 'jewelry', intBonus: 10, buyPrice: 500, sellPrice: 220, desc: 'Deep blue magic. +10 INT.' },
-      rubyNecklace: { id: 'rubyNecklace', name: 'Ruby Necklace', icon: '📿', type: 'equipment', slot: 'jewelry', strBonus: 12, buyPrice: 550, sellPrice: 240, desc: 'Fire in the stone. +12 STR.' },
-      onyxBand: { id: 'onyxBand', name: 'Onyx Band', icon: '💍', type: 'equipment', slot: 'jewelry', agiBonus: 15, buyPrice: 700, sellPrice: 310, desc: 'Shadow-bonded. +15 AGI.' },
-      emeraldSeal: { id: 'emeraldSeal', name: 'Emerald Seal', icon: '💎', type: 'equipment', slot: 'jewelry', vitBonus: 18, buyPrice: 850, sellPrice: 380, desc: 'Nature’s breath. +18 VIT.' }
+      sapphireRing: { id: 'sapphireRing', name: 'Sapphire Ring', icon: '💍', type: 'equipment', slot: 'ring', intBonus: 10, buyPrice: 500, sellPrice: 220, desc: 'Deep blue magic. +10 INT.' },
+      rubyNecklace: { id: 'rubyNecklace', name: 'Ruby Necklace', icon: '📿', type: 'equipment', slot: 'neck', strBonus: 12, buyPrice: 550, sellPrice: 240, desc: 'Fire in the stone. +12 STR.' },
+      onyxBand: { id: 'onyxBand', name: 'Onyx Band', icon: '💍', type: 'equipment', slot: 'ring', agiBonus: 15, buyPrice: 700, sellPrice: 310, desc: 'Shadow-bonded. +15 AGI.' },
+      emeraldSeal: { id: 'emeraldSeal', name: 'Emerald Earrings', icon: '👂', type: 'equipment', slot: 'earrings', vitBonus: 18, buyPrice: 850, sellPrice: 380, desc: 'Nature’s breath. +18 VIT.' }
     };
 
     const SHOP_ITEMS = ['healthPotion', 'manaPotion', 'elixir', 'holyRelic', 'bloodVial', 'veilblade', 'runesword', 'veilstaff', 'apprenticeorb', 'devourerorb', 'covenantmail', 'ashplate', 'veilrobe', 'shadowmantle'];
@@ -2845,6 +2864,80 @@
         loot: [{ item: 'devourerorb', chance: .6 }, { item: 'shadowmantle', chance: .5 }],
         desc: 'A fragment of the Devouring King\'s true power breaks through the Veil! The world shakes!',
         attacks: ['consumes the soul of', 'tears reality beside', 'unleashes the Veil\'s fury on']
+      },
+      mimic: {
+        name: 'Mimic', icon: '🧰', level: 1, hp: 50, maxHp: 50, str: 10, def: 5, agi: 15, crit: 20, xp: 120, gold: [50, 150], isBoss: false,
+        enemyType: 'aberration',
+        loot: [{ item: 'arcaneLoop', chance: .15 }, { item: 'shadowRing', chance: .15 }],
+        desc: 'A predatory creature disguised as a treasure chest. It smells of old wood and human blood.',
+        attacks: ['snaps its lid at', 'lashes its tongue at', 'bites down on']
+      }
+    };
+
+    /* ============================================================
+       QUESTS
+       types: 'kill' (target enemy), 'visit' (location/npc), 'item' (in inventory)
+       ============================================================ */
+    const QUESTS = {
+      awakening: {
+        id: 'awakening', name: "An Outworlder's Awakening", type: 'visit', target: 'trainer',
+        desc: "Seek out the Skill Trainer in Solmara to learn how to channel your Veil energy.",
+        reward: { xp: 80, gold: 30 },
+        lore: "The shattering of the Veil was no accident. You must master your power if you hope to survive the coming storms.",
+        isMain: true
+      },
+      wraithMenace: {
+        id: 'wraithMenace', name: "The Wraith Menace", type: 'kill', target: 'veilWraith', goal: 5,
+        desc: "Cull 5 Veil Wraiths in the Ashfall Coast to keep Solmara safe.",
+        reward: { xp: 150, gold: 100 },
+        lore: "The screams of the Wraiths are more frequent lately. They are gathering... waiting for someone to lead them.",
+        isMain: true
+      },
+      catacombWarden: {
+        id: 'catacombWarden', name: "Warden of the Dead", type: 'kill', target: 'cryptLord', goal: 1,
+        desc: "Venture into the Ancient Catacombs and silence the Crypt Lord.",
+        reward: { xp: 600, gold: 400, item: 'arcaneLoop' },
+        lore: "Necromancy is a rot that never stops. The Crypt Lord is but the first of the deep masters.",
+        isMain: true
+      },
+      holyRelicQuest: {
+        id: 'holyRelicQuest', name: "Relics of the Divine", type: 'item', target: 'holyRelic', goal: 1,
+        desc: "The Covenant requires a Holy Relic Shard to mend their protection.",
+        reward: { xp: 200, gold: 150 },
+        faction: 'Saints',
+        lore: "Solmara's light originates from these relics. Every shard returned is a victory for the living."
+      },
+      dominionBloodQuest: {
+        id: 'dominionBloodQuest', name: "Harvest for the King", type: 'item', target: 'bloodVial', goal: 3,
+        desc: "Bring 3 Blood Vials to the Dominion heralds.",
+        reward: { xp: 250, gold: 200 },
+        faction: 'Demons',
+        lore: "The Devouring King doesn't care for prayers. He only respects the tribute of blood."
+      },
+      wildsHunt: {
+        id: 'wildsHunt', name: "The Whispering Roots", type: 'kill', target: 'corruptTreant', goal: 2,
+        desc: "Defeat 2 Corrupted Treants in the Hollow Wilds.",
+        reward: { xp: 400, gold: 300 },
+        lore: "The forest is changing. The trees are starting to share the King's vision."
+      },
+      // --- Random Discovery Quests ---
+      lostTraveler: {
+        id: 'lostTraveler', name: "The Lost Outworlder", type: 'visit', target: 'solmara',
+        desc: "Guide the lost traveler back to Solmara by traveling there.",
+        reward: { xp: 100, gold: 50 },
+        lore: "Some fall through the Veil and never find their bearings. They need a guide."
+      },
+      salvageMission: {
+        id: 'salvageMission', name: "Supply Salvage", type: 'item', target: 'healthPotion', goal: 3,
+        desc: "An injured scout needs 3 Veil Salves (Health Potions).",
+        reward: { xp: 180, gold: 120, item: 'heavyCleaver' },
+        lore: "The front lines are desperate. A few potions could save a dozen lives."
+      },
+      monsterBounty: {
+        id: 'monsterBounty', name: "Corrupted Cull", type: 'kill', target: 'corruptWolf', goal: 4,
+        desc: "A village elder asks you to clear 4 Corrupted Wolves.",
+        reward: { xp: 220, gold: 100 },
+        lore: "The wolves aren't just hungry anymore. They're organized."
       }
     };
 
@@ -3008,14 +3101,18 @@
           weapon: { id: wId, level: 1, rarity: 'common' },
           offhand: { id: oId, level: 1, rarity: 'common' },
           armor: { id: aId, level: 1, rarity: 'common' },
-          jewelry: null
+          neck: null,
+          ring: null,
+          earrings: null
         },
         skills: cls.skills.reduce((acc, sk) => { acc[sk] = 1; return acc; }, {}),
         statPoints: 0,
         permadeath,
         kills: 0,
         stash: [],
-        stashGold: 0
+        stashGold: 0,
+        activeQuests: { awakening: { progress: 0 } }, // Give initial quest
+        completedQuests: []
       };
     }
 
@@ -3081,7 +3178,7 @@
        ============================================================ */
     function effectiveStat(stat) {
       const p = G.player; let val = p[stat] || 0;
-      for (const s of ['weapon', 'offhand', 'armor', 'jewelry']) {
+      for (const s of ['weapon', 'offhand', 'armor', 'neck', 'ring', 'earrings']) {
         const eq = p.equipment[s];
         if (eq && eq.id) {
           const item = getScaledItem(eq.id, eq.level);
@@ -3093,7 +3190,7 @@
     }
     function effectiveDef() {
       const p = G.player; let val = p.def;
-      for (const s of ['armor', 'jewelry']) {
+      for (const s of ['armor', 'neck', 'ring', 'earrings']) {
         const eq = p.equipment[s];
         if (eq && eq.id) {
           const item = getScaledItem(eq.id, eq.level, eq.rarity || 'common');
@@ -3106,7 +3203,7 @@
     }
     function effectiveMaxHp() {
       const p = G.player; let ex = 0;
-      for (const s of ['armor', 'jewelry']) {
+      for (const s of ['armor', 'neck', 'ring', 'earrings']) {
         const eq = p.equipment[s];
         if (eq && eq.id) {
           const item = getScaledItem(eq.id, eq.level, eq.rarity || 'common');
@@ -3117,7 +3214,7 @@
     }
     function effectiveMaxMp() {
       const p = G.player; let ex = 0;
-      for (const s of ['weapon', 'offhand', 'armor', 'jewelry']) {
+      for (const s of ['weapon', 'offhand', 'armor', 'neck', 'ring', 'earrings']) {
         const eq = p.equipment[s];
         if (eq && eq.id) {
           const item = getScaledItem(eq.id, eq.level);
@@ -3310,7 +3407,9 @@
           { key: 'weapon', label: 'Weapon' },
           { key: 'offhand', label: 'Off-hand' },
           { key: 'armor', label: 'Armour' },
-          { key: 'jewelry', label: 'Jewelry' }
+          { key: 'neck', label: 'Necklace' },
+          { key: 'ring', label: 'Ring' },
+          { key: 'earrings', label: 'Earrings' }
         ];
         const html = slots.map(s => {
           const eq = p.equipment[s.key];
@@ -3462,6 +3561,7 @@
           Log.add(`⚠️ <strong>Danger!</strong> ${loc.name} requires Level ${loc.minLevel}+. You are Level ${G.player.level} — this place will crush you!`, 'death');
         }
         G.location = key;
+        QuestSystem.updateProgress('visit', key);
         Log.divider();
         Log.add(`You travel to <strong>${loc.name}</strong>.`, 'story');
         Log.add(`<em>${loc.desc}</em>`, 'story');
@@ -3478,6 +3578,7 @@
         UI.setActions([
           { label: '🏪 Market', fn: "Explore.openShop()", cls: 'btn-gold' },
           { label: '🏦 Stash', fn: "Explore.openStash()", cls: 'btn-gold' },
+          { label: '📜 Quests', fn: "QuestSystem.open()", cls: 'btn-gold' },
           { label: '🏋️ Trainer', fn: "Explore.openTrainer()", cls: 'btn-violet' },
           { label: '📊 Stats', fn: "Explore.openStats()", cls: 'btn-blue' },
           { label: compLabel, fn: "Explore.openTavern()", cls: 'btn-green' },
@@ -3491,12 +3592,14 @@
       openMap() {
         const content = document.getElementById('map-modal-list');
         if (!content) { UI.openModal('modal-map'); return; }
-        const zones = Object.entries(LOCATIONS)
-          .filter(([k, loc]) => !loc.isTown)
+        const allLocs = Object.entries(LOCATIONS);
+        const towns = allLocs.filter(([k, loc]) => loc.isTown);
+        const dungeons = allLocs.filter(([k, loc]) => !loc.isTown && loc.isDungeon)
           .sort((a, b) => a[1].minLevel - b[1].minLevel);
-        const town = Object.entries(LOCATIONS).filter(([k, loc]) => loc.isTown);
+        const zones = allLocs.filter(([k, loc]) => !loc.isTown && !loc.isDungeon)
+          .sort((a, b) => a[1].minLevel - b[1].minLevel);
+
         const renderZone = ([key, loc]) => {
-          const canGo = !loc.isTown && G.player && G.player.level >= loc.minLevel;
           const isCurrent = key === G.location;
           const danger = !loc.isTown && G.player && G.player.level < loc.minLevel;
           return `<div style="background:${isCurrent ? 'rgba(139,92,246,.12)' : 'var(--bg-mid)'};border:1px solid ${isCurrent ? 'var(--violet)' : 'var(--border)'};border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
@@ -3513,8 +3616,10 @@
         };
         content.innerHTML =
           `<div style="font-family:'Cinzel',serif;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:6px;">TOWNS</div>` +
-          town.map(renderZone).join('') +
-          `<div style="font-family:'Cinzel',serif;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin:12px 0 6px;">ZONES (by level)</div>` +
+          towns.map(renderZone).join('') +
+          `<div style="font-family:'Cinzel',serif;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin:12px 0 6px;">DUNGEONS (Elite Challenges)</div>` +
+          dungeons.map(renderZone).join('') +
+          `<div style="font-family:'Cinzel',serif;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin:12px 0 6px;">ZONES (Exploration)</div>` +
           zones.map(renderZone).join('');
         UI.openModal('modal-map');
       },
@@ -3607,8 +3712,56 @@
         const loc = LOCATIONS[G.location];
         Log.add(loc.events[Math.floor(Math.random() * loc.events.length)], 'story');
         if (Math.random() < .15) Log.add('The sky tears with violet lightning — the Veil shudders.', 'veil');
+
+        const roll = Math.random();
+
+        // 1. UNIQUE DISCOVERY (8% chance)
+        if (roll < 0.08) {
+          const discRoll = Math.random();
+          if (discRoll < 0.3) {
+            // NPC with Quest
+            const available = Object.keys(QUESTS).filter(id => !G.player.activeQuests[id] && !G.player.completedQuests.includes(id) && id !== 'awakening');
+            if (available.length) {
+              const qId = available[Math.floor(Math.random() * available.length)];
+              const q = QUESTS[qId];
+              Log.divider();
+              Log.add(`👤 <strong>Encounter:</strong> You find a desperate traveler in the ${loc.name}.`, 'gold');
+              Log.add(`<em>"${q.desc}"</em>`, 'story');
+              QuestSystem.start(qId);
+            }
+          } else if (discRoll < 0.6) {
+            // Broken Carriage
+            const gold = 20 + Math.floor(Math.random() * 80);
+            const items = ['healthPotion', 'manaPotion', 'elixir'];
+            const it = items[Math.floor(Math.random() * items.length)];
+            Log.divider();
+            Log.add('🛒 <strong>Discovery:</strong> You find an overturned carriage. The horses are gone, but some cargo remains.', 'loot');
+            Log.add(`You salvaged 🪙<strong>${gold}</strong> gold and a <strong>${ITEMS[it].name}</strong>!`, 'success');
+            G.player.gold += gold;
+            Combat.addToInventory(it, 1);
+            UI.refresh();
+          } else {
+            // Chest / Mimic
+            Log.divider();
+            Log.add('📦 <strong>Discovery:</strong> A heavy, iron-bound chest sits partially buried in the ground.', 'story');
+            if (Math.random() < 0.25) {
+              Log.add('⚠️ <strong>SURPRISE!</strong> The chest sprouts teeth and a massive tongue! It\'s a <strong>MIMIC!</strong>', 'death');
+              setTimeout(() => Combat.start('mimic'), 800);
+            } else {
+              const lootId = ['leatherVest', 'copperRing', 'ironPlate', 'sagePendant', 'arcaneLoop'][Math.floor(Math.random() * 5)];
+              const gold = 50 + Math.floor(Math.random() * 100);
+              Log.add(`🎁 <strong>Luck!</strong> You pick the lock and find 🪙<strong>${gold}</strong> gold and <strong>${ITEMS[lootId].name}</strong>!`, 'success');
+              G.player.gold += gold;
+              Combat.addToInventory(lootId, 1, Math.max(1, G.player.level - 2));
+              UI.refresh();
+            }
+          }
+          Game.autosave();
+          return;
+        }
+
+        // 2. REGULAR COMBAT
         if (loc.enemies.length && Math.random() < loc.encounterChance) {
-          // Scale enemy to zone + player level
           const key = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
           setTimeout(() => Combat.start(key), 400);
         } else {
@@ -3757,6 +3910,7 @@
 
       openTrainer() {
         const p = G.player;
+        QuestSystem.updateProgress('visit', 'trainer');
         document.getElementById('trainer-gold-display').textContent = p.gold;
         document.getElementById('trainer-class-display').textContent = CLASSES[p.classKey].name;
         const container = document.getElementById('trainer-skills-list');
@@ -4299,6 +4453,7 @@
           G.enemies.forEach(e => {
             totalXp += e.xp + Math.floor(Math.random() * 12);
             totalGold += e.gold[0] + Math.floor(Math.random() * (e.gold[1] - e.gold[0] + 1));
+            QuestSystem.updateProgress('kill', e.id);
             // Record faction kill
             WorldServer.recordKill(G.player.faction);
             const lootItems = e.loot;
@@ -4447,6 +4602,121 @@
     /* ============================================================
        GAME MODULE
        ============================================================ */
+    /* ============================================================
+       QUEST SYSTEM
+       ============================================================ */
+    const QuestSystem = {
+      open() {
+        this.refresh();
+        UI.openModal('modal-quests');
+      },
+      refresh() {
+        if (!G.player) return;
+        const p = G.player;
+        if (!p.activeQuests) p.activeQuests = {};
+        if (!p.completedQuests) p.completedQuests = [];
+
+        const activeList = document.getElementById('quest-active-list');
+        const offerList = document.getElementById('quest-offer-list');
+
+        // Active
+        let activeHtml = '';
+        for (const [id, data] of Object.entries(p.activeQuests)) {
+          const q = QUESTS[id];
+          if (!q) continue;
+          const isComplete = this.checkCompletion(id);
+          activeHtml += `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid ${isComplete ? 'var(--gold)' : 'var(--border)'}; border-radius:8px; padding:12px; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-family:'Cinzel',serif; color:${isComplete ? 'var(--gold-lt)' : 'var(--violet-lt)'}; font-size:14px;">${q.name}</span>
+                <span style="font-size:10px; color:var(--text-dim);">${q.isMain ? 'MAIN STORY' : 'SIDE QUEST'}</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; font-style:italic;">"${q.lore}"</div>
+              <div style="font-size:12px; margin-bottom:10px;">${q.desc}</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:11px;">Progress: <span style="color:var(--gold);">${data.progress} / ${q.goal || 1}</span></div>
+                ${isComplete ?
+              `<button class="btn btn-sm btn-gold" onclick="QuestSystem.complete('${id}')">Complete & Claim</button>` :
+              `<div style="font-size:10px; opacity:0.6;">Quest in Progress...</div>`
+            }
+              </div>
+            </div>`;
+        }
+        activeList.innerHTML = activeHtml || '<div style="color:var(--text-dim); text-align:center; font-size:12px; padding:20px;">No current objectives.</div>';
+
+        // Offers
+        const available = Object.keys(QUESTS).filter(id => !p.activeQuests[id] && !p.completedQuests.includes(id));
+        let offerHtml = '';
+        available.forEach(id => {
+          const q = QUESTS[id];
+          if (q.faction && p.faction.toLowerCase() !== q.faction.toLowerCase()) return;
+
+          offerHtml += `
+            <div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px;">
+              <div style="font-family:'Cinzel',serif; color:var(--text-lt); font-size:13px; margin-bottom:4px;">${q.name}</div>
+              <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">${q.desc}</div>
+              <button class="btn btn-sm" style="width:100%;" onclick="QuestSystem.start('${id}')">Accept Quest</button>
+            </div>`;
+        });
+        offerList.innerHTML = offerHtml || '<div style="color:var(--text-dim); text-align:center; font-size:11px; padding:10px;">No more tasks currently available.</div>';
+      },
+      start(id) {
+        if (!G.player) return;
+        const p = G.player;
+        if (!p.activeQuests) p.activeQuests = {};
+        p.activeQuests[id] = { progress: 0 };
+        Log.add(`📜 <strong>New Quest:</strong> ${QUESTS[id].name}`, 'gold');
+        this.refresh();
+        Game.autosave();
+      },
+      updateProgress(type, target, amount = 1) {
+        if (!G.player || !G.player.activeQuests) return;
+        let changed = false;
+        for (const [id, data] of Object.entries(G.player.activeQuests)) {
+          const q = QUESTS[id];
+          if (q && q.type === type && q.target === target) {
+            const oldProgress = data.progress;
+            data.progress = Math.min(q.goal || 1, data.progress + amount);
+            if (oldProgress < data.progress && data.progress >= (q.goal || 1)) {
+              Log.add(`✅ <strong>Quest Ready!</strong> ${q.name} objective met.`, 'success');
+            }
+            changed = true;
+          }
+        }
+        if (changed) { this.refresh(); Game.autosave(); }
+      },
+      checkCompletion(id) {
+        const p = G.player; const q = QUESTS[id]; const data = p.activeQuests[id];
+        if (!data) return false;
+        if (q.type === 'item') {
+          const inv = p.inventory.find(i => i.id === q.target);
+          return (inv && inv.qty >= q.goal);
+        }
+        return data.progress >= (q.goal || 1);
+      },
+      complete(id) {
+        const p = G.player; const q = QUESTS[id];
+        if (!this.checkCompletion(id)) return;
+
+        if (q.type === 'item') {
+          Combat.removeFromInventory(q.target, q.goal);
+        }
+
+        p.gold += q.reward.gold;
+        Combat.grantXP(q.reward.xp);
+        if (q.reward.item) Combat.addToInventory(q.reward.item, 1, p.level);
+
+        delete p.activeQuests[id];
+        p.completedQuests.push(id);
+
+        Log.divider();
+        Log.add(`🏆 <strong>Quest Completed:</strong> ${q.name}`, 'gold');
+        Log.add(`⭐ +${q.reward.xp} XP | 🪙 +${q.reward.gold} Gold`, 'loot');
+
+        this.refresh(); UI.refresh(); Game.autosave();
+      }
+    };
+
     const Game = {
       _show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
 
