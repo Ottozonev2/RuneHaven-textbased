@@ -1376,6 +1376,54 @@
     }
 
     /* ============================================================
+   TOOLTIPS — Show skill descriptions on hover
+   ============================================================ */
+    .btn[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      background: var(--bg-panel);
+      border: 1px solid var(--violet);
+      border-radius: 6px;
+      color: var(--text-lt);
+      font-size: 11px;
+      font-family: 'IM Fell English', serif;
+      white-space: normal;
+      max-width: 280px;
+      width: max-content;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      pointer-events: none;
+      line-height: 1.4;
+    }
+
+    .btn[title]:hover::before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 2px;
+      border: 6px solid transparent;
+      border-top-color: var(--violet);
+      z-index: 1001;
+      pointer-events: none;
+    }
+
+    /* Hide tooltips on touch devices to avoid conflicts */
+    @media (hover: none) {
+
+      .btn[title]:hover::after,
+      .btn[title]:hover::before {
+        display: none;
+      }
+    }
+
+    /* ============================================================
    MODALS
    ============================================================ */
     .modal-overlay {
@@ -2690,10 +2738,7 @@
         // Inventory entries: { id, qty, level }
         inventory: [
           { id: 'healthPotion', qty: 2, level: 1 },
-          { id: 'manaPotion', qty: 1, level: 1 },
-          { id: wId, qty: 1, level: 1 },
-          { id: oId, qty: 1, level: 1 },
-          { id: aId, qty: 1, level: 1 }
+          { id: 'manaPotion', qty: 1, level: 1 }
         ],
         // Equipment slots: { id, level }
         equipment: {
@@ -2934,8 +2979,8 @@
       },
       _setStats(pfx, p) {
         const sh = (id, t) => { const e = document.getElementById(pfx + id); if (e) e.textContent = t; };
-        sh('s-str', effectiveStat('str')); sh('s-int', effectiveStat('int')); sh('s-wis', p.wis); sh('s-agi', effectiveStat('agi'));
-        sh('s-vit', p.vit); sh('s-def', effectiveDef()); sh('s-crit', p.crit + '%');
+        sh('s-str', condenseStat(effectiveStat('str'))); sh('s-int', condenseStat(effectiveStat('int'))); sh('s-wis', condenseStat(p.wis)); sh('s-agi', condenseStat(effectiveStat('agi')));
+        sh('s-vit', condenseStat(p.vit)); sh('s-def', condenseStat(effectiveDef())); sh('s-crit', condenseStat(p.crit) + '%');
       },
 
       refreshDrawerStats() {
@@ -3035,7 +3080,7 @@
 
       setActions(actions) {
         document.getElementById('action-btns').innerHTML = actions.map(a => {
-          const tooltipAttr = a.tooltip ? `data-tooltip="${a.tooltip}"` : '';
+          const tooltipAttr = a.tooltip ? `title="${a.tooltip}"` : '';
           return `<button class="btn ${a.cls || ''}" onclick="${a.fn}" ${a.disabled ? 'disabled' : ''} ${tooltipAttr} style="touch-action:manipulation;">${a.label}</button>`;
         }).join('');
       },
@@ -3247,7 +3292,17 @@
         const costs = { mercenary: 80, guardsman: 50, shadowBlade: 150, cleric: 70 };
         const cost = costs[type];
         if (!G.companions) G.companions = [];
-        if (G.companions.length >= 3) { Log.add('You already have 3 companions (maximum)!', 'system'); return; }
+
+        // Party size limit: Player + up to 3 companions total (including mercenaries and summons)
+        // If hiring a mercenary and already have companions, limit to 2 remaining slots
+        const hasMercenary = G.companions.some(c => !c.isSummon);
+        const maxAllowed = hasMercenary ? 3 : 3; // Always max 3 companions
+
+        if (G.companions.length >= maxAllowed) {
+          Log.add('Your party is full! Maximum party size is 4 members (you + 3 companions).', 'system');
+          return;
+        }
+
         if (p.gold < cost) { Log.add(`You need ${cost} gold to hire this companion.`, 'system'); return; }
         p.gold -= cost;
         const ct = COMPANION_TYPES[type];
@@ -3256,7 +3311,8 @@
         G.companions.push({
           type, name: ct.name, icon: ct.icon,
           hp: hp, maxHp: hp,
-          str: ct.str + Math.floor(p.level / 5)
+          str: ct.str + Math.floor(p.level / 5),
+          isSummon: false  // Mercenaries are not summons
         });
         Log.add(`⚔️ <strong>${ct.icon} ${ct.name}</strong> joins your party!`, 'success');
         UI.closeModal('modal-tavern');
@@ -3281,6 +3337,7 @@
         const stats = [
           { key: 'str', name: 'Strength', icon: '⚔️', desc: 'Increases physical damage.' },
           { key: 'int', name: 'Intelligence', icon: '🪄', desc: 'Boosts magic and healing.' },
+          { key: 'wis', name: 'Wisdom', icon: '📖', desc: 'Increases your maximum Mana.' },
           { key: 'agi', name: 'Agility', icon: '💨', desc: 'Improves dodge and crit chance.' },
           { key: 'vit', name: 'Vitality', icon: '❤️', desc: 'Increases maximum Health.' },
           { key: 'def', name: 'Defense', icon: '🛡️', desc: 'Reduces incoming damage.' }
@@ -3303,7 +3360,8 @@
         if (!p.statPoints || p.statPoints <= 0) return;
         p.statPoints--;
         p[stat]++;
-        if (stat === 'vit') p.maxHp += 5;
+        if (stat === 'vit') { p.maxHp += 5; p.hp += 5; }
+        if (stat === 'wis') { p.maxMp += 10; p.mp += 10; }
         Log.add(`✨ Your <strong>${stat.toUpperCase()}</strong> increased!`, 'success');
         this.openStats();
         UI.refresh();
@@ -3422,6 +3480,15 @@
       },
 
       showCombatActions() {
+        // Initial combat menu: Attack, Defend, or Flee
+        UI.setActions([
+          { label: '⚔️ Attack', fn: "Combat.showAttackMenu()", cls: 'btn-red', tooltip: 'Choose your attack or skill.' },
+          { label: '🛡️ Defend', fn: "Combat.defend()", cls: 'btn-blue', tooltip: 'Reduce incoming damage by 50% this turn.' },
+          { label: '💨 Flee', fn: "Combat.flee()", cls: '', tooltip: 'Attempt to escape from battle.' }
+        ]);
+      },
+
+      showAttackMenu() {
         const p = G.player;
         const skillBtns = Object.keys(p.skills).map(sk => {
           const s = SKILLS[sk];
@@ -3430,28 +3497,30 @@
           let tooltip = `${s.desc} | Cost: ${s.type === 'pact' ? '15 HP' : s.cost + ' MP'}`;
           if (s.duration) tooltip += ` | Duration: ${s.duration} turns`;
 
-          // Dynamic tooltip calculation
+          // Dynamic tooltip calculation with condensed stats
           const skLevel = p.skills[sk] || 1;
           const lvMult = 1 + (skLevel - 1) * 0.15;
           let effectStr = '';
+          const effStr = condenseStat(effectiveStat('str'));
+          const effInt = condenseStat(effectiveStat('int'));
 
           if (s.type === 'damage') {
-            const rawDmg = Math.floor(effectiveStat('str') * s.mult * lvMult);
+            const rawDmg = Math.floor(effStr * s.mult * lvMult);
             effectStr = `Est. Dmg: ~${rawDmg}${s.doubleHit ? ' x2' : ''}`;
           } else if (s.type === 'magic') {
-            const rawDmg = Math.floor(effectiveStat('int') * s.mult * lvMult);
+            const rawDmg = Math.floor(effInt * s.mult * lvMult);
             effectStr = `Est. Dmg: ~${rawDmg}`;
           } else if (s.type === 'drain') {
-            const rawDmg = Math.floor(effectiveStat('int') * s.mult * lvMult);
+            const rawDmg = Math.floor(effInt * s.mult * lvMult);
             effectStr = `Est. Dmg: ~${rawDmg} (Heal: ~${Math.floor(rawDmg * 0.5)})`;
           } else if (s.type === 'heal') {
-            const rawHeal = Math.floor((effectiveStat('int') + p.vit) * s.healMult * lvMult);
+            const rawHeal = Math.floor((effInt + p.vit) * s.healMult * lvMult);
             effectStr = `Est. Heal: ~${rawHeal}`;
           } else if (s.type === 'summon') {
             const ct = COMPANION_TYPES['skeleton'];
             if (ct) {
               const summonHp = ct.hp + Math.floor(p.level * 15);
-              const summonStr = ct.str + Math.floor(p.level / 2);
+              const summonStr = Math.floor(ct.str + (p.level / 2));
               effectStr = `Summon: ${summonHp} HP, ${summonStr} STR`;
             }
           } else if (s.type === 'buff' && s.strBonus) {
@@ -3471,13 +3540,14 @@
           };
         });
 
-        const basicDmg = Math.floor(effectiveStat('str') * 1.5) + 3; // +3 avg variance
+        const effStrObj = condenseStat(effectiveStat('str'));
+        const basicDmg = Math.floor(effStrObj * 1.5) + 3; // +3 avg variance
+
         UI.setActions([
-          { label: '⚔ Attack', fn: "Combat.attack()", cls: 'btn-red', tooltip: `Basic strike. Est. Dmg: ~${basicDmg} (1.5x STR)` },
+          { label: '⚔️ Basic Attack', fn: "Combat.attack()", cls: 'btn-red', tooltip: `Basic strike. Est. Dmg: ~${basicDmg} (1.5x STR)` },
           ...skillBtns,
-          { label: '🧪 Item', fn: "Combat.showItemMenu()", cls: 'btn-green', tooltip: 'Open your inventory to use consumables.' },
-          { label: '🛡 Defend', fn: "Combat.defend()", cls: 'btn-blue', tooltip: 'Reduce incoming damage by 50% this turn.' },
-          { label: '💨 Flee', fn: "Combat.flee()", cls: '', tooltip: 'Attempt to escape from battle.' }
+          { label: '🧪 Use Item', fn: "Combat.showItemMenu()", cls: 'btn-green', tooltip: 'Use a consumable from your inventory.' },
+          { label: '← Back', fn: "Combat.showCombatActions()", cls: 'btn-sm' }
         ]);
       },
 
@@ -3574,14 +3644,35 @@
           G.combatBuffs.defenseBonus = skill.defense; G.playerDefending = true;
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! Defensive stance taken.`, 'player');
         } else if (skill.type === 'summon') {
+          if (!G.companions) G.companions = [];
+
+          // Party limit: Player + 3 companions max
+          // If there's a mercenary (non-summon), only 2 summon slots available
+          const hasMercenary = G.companions.some(c => !c.isSummon);
+          const maxSummons = hasMercenary ? 2 : 3;
+          const currentSummons = G.companions.filter(c => c.isSummon).length;
+
+          if (G.companions.length >= 3) {
+            Log.add('Your party is full! Maximum party size is 4 members (you + 3 companions).', 'system');
+            return;
+          }
+
+          if (currentSummons >= maxSummons) {
+            const msg = hasMercenary
+              ? 'Maximum summons reached! With a mercenary, you can only have 2 summons.'
+              : 'Maximum summons reached! You can have up to 3 summons.';
+            Log.add(msg, 'system');
+            return;
+          }
+
           const ct = COMPANION_TYPES['skeleton'];
           const hpOff = Math.floor(G.player.level * 15);
-          if (!G.companions) G.companions = [];
           G.companions.push({
             type: 'skeleton', name: ct.name, icon: ct.icon,
             hp: ct.hp + hpOff, maxHp: ct.hp + hpOff,
-            str: ct.str + Math.floor(G.player.level / 2),
-            isSummon: true
+            str: Math.floor(ct.str + (G.player.level / 2)),
+            isSummon: true,
+            turnsLeft: 5  // Summons last 5 turns
           });
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! A skeletal warrior rises to fight for you!`, 'veil');
         } else if (skill.type === 'buff') {
@@ -5479,6 +5570,16 @@
       _e(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
     };
 
+
+    /* ============================================================
+       HELPER: Condense stat numbers to remove excessive decimals
+       ============================================================ */
+    function condenseStat(value) {
+      if (typeof value !== 'number') return value;
+      // Round to 1 decimal place and remove trailing .0
+      const rounded = Math.round(value * 10) / 10;
+      return rounded % 1 === 0 ? Math.round(rounded) : rounded;
+    }
 
     /* ============================================================
        INIT
