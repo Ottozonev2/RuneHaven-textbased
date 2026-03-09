@@ -5158,9 +5158,22 @@
       async _get(binId, tries = 2) {
         for (let i = 0; i < tries; i++) {
           try {
-            const r = await fetch(`${this._base}${binId}`, { headers: this._headers() });
+            const url = this._isCloudflare ? `${this._base}${binId}` : `${this._base}${binId}`;
+            const r = await fetch(url, { headers: this._headers() });
+
+            // Auto fallback to JSONBin if Cloudflare route is missing/failing
+            if (!r.ok && this._isCloudflare && (r.status === 404 || r.status >= 500)) {
+              console.warn("Cloudflare API failed, falling back to JSONBin...");
+              const fbUrl = `https://api.jsonbin.io/v3/b/${binId}`;
+              const fbReq = await fetch(fbUrl, { headers: { 'Content-Type': 'application/json', 'X-Master-Key': WORLD_CONFIG.apiKey } });
+              if (!fbReq.ok) throw new Error('Fallback fetch failed');
+              const data = await fbReq.json();
+              return data.record || data;
+            }
+
             if (!r.ok) throw new Error('Fetch failed');
-            return await r.json();
+            const dataOrig = await r.json();
+            return dataOrig.record || dataOrig;
           } catch (e) {
             if (i === tries - 1) throw e;
             await new Promise(res => setTimeout(res, 500));
@@ -5171,12 +5184,29 @@
       async _put(binId, data, tries = 2) {
         for (let i = 0; i < tries; i++) {
           try {
-            const r = await fetch(`${this._base}${binId}`, {
-              method: 'POST', headers: this._headers(),
+            const url = this._isCloudflare ? `${this._base}${binId}` : `${this._base}${binId}`;
+            const r = await fetch(url, {
+              method: this._isCloudflare ? 'POST' : 'PUT',
+              headers: this._headers(),
               body: JSON.stringify(data)
             });
+
+            // Auto fallback to JSONBin if Cloudflare route is missing/failing
+            if (!r.ok && this._isCloudflare && (r.status === 404 || r.status >= 500)) {
+              const fbUrl = `https://api.jsonbin.io/v3/b/${binId}`;
+              const fbReq = await fetch(fbUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': WORLD_CONFIG.apiKey },
+                body: JSON.stringify(data)
+              });
+              if (!fbReq.ok) throw new Error('Fallback write failed');
+              const resData = await fbReq.json();
+              return resData.record || resData;
+            }
+
             if (!r.ok) throw new Error('Write failed');
-            return await r.json();
+            const resOrig = await r.json();
+            return resOrig.record || resOrig;
           } catch (e) {
             if (i === tries - 1) throw e;
             await new Promise(res => setTimeout(res, 500));
