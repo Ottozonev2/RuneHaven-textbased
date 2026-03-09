@@ -1899,17 +1899,6 @@
                 </div>
               </div>
             </div>
-            <!-- Combat Skills Info Panel -->
-            <div id="combat-skills-panel"
-              style="display:none; margin-top:12px; padding:10px; background:rgba(144,96,216,0.05); border:1px solid var(--violet-dk); border-radius:6px; max-height:300px; overflow-y:auto;">
-              <div
-                style="font-family:'Cinzel',serif; font-size:10px; color:var(--violet-lt); margin-bottom:8px; letter-spacing:1px; border-bottom:1px solid var(--violet-dk); padding-bottom:4px;">
-                ✨ YOUR SKILLS
-              </div>
-              <div id="combat-skills-list">
-                <!-- Skills will be rendered here during combat -->
-              </div>
-            </div>
             <div class="btn-grid" id="action-btns"></div>
           </div>
         </div>
@@ -2906,7 +2895,7 @@
         document.getElementById('stat-gold').textContent = p.gold;
         // Location
         document.getElementById('location-name').textContent = LOCATIONS[G.location].name;
-        this.refreshInventory(); this.refreshEquipment(); this.refreshMapTab(); this.refreshCompanions(); this.refreshCombatSkills();
+        this.refreshInventory(); this.refreshEquipment(); this.refreshMapTab(); this.refreshCompanions();
       },
 
       refreshCompanions() {
@@ -3037,84 +3026,6 @@
         ['map-list', 'd-map-list'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = html; });
       },
 
-      refreshCombatSkills() {
-        const p = G.player;
-        const panel = document.getElementById('combat-skills-panel');
-        const container = document.getElementById('combat-skills-list');
-
-        if (!panel || !container || !p || !p.skills) return;
-
-        // Only show skills panel during combat
-        if (!G.inCombat) {
-          panel.style.display = 'none';
-          return;
-        }
-
-        panel.style.display = 'block';
-
-        const skillsArray = Object.keys(p.skills).map(sk => ({
-          key: sk,
-          skill: SKILLS[sk],
-          level: p.skills[sk]
-        }));
-
-        if (skillsArray.length === 0) {
-          container.innerHTML = `<div style="color:var(--text-dim);text-align:center;padding:10px;font-size:11px;font-style:italic;">No skills learned.</div>`;
-          return;
-        }
-
-        const html = skillsArray.map(({ key, skill, level }) => {
-          const hasMp = skill.type === 'pact' || (p.mp >= skill.cost);
-
-          // Calculate skill effectiveness
-          const lvMult = 1 + (level - 1) * 0.15;
-          let effectInfo = '';
-          const effStr = condenseStat(effectiveStat('str'));
-          const effInt = condenseStat(effectiveStat('int'));
-
-          if (skill.type === 'damage') {
-            const dmg = Math.floor(effStr * skill.mult * lvMult);
-            effectInfo = `~${dmg} dmg`;
-          } else if (skill.type === 'magic') {
-            const dmg = Math.floor(effInt * skill.mult * lvMult);
-            effectInfo = `~${dmg} dmg`;
-          } else if (skill.type === 'drain') {
-            const dmg = Math.floor(effInt * skill.mult * lvMult);
-            effectInfo = `~${dmg} dmg | ~${Math.floor(dmg * 0.5)} heal`;
-          } else if (skill.type === 'heal') {
-            const heal = Math.floor((effInt + p.vit) * skill.healMult * lvMult);
-            effectInfo = `~${heal} heal`;
-          } else if (skill.type === 'summon') {
-            effectInfo = `Summon ally`;
-          } else if (skill.type === 'defend') {
-            effectInfo = `+${skill.defense || 0} def`;
-          } else if (skill.type === 'buff') {
-            effectInfo = `+${skill.strBonus || 0} STR`;
-          }
-
-          const costText = skill.type === 'pact' ? '15 HP' : `${skill.cost} MP`;
-          const canUse = hasMp;
-
-          return `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; margin-bottom:4px; background:${canUse ? 'rgba(144,96,216,0.12)' : 'rgba(0,0,0,0.2)'}; border:1px solid ${canUse ? 'var(--violet-dk)' : 'var(--border)'}; border-radius:4px;">
-              <div style="flex:1;">
-                <div style="font-size:11px; font-weight:600; color:${canUse ? 'var(--violet-lt)' : 'var(--text-dim)'}; margin-bottom:2px;">
-                  ${skill.icon} ${skill.name} <span style="font-size:9px; color:var(--violet); font-family:'Cinzel',serif;">Lv.${level}</span>
-                </div>
-                <div style="font-size:9px; color:${canUse ? 'var(--text)' : 'var(--text-dim)'};">
-                  ${effectInfo} ${effectInfo ? '•' : ''} ${costText}
-                </div>
-              </div>
-              <div style="font-size:9px; color:${canUse ? 'var(--violet-lt)' : 'var(--text-dim)'}; text-align:right;">
-                ${canUse ? '✓ Ready' : '✗ Low MP'}
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        container.innerHTML = html;
-      },
-
       switchTab(tab) {
         ['inventory', 'equipment', 'location'].forEach(t => {
           const b = document.getElementById('tab-' + t), tc = document.getElementById('tc-' + t);
@@ -3151,23 +3062,6 @@
 
       openModal(id) { document.getElementById(id).classList.add('open'); },
       closeModal(id) { document.getElementById(id).classList.remove('open'); },
-
-      upgradeSkillFromPanel(skillKey) {
-        const p = G.player;
-        const lv = p.skills[skillKey];
-        const cost = lv * 100;
-        if (p.gold < cost) {
-          Log.add(`❌ Not enough gold. Need ${cost}g to upgrade.`, 'system');
-          return;
-        }
-        p.gold -= cost;
-        p.skills[skillKey]++;
-        Log.add(`🔥 <strong>${SKILLS[skillKey].name}</strong> upgraded to level ${p.skills[skillKey]}!`, 'success');
-        this.refreshCombatSkills();
-        this.refresh();
-        Game.autosave();
-      },
-
 
       showLevelUpBanner(level) {
         const el = document.createElement('div');
