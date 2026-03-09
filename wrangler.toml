@@ -5,4 +5,3 @@ pages_build_output_dir = "."
 [[kv_namespaces]]
 binding = "SAVES_KV"
 id = "7c5265dab9bc45e49753a6a87ac400ea"
-preview_id = "7c5265dab9bc45e49753a6a87ac400ea"
