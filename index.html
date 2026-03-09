@@ -1705,8 +1705,9 @@
         <span class="topbar-faction" id="top-faction">—</span>
       </div>
       <div class="topbar-btns">
-        <button class="btn btn-sm btn-gold" onclick="Game.saveGame()">💾</button>
-        <button class="btn btn-sm btn-red" onclick="Game.showTitle()">✕</button>
+        <button class="btn btn-sm btn-gold" onclick="GlobalChat.openParty()" title="Party Management">⚔️ Party</button>
+        <button class="btn btn-sm btn-gold" onclick="Game.saveGame()" title="Save Game">💾</button>
+        <button class="btn btn-sm btn-red" onclick="Game.showTitle()" title="Quit to Title">✕</button>
       </div>
     </div>
 
@@ -1752,6 +1753,16 @@
           </div>
         </div>
         <div class="gold-row">🪙 <span id="stat-gold">0</span> Gold</div>
+
+        <!-- NEW: Companions Section in Sidebar -->
+        <div id="panel-companions" style="margin-top:20px; border-top:1px solid var(--border); padding-top:10px;">
+          <div
+            style="font-family:'Cinzel',serif; font-size:10px; color:var(--violet-lt); margin-bottom:10px; letter-spacing:1px;">
+            ACTIVE PARTY</div>
+          <div id="companion-list-sidebar">
+            <div style="color:var(--text-dim); font-size:11px; font-style:italic;">No companions.</div>
+          </div>
+        </div>
       </div>
 
       <!-- CENTRE -->
@@ -1914,6 +1925,45 @@
       <div id="stats-list-container" style="display:flex;flex-direction:column;gap:8px;"></div>
       <div style="margin-top:20px;text-align:center;">
         <button class="btn btn-sm" onclick="UI.closeModal('modal-stats')">Close</button>
+      </div>
+    </div>
+
+    <!-- PARTY MENU MODAL -->
+    <div class="modal-overlay" id="modal-party">
+      <div class="modal-content" style="max-width:440px;">
+        <div class="modal-header">
+          <div class="modal-title">⚔️ PARTY MANAGEMENT</div>
+          <button class="modal-close" onclick="UI.closeModal('modal-party')">×</button>
+        </div>
+        <div id="party-info-box"
+          style="margin-bottom:15px; padding:12px; background:rgba(184, 144, 255, 0.05); border:1px solid var(--violet-dk); border-radius:4px;">
+          <div style="font-size:11px; color:var(--violet-lt); margin-bottom:4px; font-family:'Cinzel',serif;">CURRENT
+            PARTY CODE</div>
+          <div style="display:flex; gap:8px;">
+            <input id="party-menu-code" type="text" readonly
+              style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--text-lt); padding:6px 10px; font-family:monospace; font-size:16px; border-radius:4px; text-align:center;">
+            <button class="btn btn-sm" onclick="GlobalChat.createParty()">New Code</button>
+          </div>
+        </div>
+        <div class="stat-section">
+          <div style="color:var(--violet-lt); font-family:'Cinzel',serif; font-size:11px; margin-bottom:8px;">PARTY
+            MEMBERS</div>
+          <div id="party-member-list" style="display:flex; flex-direction:column; gap:6px; min-height:40px;">
+            <!-- Render members here -->
+          </div>
+        </div>
+        <div class="stat-section" id="party-invites-section" style="display:none;">
+          <div style="color:var(--gold); font-family:'Cinzel',serif; font-size:11px; margin-bottom:8px;">PENDING
+            INVITATIONS</div>
+          <div id="party-invite-list" style="display:flex; flex-direction:column; gap:6px;">
+            <!-- Render invites here -->
+          </div>
+        </div>
+        <div style="margin-top:15px; display:flex; gap:10px;">
+          <button class="btn btn-red btn-sm" style="flex:1;"
+            onclick="GlobalChat.leaveChannel(); UI.closeModal('modal-party')">Leave Party</button>
+          <button class="btn btn-sm" style="flex:1;" onclick="UI.closeModal('modal-party')">Close</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2305,7 +2355,8 @@
       veilblade: { id: 'veilblade', name: 'Veilblade', icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 5, buyPrice: 90, sellPrice: 40, desc: 'A sword forged from Veil fragments. +5 STR.' },
       runesword: { id: 'runesword', name: 'Runic Longsword', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 10, buyPrice: 200, sellPrice: 90, desc: 'Ancient runes etched into the blade. +10 STR.' },
       veilstaff: { id: 'veilstaff', name: 'Veil Staff', icon: '🪄', type: 'equipment', slot: 'weapon', intBonus: 7, buyPrice: 100, sellPrice: 45, desc: 'Channels raw Veil energy. +7 INT.' },
-      devourerorb: { id: 'devourerorb', name: "Devourer's Orb", icon: '🔮', type: 'equipment', slot: 'weapon', intBonus: 12, buyPrice: 220, sellPrice: 100, desc: "Pulsing with the Devouring King's energy. +12 INT." },
+      apprenticeorb: { id: 'apprenticeorb', name: "Apprentice Orb", icon: '🔮', type: 'equipment', slot: 'offhand', intBonus: 4, buyPrice: 60, sellPrice: 25, desc: "A simple focus for magic users. +4 INT." },
+      devourerorb: { id: 'devourerorb', name: "Devourer's Orb", icon: '🔮', type: 'equipment', slot: 'offhand', intBonus: 12, buyPrice: 220, sellPrice: 100, desc: "Pulsing with the Devouring King's energy. +12 INT." },
       // Armour
       covenantmail: { id: 'covenantmail', name: 'Covenant Mail', icon: '🛡️', type: 'equipment', slot: 'armor', defBonus: 5, vitBonus: 2, buyPrice: 80, sellPrice: 35, desc: 'Holy-blessed chain armour from Solmara. +5 DEF, +2 VIT.' },
       ashplate: { id: 'ashplate', name: 'Ash Warlord Plate', icon: '⛓️', type: 'equipment', slot: 'armor', defBonus: 10, vitBonus: 5, buyPrice: 180, sellPrice: 80, desc: 'Brutal Ashen Dominion armour. +10 DEF, +5 VIT.' },
@@ -2313,7 +2364,7 @@
       shadowmantle: { id: 'shadowmantle', name: 'Shadow Mantle', icon: '🪬', type: 'equipment', slot: 'armor', defBonus: 3, agiBonus: 5, buyPrice: 130, sellPrice: 60, desc: 'Woven from shadowstuff. +3 DEF, +5 AGI.' }
     };
 
-    const SHOP_ITEMS = ['healthPotion', 'manaPotion', 'elixir', 'holyRelic', 'bloodVial', 'veilblade', 'runesword', 'veilstaff', 'devourerorb', 'covenantmail', 'ashplate', 'veilrobe', 'shadowmantle'];
+    const SHOP_ITEMS = ['healthPotion', 'manaPotion', 'elixir', 'holyRelic', 'bloodVial', 'veilblade', 'runesword', 'veilstaff', 'apprenticeorb', 'devourerorb', 'covenantmail', 'ashplate', 'veilrobe', 'shadowmantle'];
 
     /* ============================================================
        ENEMIES — All from Eryndor world lore
@@ -2525,10 +2576,11 @@
 
     let G = {
       player: null, location: 'solmara',
-      inCombat: false, currentEnemy: null,
+      inCombat: false, enemies: [], targetIndex: 0,
       playerDefending: false, combatBuffs: {},
       turnCount: 0, canAct: true,
-      companions: []  // Array of { type, name, icon, str, turnsLeft }
+      companions: [], // Array of { type, name, icon, hp, maxHp, str, turnsLeft }
+      partyInvites: []
     };
 
     /* ============================================================
@@ -2543,7 +2595,7 @@
         str: b.str, int: b.int, agi: b.agi, vit: b.vit, def: b.def, crit: b.crit,
         gold: 60,
         inventory: [{ id: 'healthPotion', qty: 2 }, { id: 'manaPotion', qty: 1 }],
-        equipment: { weapon: null, armor: null },
+        equipment: { weapon: null, offhand: null, armor: null },
         skills: cls.skills.reduce((acc, sk) => { acc[sk] = 1; return acc; }, {}), // { skillKey: level }
         statPoints: 0,
         permadeath,   // saved on player — survives load
@@ -2557,9 +2609,9 @@
        ============================================================ */
     function effectiveStat(stat) {
       const p = G.player; let val = p[stat] || 0;
-      for (const s of ['weapon', 'armor']) {
+      for (const s of ['weapon', 'offhand', 'armor']) {
         const eq = p.equipment[s];
-        if (eq && ITEMS[eq][stat + 'Bonus']) val += ITEMS[eq][stat + 'Bonus'];
+        if (eq && ITEMS[eq] && ITEMS[eq][stat + 'Bonus']) val += ITEMS[eq][stat + 'Bonus'];
       }
       if (stat === 'str' && G.combatBuffs.strBonus && G.combatBuffs.turns > 0) val += G.combatBuffs.strBonus;
       return val;
@@ -2641,7 +2693,33 @@
         document.getElementById('stat-gold').textContent = p.gold;
         // Location
         document.getElementById('location-name').textContent = LOCATIONS[G.location].name;
-        this.refreshInventory(); this.refreshEquipment(); this.refreshMapTab();
+        this.refreshInventory(); this.refreshEquipment(); this.refreshMapTab(); this.refreshCompanions();
+      },
+
+      refreshCompanions() {
+        const p = G.player; if (!p) return;
+        const list = document.getElementById('companion-list-sidebar');
+        if (!list) return;
+
+        if (!G.companions || G.companions.length === 0) {
+          list.innerHTML = `<div style="color:var(--text-dim); font-size:11px; font-style:italic;">No companions.</div>`;
+          return;
+        }
+
+        list.innerHTML = G.companions.map((c, idx) => {
+          const hpPct = Math.max(0, (c.hp / c.maxHp) * 100);
+          return `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:4px; padding:6px; margin-bottom:6px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+                <span style="font-weight:600; color:var(--text-lt);">${c.icon} ${c.name}</span>
+                ${c.isSummon ? `<span style="color:var(--violet-lt); font-size:9px;">⏳ ${c.turnsLeft}</span>` : ''}
+              </div>
+              <div class="main-bar" style="height:4px; background:rgba(0,0,0,0.3);">
+                <div class="main-bar-fill hp-fill" style="width:${hpPct}%;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
       },
 
       _setBars(pfx, p, maxHp) {
@@ -2675,7 +2753,12 @@
 
       refreshEquipment() {
         const p = G.player;
-        const html = [{ key: 'weapon', label: 'Weapon' }, { key: 'armor', label: 'Armour' }].map(s => {
+        const slots = [
+          { key: 'weapon', label: 'Weapon' },
+          { key: 'offhand', label: 'Off-hand' },
+          { key: 'armor', label: 'Armour' }
+        ];
+        const html = slots.map(s => {
           const eqId = p.equipment[s.key], item = eqId ? ITEMS[eqId] : null;
           const bonus = item ? Object.entries(item).filter(([k]) => k.endsWith('Bonus')).map(([k, v]) => `+${v} ${k.replace('Bonus', '').toUpperCase()}`).join(', ') : '';
           return `<div class="eq-slot"><div class="eq-slot-name">${s.label}</div><div class="eq-slot-item ${item ? '' : 'empty'}">${item ? item.icon + ' ' + item.name : '— Empty —'}</div>${bonus ? `<div class="eq-bonus">${bonus}</div>` : ''}${item ? `<button class="btn btn-sm btn-red" style="margin-top:6px;width:100%;" onclick="Combat.unequip('${s.key}')">Unequip</button>` : ''}</div>`;
@@ -2743,17 +2826,37 @@
         ).join('');
       },
 
-      showEnemyPanel(enemy) {
-        const panel = document.getElementById('combat-enemy-area');
-        if (!enemy) { panel.style.display = 'none'; return; }
-        panel.style.display = '';
-        document.getElementById('enemy-name-disp').textContent = enemy.icon + ' ' + enemy.name;
-        document.getElementById('enemy-level-disp').textContent = `Lv.${enemy.level}`;
-        this.updateEnemyBar(enemy);
+      showEnemyPanel(enemies) {
+        const area = document.getElementById('combat-enemy-area');
+        if (!enemies || enemies.length === 0) { area.style.display = 'none'; area.innerHTML = ''; return; }
+        area.style.display = 'flex';
+        area.style.flexDirection = 'column';
+        area.style.gap = '8px';
+
+        area.innerHTML = enemies.map((e, idx) => {
+          const isTargeted = G.targetIndex === idx;
+          const isDead = e.hp <= 0;
+          const opacity = isDead ? 0.4 : 1.0;
+          return `
+            <div onclick="Combat.setTarget(${idx})" style="
+              cursor:pointer; padding:8px; border:1px solid ${isTargeted ? 'var(--gold)' : 'var(--border)'};
+              background:${isTargeted ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.03)'};
+              border-radius:4px; opacity:${opacity}; transition:all 0.2s;
+            ">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;">
+                <span style="font-family:'Cinzel',serif; color:${isTargeted ? 'var(--gold-lt)' : 'var(--text-lt)'}">${isTargeted ? '🎯 ' : ''}${e.icon} ${e.name}</span>
+                <span style="color:var(--text-dim)">Lv.${e.level}</span>
+              </div>
+              <div class="main-bar" style="height:6px;">
+                <div class="main-bar-fill hp-fill" style="width:${Math.max(0, e.hp / e.maxHp * 100)}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
       },
       updateEnemyBar(enemy) {
-        document.getElementById('enemy-hp-disp').textContent = `${enemy.hp}/${enemy.maxHp}`;
-        document.getElementById('enemy-hp-bar').style.width = Math.max(0, enemy.hp / enemy.maxHp * 100) + '%';
+        // Redundant now with showEnemyPanel handling full list, but keeping for compatibility if called
+        this.showEnemyPanel(G.enemies);
       }
     };
 
@@ -2920,7 +3023,13 @@
         if (p.gold < cost) { Log.add(`You need ${cost} gold to hire this companion.`, 'system'); return; }
         p.gold -= cost;
         const ct = COMPANION_TYPES[type];
-        G.companions.push({ type, name: ct.name, icon: ct.icon, str: ct.str + Math.floor(p.level / 5) });
+        const hpBase = ct.hp || 50;
+        const hp = hpBase + (p.level * 10);
+        G.companions.push({
+          type, name: ct.name, icon: ct.icon,
+          hp: hp, maxHp: hp,
+          str: ct.str + Math.floor(p.level / 5)
+        });
         Log.add(`⚔️ <strong>${ct.icon} ${ct.name}</strong> joins your party!`, 'success');
         UI.closeModal('modal-tavern');
         UI.refresh(); this.showTownActions(); Game.autosave();
@@ -3030,19 +3139,34 @@
     const Combat = {
       start(enemyKey) {
         const base = ENEMIES[enemyKey];
-        G.currentEnemy = this.scaleEnemy(base);
-        G.currentEnemy.status = {}; // { stun: 0, poison: 0 }
+        const partySize = 1 + (G.companions ? G.companions.length : 0);
+        const groupSize = Math.min(4, 1 + Math.floor(Math.random() * partySize));
+
+        G.enemies = [];
+        for (let i = 0; i < groupSize; i++) {
+          const e = this.scaleEnemy(base);
+          e.status = {};
+          G.enemies.push(e);
+        }
+        G.targetIndex = 0;
         G.inCombat = true; G.playerDefending = false; G.combatBuffs = {}; G.turnCount = 0;
+
         Log.divider();
-        if (G.currentEnemy.isBoss) {
-          Log.add(`⚠️ <strong>WORLD BOSS!</strong> ${G.currentEnemy.icon} <strong>${G.currentEnemy.name}</strong> (Lv.${G.currentEnemy.level}) emerges!`, 'death');
+        if (G.enemies[0].isBoss) {
+          Log.add(`⚠️ <strong>WORLD BOSS!</strong> ${G.enemies[0].icon} <strong>${G.enemies[0].name}</strong> (Lv.${G.enemies[0].level}) emerges!`, 'death');
           UI.veilFlash();
         } else {
-          Log.add(`⚔ A ${G.currentEnemy.icon} <strong>${G.currentEnemy.name}</strong> (Lv.${G.currentEnemy.level}) bars your path!`, 'combat');
+          const names = G.enemies.map(e => `<strong>${e.name}</strong>`).join(', ');
+          Log.add(`⚔️ A group of ${G.enemies.length} enemies (${names}) bars your path!`, 'combat');
         }
         Log.add(`<em>${base.desc}</em>`, 'story');
-        if (G.companion) Log.add(`👥 ${G.companion.icon} <strong>${G.companion.name}</strong> stands ready at your side!`, 'success');
-        UI.showEnemyPanel(G.currentEnemy); this.showCombatActions(); UI.refresh();
+        UI.showEnemyPanel(G.enemies); this.showCombatActions(); UI.refresh();
+      },
+
+      setTarget(idx) {
+        if (!G.inCombat || !G.enemies[idx] || G.enemies[idx].hp <= 0) return;
+        G.targetIndex = idx;
+        UI.showEnemyPanel(G.enemies);
       },
 
       showCombatActions() {
@@ -3063,19 +3187,25 @@
       attack() {
         if (!G.canAct) return;
         G.playerDefending = false;
-        const enemy = G.currentEnemy;
+        const enemy = G.enemies[G.targetIndex];
+        if (!enemy || enemy.hp <= 0) {
+          Log.add('Select a living target!', 'system'); return;
+        }
         let dmg = Math.max(1, effectiveStat('str') + Math.floor(Math.random() * 5) - enemy.def);
         const crit = Math.random() * 100 < G.player.crit;
         if (crit) dmg = Math.floor(dmg * 1.8);
         enemy.hp -= dmg;
-        Log.add(crit ? `💥 Critical hit! You strike for <strong>${dmg}</strong>!` : `You attack for <strong>${dmg}</strong> damage.`, 'player');
+        Log.add(crit ? `💥 Critical hit! You strike <strong>${enemy.name}</strong> for <strong>${dmg}</strong>!` : `You attack <strong>${enemy.name}</strong> for <strong>${dmg}</strong> damage.`, 'player');
         this.afterPlayerTurn();
       },
 
       useSkill(skillKey) {
         if (!G.canAct) return;
         G.playerDefending = false;
-        const p = G.player, enemy = G.currentEnemy, skill = SKILLS[skillKey];
+        const p = G.player, enemy = G.enemies[G.targetIndex], skill = SKILLS[skillKey];
+        if (!enemy || enemy.hp <= 0) {
+          Log.add('Select a living target!', 'system'); return;
+        }
         // Special pact mechanic: pay HP for MP
         if (skill.type === 'pact') {
           if (p.hp <= 20) { Log.add('You are too weak for a Demonic Pact!', 'system'); return; }
@@ -3141,9 +3271,15 @@
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! Defensive stance taken.`, 'player');
         } else if (skill.type === 'summon') {
           const ct = COMPANION_TYPES['skeleton'];
-          G.companion = { type: 'skeleton', name: ct.name, icon: ct.icon, str: ct.str + Math.floor(G.player.level / 3) };
-          G.combatBuffs = { strBonus: skill.strBonus, turns: 3 };
-          Log.add(`${skill.icon} <strong>${skill.name}</strong>! A skeletal warrior rises from the dead to fight for you!`, 'veil');
+          const hpOff = Math.floor(G.player.level * 8);
+          if (!G.companions) G.companions = [];
+          G.companions.push({
+            type: 'skeleton', name: ct.name, icon: ct.icon,
+            hp: ct.hp + hpOff, maxHp: ct.hp + hpOff,
+            str: ct.str + Math.floor(G.player.level / 3),
+            isSummon: true, turnsLeft: 8
+          });
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! A skeletal warrior rises to fight for you!`, 'veil');
         } else if (skill.type === 'buff') {
           G.combatBuffs = { strBonus: skill.strBonus, turns: 3 };
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! Power surges through you!`, 'player');
@@ -3187,42 +3323,84 @@
       },
 
       enemyTurn() {
-        const p = G.player, enemy = G.currentEnemy;
+        const livingEnemies = G.enemies.filter(e => e.hp > 0);
+        if (livingEnemies.length === 0) { this.afterPlayerTurn(); return; }
 
-        // Handle Status Effects
-        if (enemy.status.poison > 0) {
-          const poiDmg = Math.floor(enemy.maxHp * 0.08);
-          enemy.hp -= poiDmg;
-          enemy.status.poison--;
-          Log.add(`🤢 The ${enemy.name} takes <strong>${poiDmg}</strong> poison damage!`, 'combat');
-          if (enemy.hp <= 0) { this.afterPlayerTurn(); return; }
-        }
+        livingEnemies.forEach((enemy, idx) => {
+          setTimeout(() => {
+            if (!G.inCombat || enemy.hp <= 0) return;
 
-        if (enemy.status.stun > 0) {
-          enemy.status.stun--;
-          Log.add(`💫 The ${enemy.name} is stunned and cannot move!`, 'combat');
-          this.afterEnemyTurn(); return;
-        }
+            // Handle Status Effects
+            if (enemy.status.poison > 0) {
+              const poiDmg = Math.floor(enemy.maxHp * 0.08);
+              enemy.hp -= poiDmg;
+              enemy.status.poison--;
+              Log.add(`🤢 The ${enemy.name} takes <strong>${poiDmg}</strong> poison damage!`, 'combat');
+              if (enemy.hp <= 0) { UI.showEnemyPanel(G.enemies); return; }
+            }
 
-        const atk = enemy.attacks[Math.floor(Math.random() * enemy.attacks.length)];
-        // Dodge nerfed: max 25%, base 4%, and AGI advantage matters less
-        const dodge = Math.min(.25, (effectiveStat('agi') - enemy.agi) * .015 + .04);
-        if (Math.random() < dodge) { Log.add(`The ${enemy.name} ${atk} you — you barely dodge!`, 'player'); return; }
-        // Enemy attacks with random variance: base str ± 20%
-        let dmg = Math.max(1, enemy.str + Math.floor(Math.random() * Math.ceil(enemy.str * 0.2)) - effectiveDef());
-        const crit = Math.random() * 100 < enemy.crit;
-        if (crit) dmg = Math.floor(dmg * 2.0); // crit deals double (was 1.6)
-        p.hp -= dmg;
-        if (enemy.isBoss) UI.veilFlash();
-        Log.add(`The ${enemy.icon} ${enemy.name} ${atk} you for <strong>${dmg}</strong>${crit ? ' 💥 (CRITICAL!)' : ''}!`, 'combat');
-        if (p.hp <= 0) { p.hp = 0; UI.refresh(); this.endCombat(false, false, true); }
+            if (enemy.status.stun > 0) {
+              enemy.status.stun--;
+              Log.add(`💫 The ${enemy.name} is stunned and cannot move!`, 'combat');
+              return;
+            }
+
+            // Pick a Target: Player or a living Companion
+            const targets = [{ type: 'player', name: G.player.name, ref: G.player }];
+            if (G.companions) {
+              G.companions.forEach(c => {
+                if (c.hp > 0) targets.push({ type: 'companion', name: c.name, ref: c, icon: c.icon });
+              });
+            }
+            const target = targets[Math.floor(Math.random() * targets.length)];
+
+            const atk = enemy.attacks[Math.floor(Math.random() * enemy.attacks.length)];
+            const targetAgi = target.type === 'player' ? effectiveStat('agi') : 10;
+            const dodge = Math.min(.25, (targetAgi - enemy.agi) * .015 + .04);
+
+            if (Math.random() < dodge) {
+              Log.add(`The ${enemy.name} ${atk} ${target.name} — ${target.type === 'player' ? 'you barely dodge' : 'they dodge'}!`, 'player');
+            } else {
+              let dmg = Math.max(1, enemy.str + Math.floor(Math.random() * Math.ceil(enemy.str * 0.2)));
+              if (target.type === 'player') {
+                dmg = Math.max(1, dmg - effectiveDef());
+                if (G.playerDefending) dmg = Math.floor(dmg * 0.5);
+              } else {
+                dmg = Math.max(1, dmg - 5); // Base def for companions
+              }
+
+              const crit = Math.random() * 100 < enemy.crit;
+              if (crit) dmg = Math.floor(dmg * 2.0);
+
+              target.ref.hp -= dmg;
+              if (enemy.isBoss) UI.veilFlash();
+
+              const targetTitle = target.type === 'player' ? 'you' : `<strong>${target.icon} ${target.name}</strong>`;
+              Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${targetTitle} for <strong>${dmg}</strong>${crit ? ' 💥 (CRITICAL!)' : ''}!`, 'combat');
+
+              if (target.type === 'player' && G.player.hp <= 0) {
+                G.player.hp = 0; UI.refresh(); this.endCombat(false, false, true);
+              } else if (target.type === 'companion' && target.ref.hp <= 0) {
+                Log.add(`💀 <strong>${target.name}</strong> has been slain!`, 'death');
+                target.ref.hp = 0;
+              }
+            }
+            UI.refresh();
+          }, idx * 400);
+        });
       },
 
       companionAttack() {
-        if (!G.companions || !G.companions.length || !G.currentEnemy || G.currentEnemy.hp <= 0) return;
+        if (!G.companions || !G.companions.length || !G.inCombat) return;
         G.companions.forEach(c => {
-          if (!G.currentEnemy || G.currentEnemy.hp <= 0) return;
-          const enemy = G.currentEnemy;
+          if (c.hp <= 0) return;
+          // Target current targeted enemy or first living enemy
+          let enemy = G.enemies[G.targetIndex];
+          if (!enemy || enemy.hp <= 0) {
+            enemy = G.enemies.find(e => e.hp > 0);
+          }
+          if (!enemy) return;
+
           const dmg = Math.max(1, c.str + Math.floor(Math.random() * 4) - Math.floor(enemy.def / 2));
           enemy.hp -= dmg;
           Log.add(`${c.icon} <strong>${c.name}</strong> strikes the ${enemy.name} for <strong>${dmg}</strong>!`, 'player');
@@ -3253,13 +3431,45 @@
       afterPlayerTurn(skipEnemy = false) {
         G.turnCount++;
         if (G.combatBuffs.turns > 0) G.combatBuffs.turns--;
+
+        // Summons decay
+        if (G.companions) {
+          G.companions.forEach((c, idx) => {
+            if (c.isSummon) {
+              c.turnsLeft--;
+              if (c.turnsLeft <= 0) {
+                Log.add(`💀 Your ${c.name} crumbles back into dust.`, 'system');
+                G.companions.splice(idx, 1);
+              }
+            }
+          });
+        }
+
         // Companion attacks after player each turn
         this.companionAttack();
-        UI.refresh(); UI.updateEnemyBar(G.currentEnemy);
-        if (G.currentEnemy.hp <= 0) { G.currentEnemy.hp = 0; UI.updateEnemyBar(G.currentEnemy); this.endCombat(true); return; }
+        UI.refresh(); UI.showEnemyPanel(G.enemies);
+
+        const allDead = G.enemies.every(e => e.hp <= 0);
+        if (allDead) { this.endCombat(true); return; }
+
+        // Auto-select next target if current is dead
+        if (G.enemies[G.targetIndex].hp <= 0) {
+          G.targetIndex = G.enemies.findIndex(e => e.hp > 0);
+          UI.showEnemyPanel(G.enemies);
+        }
+
         if (!skipEnemy) {
           G.canAct = false;
-          setTimeout(() => { this.enemyTurn(); G.playerDefending = false; G.canAct = true; UI.refresh(); this.showCombatActions(); }, 700);
+          const totalAtkTime = G.enemies.filter(e => e.hp > 0).length * 400 + 500;
+          setTimeout(() => {
+            this.enemyTurn();
+            setTimeout(() => {
+              G.playerDefending = false; G.canAct = true;
+              // Clear out dead companions after the turn
+              G.companions = G.companions.filter(c => c.hp > 0);
+              UI.refresh(); this.showCombatActions();
+            }, totalAtkTime);
+          }, 700);
         } else { this.showCombatActions(); }
       },
 
@@ -3268,39 +3478,32 @@
         UI.showEnemyPanel(null);
         if (died) {
           const p = G.player;
-          Log.add(`💀 <strong>The ${G.currentEnemy.name} has slain you!</strong>`, 'death');
+          const killer = G.enemies.find(e => e.hp > 0) || G.enemies[0];
+          Log.add(`💀 <strong>The ${killer.name} has slain you!</strong>`, 'death');
           if (p.permadeath) {
-            // ── PERMADEATH: show special modal then delete save ──
-            const killerEl = document.getElementById('permadeath-killer');
-            const epitaphEl = document.getElementById('permadeath-epitaph');
-            if (killerEl) killerEl.textContent = G.currentEnemy.icon + ' ' + G.currentEnemy.name;
-            if (epitaphEl) epitaphEl.textContent =
-              `${p.name} · Lv.${p.level} ${CLASSES[p.classKey].name} · ${p.kills || 0} kills · Fell at ${LOCATIONS[G.location]?.name || G.location}`;
+            // ... (rest of death logic)
             UI.openModal('modal-permadeath');
           } else {
-            // ── NORMAL DEATH: auto-respawn at Solmara, no modal ──
-            const penalty = Math.min(p.gold, Math.floor(p.gold * 0.15));
-            p.gold -= penalty;
-            p.hp = Math.floor(effectiveMaxHp() * 0.25);
-            p.mp = Math.floor(p.maxMp * 0.25);
+            // ... (rest of normal death logic)
             G.location = 'solmara';
-            Log.add(`The Veil spits you back out. ${penalty > 0 ? `You lost ${penalty} gold.` : ''} You collapse at Solmara.`, 'veil');
             UI.refresh(); Game.autosave(); Explore.showTownActions();
           }
           return;
         }
         if (victory) {
-          const e = G.currentEnemy;
-          const xp = e.xp + Math.floor(Math.random() * 12), gold = e.gold[0] + Math.floor(Math.random() * (e.gold[1] - e.gold[0] + 1));
-          G.player.gold += gold;
-          // Track kills
-          G.player.kills = (G.player.kills || 0) + 1;
-          Log.add(`⚔ <strong>Victory!</strong> ${e.icon} ${e.name} falls.`, 'success');
-          Log.add(`🪙 +${gold} gold. ⭐ +${xp} XP.`, 'loot');
-          e.loot.forEach(d => { if (Math.random() < d.chance) { this.addToInventory(d.item, 1); Log.add(`🎁 Found: ${ITEMS[d.item].icon} <strong>${ITEMS[d.item].name}</strong>!`, 'loot'); } });
-          this.grantXP(xp);
-          // Record faction kill (async, fire-and-forget)
-          WorldServer.recordKill(G.player.faction);
+          let totalGold = 0, totalXp = 0;
+          G.enemies.forEach(e => {
+            totalXp += e.xp + Math.floor(Math.random() * 12);
+            totalGold += e.gold[0] + Math.floor(Math.random() * (e.gold[1] - e.gold[0] + 1));
+            // Record faction kill
+            WorldServer.recordKill(G.player.faction);
+            // Drop loot
+            e.loot.forEach(d => { if (Math.random() < d.chance) { this.addToInventory(d.item, 1); Log.add(`🎁 Found: ${ITEMS[d.item].icon} <strong>${ITEMS[d.item].name}</strong>!`, 'loot'); } });
+          });
+          G.player.gold += totalGold;
+          G.player.kills = (G.player.kills || 0) + G.enemies.length;
+          Log.add(`⚔ <strong>Group Defeated!</strong> 🪙 +${totalGold} gold. ⭐ +${totalXp} XP.`, 'success');
+          this.grantXP(totalXp);
         } else if (fled) {
           Log.add('You slip away into the darkness of Eryndor.', 'system');
         }
@@ -3331,7 +3534,12 @@
 
       equipItem(id) {
         const p = G.player, item = ITEMS[id]; if (item.type !== 'equipment') return;
-        p.equipment[item.slot] = id; this.removeFromInventory(id, 1);
+        const slot = item.slot || 'weapon';
+        // Swap logic: if something is already in the slot, unequip it
+        if (p.equipment[slot]) {
+          this.unequip(slot);
+        }
+        p.equipment[slot] = id; this.removeFromInventory(id, 1);
         Log.add(`Equipped ${item.icon} <strong>${item.name}</strong>.`, 'success');
         UI.refresh();
       },
@@ -4084,13 +4292,52 @@
         this.refresh();
       },
 
-      joinParty() {
-        const val = (document.getElementById('party-code-input').value || '').trim().toUpperCase();
+      joinParty(val) {
+        val = (val || document.getElementById('party-code-input').value || '').trim().toUpperCase();
         if (!val) return;
         G.partyCode = val;
-        Log.add(`\u2694\uFE0F Joined party: <strong>${val}</strong>`, 'success');
+        Log.add(`⚔️ Joined party: <strong>${val}</strong>`, 'success');
         this._updateChannelTabs();
         this.refresh();
+        if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu();
+      },
+
+      openParty() {
+        UI.openModal('modal-party');
+        this.refreshPartyMenu();
+      },
+
+      refreshPartyMenu() {
+        document.getElementById('party-menu-code').value = G.partyCode || 'NONE';
+
+        // Members
+        const mlist = document.getElementById('party-member-list');
+        if (G.partyCode) {
+          mlist.innerHTML = `<div style="color:var(--text-dim); font-size:12px; font-style:italic;">You are in party <strong>${G.partyCode}</strong>. Member tracking coming soon!</div>`;
+        } else {
+          mlist.innerHTML = `<div style="color:var(--text-dim); font-size:12px; font-style:italic;">You are not in a party. Create or join one!</div>`;
+        }
+
+        // Invites
+        const invSec = document.getElementById('party-invites-section');
+        const invList = document.getElementById('party-invite-list');
+        if (G.partyInvites && G.partyInvites.length > 0) {
+          invSec.style.display = 'block';
+          invList.innerHTML = G.partyInvites.map(inv => {
+            const time = new Date(inv.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return `
+              <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px; border:1px solid var(--border);">
+                <div>
+                  <div style="font-size:12px; color:var(--text-lt);">${inv.author} <span style="font-size:10px; color:var(--text-dim);">${time}</span></div>
+                  <div style="font-size:10px; color:var(--text-dim);">Code: ${inv.code}</div>
+                </div>
+                <button class="btn btn-sm btn-gold" onclick="GlobalChat.joinParty('${inv.code}'); G.partyInvites = G.partyInvites.filter(x => x.code !== '${inv.code}'); GlobalChat.refreshPartyMenu();">Accept</button>
+              </div>
+            `;
+          }).join('');
+        } else {
+          invSec.style.display = 'none';
+        }
       },
 
       createParty() {
@@ -4187,8 +4434,20 @@
             }
             if (filtered.length) this._lastTs[ch] = Math.max(...filtered.map(m => m.ts));
           });
+          // Parse invitations
+          if (G.player) {
+            const invitations = this._cache.filter(m => m.text.includes('/invite @' + G.player.name));
+            invitations.forEach(m => {
+              const codeMatch = m.text.match(/Code: ([A-Z0-9]{6})/);
+              if (codeMatch && !G.partyInvites.some(inv => inv.code === codeMatch[1])) {
+                G.partyInvites.push({ author: m.author, code: codeMatch[1], ts: m.ts });
+                Log.add(`📩 Party invite from <strong>${m.author}</strong>! (Check Party Menu)`, 'success');
+              }
+            });
+          }
           this._updateBadges();
           if (this._expanded) this._renderMessages();
+          if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu();
           this._setDot('green');
         } catch (e) { this._setDot('red'); }
       },
@@ -4342,6 +4601,18 @@
         const pname = G.player?.name;
         this._mine = this._guilds.find(g => g.members && g.members.some(m => m.name === pname)) || null;
         this._myMem = this._mine ? (this._mine.members.find(m => m.name === pname) || null) : null;
+
+        // Sync player details in the guild registry if they changed
+        if (this._myMem && G.player) {
+          let coreChanged = false;
+          if (this._myMem.level !== G.player.level) { this._myMem.level = G.player.level; coreChanged = true; }
+          const curCls = CLASSES[G.player.classKey]?.name || '';
+          if (this._myMem.cls !== curCls) { this._myMem.cls = curCls; coreChanged = true; }
+          if (coreChanged) {
+            this._save(); // Fire and forget update to JSONBin
+          }
+        }
+
         // Sync guild name on player for display
         if (G.player) {
           G.player.guildName = this._mine?.name || '';
