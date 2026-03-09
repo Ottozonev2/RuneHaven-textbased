@@ -1,8 +1,0 @@
-{
-    "name": "rune-haven",
-    "version": "1.0.0",
-    "description": "Rune Haven — Cloud save backend",
-    "dependencies": {
-        "@netlify/blobs": "^7.3.0"
-    }
-}
