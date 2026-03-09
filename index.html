@@ -3066,8 +3066,6 @@
       turnCount: 0, canAct: true,
       companions: [], // Mercs and Summons
       partyCode: '',
-      partyMembers: {}, // { name: { hp, maxHp, level, icon, ts, isCombat } }
-      partyInvites: [],
       lastPulse: 0,
       lastPartyCmdTs: 0
     };
@@ -5146,19 +5144,26 @@
        WORLD SERVER — Async Multiplayer via JSONBin.io
        ============================================================ */
     const WorldServer = {
-      _base: '/api/world?bin=',
+      // Auto-detect server: Use our new Cloudflare API if on Cloudflare/localhost, fallback to JSONBin (only for notes/leaderboard)
+      _base: (window.location.hostname.includes('pages.dev') || window.location.port === '8788')
+        ? '/api/world?bin='
+        : 'https://api.jsonbin.io/v3/b/',
       _lbTab: 'level',
+
+      _isCloudflare: (window.location.hostname.includes('pages.dev') || window.location.hostname === 'localhost'),
 
       _ok() { return WORLD_CONFIG.enabled; },
 
       _headers() {
-        return { 'Content-Type': 'application/json' };
+        if (this._isCloudflare) return { 'Content-Type': 'application/json' };
+        return { 'Content-Type': 'application/json', 'X-Master-Key': WORLD_CONFIG.apiKey };
       },
 
       async _get(binId, tries = 2) {
         for (let i = 0; i < tries; i++) {
           try {
-            const r = await fetch(`${this._base}${binId}`, { headers: this._headers() });
+            const url = this._isCloudflare ? `${this._base}${binId}` : `${this._base}${binId}`;
+            const r = await fetch(url, { headers: this._headers() });
             if (!r.ok) throw new Error('Fetch failed');
             return await r.json();
           } catch (e) {
@@ -5171,8 +5176,10 @@
       async _put(binId, data, tries = 2) {
         for (let i = 0; i < tries; i++) {
           try {
-            const r = await fetch(`${this._base}${binId}`, {
-              method: 'POST', headers: this._headers(),
+            const url = this._isCloudflare ? `${this._base}${binId}` : `${this._base}${binId}`;
+            const r = await fetch(url, {
+              method: this._isCloudflare ? 'POST' : 'PUT',
+              headers: this._headers(),
               body: JSON.stringify(data)
             });
             if (!r.ok) throw new Error('Write failed');

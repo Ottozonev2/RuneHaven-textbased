@@ -2,19 +2,18 @@
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "runehaven",
     "compatibility_date": "2025-09-27",
-    "observability": {
-        "enabled": true
-    },
-    "assets": {
-        "directory": "./dist"
-    },
     "compatibility_flags": [
         "nodejs_compat"
     ],
+    "pages_build_output_dir": "./dist",
+    "observability": {
+        "enabled": true
+    },
     "kv_namespaces": [
         {
             "binding": "SAVES_KV",
-            "id": "7c5265dab9bc45e49753a6a87ac400ea"
+            "id": "7c5265dab9bc45e49753a6a87ac400ea",
+            "preview_id": "7c5265dab9bc45e49753a6a87ac400ea"
         }
     ]
 }
