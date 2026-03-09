@@ -1,0 +1,12 @@
+.git/
+.github/
+node_modules/
+vendor/
+*.pack
+*.idx
+*.png
+!townbackground.png
+!combatbackground.png
+!menu-bg.png
+!icon-1192.png
+!icon-512.png
