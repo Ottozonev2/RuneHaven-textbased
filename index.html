@@ -2039,6 +2039,14 @@
         </div>
         <div class="shop-item">
           <div class="shop-item-info">
+            <div class="item-nm">Church Cleric</div>
+            <div class="item-dsc">A holy healer. Restores your HP ⛪ during combat.</div>
+          </div>
+          <span class="shop-item-price">🪙70</span>
+          <button class="btn btn-sm btn-gold" onclick="Explore.hireCompanion('cleric')">Hire</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-item-info">
             <div class="item-nm">🗡️ Shadow Blade</div>
             <div class="item-dsc">An elite Dominion hunter. Deadly but pricey.</div>
           </div>
@@ -2337,8 +2345,9 @@
        ============================================================ */
     const COMPANION_TYPES = {
       skeleton: { name: 'Skeleton Warrior', icon: '💀', str: 8, desc: 'A risen warrior — attacks each turn.' },
-      mercenary: { name: 'Mercenary', icon: '⚔️', str: 10, desc: 'A hired blade from the Tavern.' },
+      mercenary: { name: 'Mercenary', icon: '⚔️', str: 10, desc: 'A seasoned fighter with a sharp sword.' },
       guardsman: { name: 'Guardsman', icon: '🛡️', str: 7, desc: 'A stalwart shield-brother from Solmara.' },
+      cleric: { name: 'Cleric', icon: '⛪', str: 4, desc: 'A holy healer. Heals the player for 10% HP each turn.' },
       shadowBlade: { name: 'Shadow Blade', icon: '🗡️', str: 12, desc: 'An elite Dominion hunter — costly but deadly.' }
     };
 
@@ -2572,7 +2581,7 @@
     /* ============================================================
        GAME STATE
        ============================================================ */
-    const MAX_LEVEL = 100;
+    const MAX_LEVEL = 60;
 
     let G = {
       player: null, location: 'solmara',
@@ -3024,8 +3033,16 @@
         const manaAmt = Math.floor(p.maxMp * 0.35);
         p.hp = Math.min(maxHp, p.hp + healAmt);
         p.mp = Math.min(p.maxMp, p.mp + manaAmt);
+
+        // Heal companions too
+        if (G.companions) {
+          G.companions.forEach(c => {
+            if (c.hp > 0) c.hp = Math.min(c.maxHp, c.hp + Math.floor(c.maxHp * 0.35));
+          });
+        }
+
         Log.divider();
-        Log.add(`🍖 You eat a warm meal at the Tavern. −${cost} gold. +${healAmt} HP, +${manaAmt} MP.`, 'heal');
+        Log.add(`🍖 You eat a warm meal at the Tavern. −${cost} gold. +${healAmt} HP, +${manaAmt} MP. Your companions are refreshed.`, 'heal');
         UI.closeModal('modal-tavern');
         UI.refresh(); Game.autosave();
       },
@@ -3034,15 +3051,21 @@
         const p = G.player, cost = 20;
         if (p.gold < cost) { Log.add('Not enough gold to rent a room!', 'system'); UI.closeModal('modal-tavern'); return; }
         p.gold -= cost; p.hp = effectiveMaxHp(); p.mp = p.maxMp;
+
+        // Heal companions too
+        if (G.companions) {
+          G.companions.forEach(c => { if (c.hp > 0) c.hp = c.maxHp; });
+        }
+
         Log.divider();
-        Log.add(`🛏 You rest at the Tavern. −${cost} gold. HP and MP fully restored.`, 'heal');
+        Log.add(`🛏 You rest at the Tavern. −${cost} gold. HP, MP, and Companions fully restored.`, 'heal');
         UI.closeModal('modal-tavern');
         UI.refresh(); Game.autosave();
       },
 
       hireCompanion(type) {
         const p = G.player;
-        const costs = { mercenary: 80, guardsman: 50, shadowBlade: 150 };
+        const costs = { mercenary: 80, guardsman: 50, shadowBlade: 150, cleric: 70 };
         const cost = costs[type];
         if (!G.companions) G.companions = [];
         if (G.companions.length >= 3) { Log.add('You already have 3 companions (maximum)!', 'system'); return; }
@@ -3426,6 +3449,15 @@
         if (!G.companions || !G.companions.length || !G.inCombat) return;
         G.companions.forEach(c => {
           if (c.hp <= 0) return;
+
+          // Special logic for Cleric (Heal instead of Attack)
+          if (c.type === 'cleric') {
+            const heal = Math.floor(effectiveMaxHp() * 0.10);
+            G.player.hp = Math.min(effectiveMaxHp(), G.player.hp + heal);
+            Log.add(`${c.icon} <strong>${c.name}</strong> prays for you, restoring <strong>${heal}</strong> HP!`, 'heal');
+            return;
+          }
+
           // Target current targeted enemy or first living enemy
           let enemy = G.enemies[G.targetIndex];
           if (!enemy || enemy.hp <= 0) {
@@ -3516,8 +3548,11 @@
             // ... (rest of death logic)
             UI.openModal('modal-permadeath');
           } else {
-            // ... (rest of normal death logic)
+            // Normal death logic
             G.location = 'solmara';
+            G.inCombat = false; // Force combat end
+            G.companions = G.companions.filter(c => !c.isSummon); // Wipe summons
+            G.companions.forEach(c => { c.hp = Math.floor(c.maxHp * 0.1); }); // Mercs left at low health
             UI.refresh(); Game.autosave(); Explore.showTownActions();
           }
           return;
@@ -3665,7 +3700,10 @@
         const classKey = this._selectedClass || 'paladin';
         const isHardcore = document.getElementById('permadeath-toggle')?.checked || false;
         G.player = createPlayer(name, classKey, isHardcore);
-        G.location = 'solmara'; G.inCombat = false; G.companion = null;
+        G.location = 'solmara'; G.inCombat = false;
+        G.companions = []; // Reset companions for new character
+        G.partyCode = ''; // Reset party for new character
+        G.partyInvites = [];
         if (!G.activeSaveSlot) G.activeSaveSlot = 'runehaven_slot_0';
         this._show('screen-game');
         GlobalChat.init();
@@ -4293,13 +4331,17 @@
         if (ci) ci.style.display = 'none';
         if (this._channel === 'guild') {
           if (this._guild()) {
-            if (ci) { ci.style.display = 'flex'; }
-            if (cn) cn.textContent = '\uD83C\uDFF0 Guild: ' + this._guild();
+            if (ci) ci.style.display = 'flex';
+            if (cn) cn.textContent = '🏰 Guild: ' + this._guild();
+          } else {
+            if (gj) gj.style.display = 'flex';
           }
         } else if (this._channel === 'party') {
           if (this._party()) {
-            if (ci) { ci.style.display = 'flex'; }
-            if (cn) cn.textContent = '\u2694\uFE0F Party code: ' + this._party();
+            if (ci) ci.style.display = 'flex';
+            if (cn) cn.textContent = '⚔️ Party code: ' + this._party();
+          } else {
+            if (pj) pj.style.display = 'flex';
           }
         }
       },
@@ -4476,18 +4518,24 @@
           // Parse invitations
           if (G.player) {
             const myName = G.player.name.toLowerCase();
-            const invitations = this._cache.filter(m => {
-              const txt = m.text.toLowerCase();
-              return txt.includes('/invite @' + myName) || txt.includes('/invite ' + myName);
-            });
-            invitations.forEach(m => {
-              const codeMatch = m.text.match(/Code: ([A-Z0-9]+)/i);
-              if (codeMatch) {
-                const code = codeMatch[1].toUpperCase();
-                if (!G.partyInvites.some(inv => inv.code === code)) {
-                  G.partyInvites.push({ author: m.author, code: code, ts: m.ts });
-                  Log.add(`📩 Party invite from <strong>${m.author}</strong>! (Check Party Menu)`, 'success');
-                  if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu();
+            this._cache.forEach(m => {
+              // Don't detect our own invitations
+              if (m.author === G.player.name) return;
+
+              const txt = (m.text || '').toLowerCase();
+              const isForMe = txt.includes('/invite @' + myName) ||
+                txt.includes('/invite ' + myName) ||
+                (txt.includes('join my party') && txt.includes(myName));
+
+              if (isForMe) {
+                const codeMatch = m.text.match(/Code:?\s?([A-Z0-9]+)/i);
+                if (codeMatch) {
+                  const code = codeMatch[1].toUpperCase();
+                  if (!G.partyInvites.some(inv => inv.code === code)) {
+                    G.partyInvites.push({ author: m.author, code: code, ts: m.ts });
+                    Log.add(`📩 Party invite from <strong>${m.author}</strong>! (Check Party Menu)`, 'success');
+                    if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu();
+                  }
                 }
               }
             });
