@@ -2701,25 +2701,51 @@
         const list = document.getElementById('companion-list-sidebar');
         if (!list) return;
 
-        if (!G.companions || G.companions.length === 0) {
-          list.innerHTML = `<div style="color:var(--text-dim); font-size:11px; font-style:italic;">No companions.</div>`;
-          return;
+        let html = '';
+
+        // 1. Show Player first (mini bar)
+        const playerHpPct = Math.max(0, (p.hp / effectiveMaxHp()) * 100);
+        html += `
+          <div style="background:rgba(201,168,76,0.05); border:1px solid var(--gold-dk); border-radius:4px; padding:6px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+              <span style="font-weight:600; color:var(--gold-lt);">⭐ You (${p.name})</span>
+            </div>
+            <div class="main-bar" style="height:4px; background:rgba(0,0,0,0.3);">
+              <div class="main-bar-fill hp-fill" style="width:${playerHpPct}%;"></div>
+            </div>
+          </div>
+        `;
+
+        // 2. Show Companions
+        if (G.companions && G.companions.length > 0) {
+          html += G.companions.map((c, idx) => {
+            const hpPct = Math.max(0, (c.hp / c.maxHp) * 100);
+            return `
+              <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:4px; padding:6px; margin-bottom:6px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+                  <span style="font-weight:600; color:var(--text-lt);">${c.icon} ${c.name}</span>
+                  ${c.isSummon ? `<span style="color:var(--violet-lt); font-size:9px;">⏳ ${c.turnsLeft}</span>` : ''}
+                </div>
+                <div class="main-bar" style="height:4px; background:rgba(0,0,0,0.3);">
+                  <div class="main-bar-fill hp-fill" style="width:${hpPct}%;"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
         }
 
-        list.innerHTML = G.companions.map((c, idx) => {
-          const hpPct = Math.max(0, (c.hp / c.maxHp) * 100);
-          return `
-            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:4px; padding:6px; margin-bottom:6px;">
-              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
-                <span style="font-weight:600; color:var(--text-lt);">${c.icon} ${c.name}</span>
-                ${c.isSummon ? `<span style="color:var(--violet-lt); font-size:9px;">⏳ ${c.turnsLeft}</span>` : ''}
-              </div>
-              <div class="main-bar" style="height:4px; background:rgba(0,0,0,0.3);">
-                <div class="main-bar-fill hp-fill" style="width:${hpPct}%;"></div>
-              </div>
-            </div>
-          `;
-        }).join('');
+        // 3. Party members (Placeholder for now)
+        if (G.partyCode) {
+          html += `<div style="font-size:9px; color:var(--text-dim); text-align:center; padding:4px; border-top:1px solid rgba(255,255,255,0.05); margin-top:5px;">
+            Party: ${G.partyCode}
+          </div>`;
+        }
+
+        if (!G.companions || G.companions.length === 0) {
+          if (!G.partyCode) html += `<div style="color:var(--text-dim); font-size:11px; font-style:italic;">No active party.</div>`;
+        }
+
+        list.innerHTML = html;
       },
 
       _setBars(pfx, p, maxHp) {
@@ -3138,12 +3164,18 @@
        ============================================================ */
     const Combat = {
       start(enemyKey) {
-        const base = ENEMIES[enemyKey];
+        const loc = LOCATIONS[G.location];
         const partySize = 1 + (G.companions ? G.companions.length : 0);
         const groupSize = Math.min(4, 1 + Math.floor(Math.random() * partySize));
 
         G.enemies = [];
         for (let i = 0; i < groupSize; i++) {
+          // If it's a random encounter (key matches loc enemies), pick other types randomly from the same zone
+          let currentKey = enemyKey;
+          if (i > 0 && loc.enemies && loc.enemies.includes(enemyKey)) {
+            currentKey = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+          }
+          const base = ENEMIES[currentKey];
           const e = this.scaleEnemy(base);
           e.status = {};
           G.enemies.push(e);
