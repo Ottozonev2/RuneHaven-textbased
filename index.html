@@ -605,6 +605,7 @@
       flex: 1;
       overflow: hidden;
       min-height: 0;
+      position: relative;
     }
 
     #panel-stats {
@@ -1712,17 +1713,139 @@
   <!-- ============================================================
      MAIN GAME SCREEN
      ============================================================ -->
-  <div id="screen-game" class="screen">
+  <div id="screen-game" class="screen" style="display:flex; flex-direction:column; height:100vh; overflow:hidden;">
 
-    <!-- ======================================================
-         PERSISTENT WORLD CHAT PANEL (bottom of game screen)
-         ====================================================== -->
+    <div class="topbar">
+      <div class="topbar-title">🌀 RUNE HAVEN</div>
+      <div class="topbar-info">
+        <div class="topbar-stat">Lv <span id="top-level">1</span></div>
+        <div class="topbar-stat">HP <span id="top-hp">—</span></div>
+        <div class="topbar-stat">🪙<span id="top-gold">0</span></div>
+        <span class="topbar-faction" id="top-faction">—</span>
+      </div>
+      <div class="topbar-btns">
+        <button class="btn btn-sm btn-gold" onclick="GlobalChat.openParty()" title="Party Management">⚔️ Party</button>
+        <button class="btn btn-sm btn-gold" onclick="Game.saveGame()" title="Save Game">💾</button>
+        <button class="btn btn-sm btn-red" onclick="Game.showTitle()" title="Quit to Title">✕</button>
+      </div>
+    </div>
+
+    <div class="game-body" style="flex:1;">
+      <!-- All panels moved here -->
+      <!-- LEFT: Stats panel (desktop) -->
+      <div id="panel-stats">
+        <div class="panel-header">Outworlder</div>
+        <div class="stat-section char-portrait">
+          <span class="portrait-icon" id="stat-portrait">🌀</span>
+          <div class="char-name-dsp" id="stat-name">Hero</div>
+          <div class="char-cls-dsp" id="stat-class">Paladin · Lv.1</div>
+          <div class="char-faction-dsp" id="stat-faction-dsp">—</div>
+        </div>
+        <div class="stat-section">
+          <div class="bar-wrap">
+            <div class="bar-label-row"><span class="lbl">❤️ HP</span><span class="val" id="stat-hp">—</span></div>
+            <div class="main-bar">
+              <div class="main-bar-fill hp-fill" id="hp-bar" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-label-row"><span class="lbl">🔮 MP</span><span class="val" id="stat-mp">—</span></div>
+            <div class="main-bar">
+              <div class="main-bar-fill mp-fill" id="mp-bar" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-label-row"><span class="lbl">⭐ XP</span><span class="val" id="stat-xp">—</span></div>
+            <div class="main-bar">
+              <div class="main-bar-fill xp-fill" id="xp-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-section">
+          <div class="stat-grid">
+            <div class="stat-item"><span class="sn">STR</span><span class="sv" id="s-str">—</span></div>
+            <div class="stat-item"><span class="sn">INT</span><span class="sv" id="s-int">—</span></div>
+            <div class="stat-item"><span class="sn">WIS</span><span class="sv" id="s-wis">—</span></div>
+            <div class="stat-item"><span class="sn">AGI</span><span class="sv" id="s-agi">—</span></div>
+            <div class="stat-item"><span class="sn">VIT</span><span class="sv" id="s-vit">—</span></div>
+            <div class="stat-item"><span class="sn">DEF</span><span class="sv" id="s-def">—</span></div>
+            <div class="stat-item"><span class="sn">CRIT</span><span class="sv" id="s-crit">—</span></div>
+          </div>
+        </div>
+        <div class="gold-row">🪙 <span id="stat-gold">0</span> Gold</div>
+
+        <div id="panel-companions" style="margin-top:20px; border-top:1px solid var(--border); padding-top:10px;">
+          <div
+            style="font-family:'Cinzel',serif; font-size:10px; color:var(--violet-lt); margin-bottom:10px; letter-spacing:1px;">
+            ACTIVE PARTY</div>
+          <div id="companion-list-sidebar">
+            <div style="color:var(--text-dim); font-size:11px; font-style:italic;">No companions.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTRE -->
+      <div id="panel-centre">
+        <div id="panel-log">
+          <div class="panel-header">The Veil Chronicle</div>
+          <div id="text-log"></div>
+        </div>
+        <div id="panel-actions">
+          <div class="location-bar">📍 <span id="location-name">Ashfall Coast</span></div>
+          <div class="action-area">
+            <div id="combat-enemy-area" style="display:none;">
+              <div class="enemy-name-row">
+                <span class="enemy-name-dsp" id="enemy-name-disp">Enemy</span>
+                <span class="enemy-lvl-dsp" id="enemy-level-disp">Lv.1</span>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar-label-row"><span class="lbl">❤️ Enemy HP</span><span class="val"
+                    id="enemy-hp-disp">—</span></div>
+                <div class="main-bar">
+                  <div class="main-bar-fill hp-fill" id="enemy-hp-bar" style="width:100%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="btn-grid" id="action-btns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Sidebar (desktop) -->
+      <div id="panel-right">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="UI.switchTab('inventory')" id="tab-inventory">Bag</button>
+          <button class="tab-btn" onclick="UI.switchTab('equipment')" id="tab-equipment">Gear</button>
+          <button class="tab-btn" onclick="UI.switchTab('location')" id="tab-location">Map</button>
+        </div>
+        <div class="tab-content active" id="tc-inventory">
+          <div class="panel-header" style="font-size:9px;">INVENTORY</div>
+          <div class="inv-list" id="inv-list">
+            <div class="inv-empty">Your pack is empty.</div>
+          </div>
+          <div style="padding:6px 10px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);">Slots:
+            <span id="inv-count">0</span>/20</div>
+        </div>
+        <div class="tab-content" id="tc-equipment">
+          <div class="panel-header" style="font-size:9px;">EQUIPMENT</div>
+          <div class="eq-list" id="eq-list"></div>
+        </div>
+        <div class="tab-content" id="tc-location">
+          <div class="panel-header" style="font-size:9px;">ERYNDOR MAP</div>
+          <div class="eq-list" id="map-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERSISTENT WORLD CHAT PANEL (part of flex flow now) -->
     <div id="chat-panel" style="
-        position:absolute; bottom:0; left:0; right:0; z-index:80;
-        background:rgba(17, 13, 26, 0.75); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+        position:relative; z-index:80;
+        background:var(--bg-panel);
         border-top:1px solid var(--border);
-        display:flex; flex-direction:column; max-height:280px;
-        transition:max-height .25s ease;
+        display:flex; flex-direction:column;
+        transition:height .25s ease;
+        flex-shrink:0;
+        width:100%;
       ">
       <!-- Header bar (click to expand/collapse) -->
       <div onclick="GlobalChat.toggle()" style="
@@ -1809,131 +1932,6 @@
           Request Trade</button>
       </div>
     </div>
-
-    <div class="topbar">
-      <div class="topbar-title">🌀 RUNE HAVEN</div>
-      <div class="topbar-info">
-        <div class="topbar-stat">Lv <span id="top-level">1</span></div>
-        <div class="topbar-stat">HP <span id="top-hp">—</span></div>
-        <div class="topbar-stat">🪙<span id="top-gold">0</span></div>
-        <span class="topbar-faction" id="top-faction">—</span>
-      </div>
-      <div class="topbar-btns">
-        <button class="btn btn-sm btn-gold" onclick="GlobalChat.openParty()" title="Party Management">⚔️ Party</button>
-        <button class="btn btn-sm btn-gold" onclick="Game.saveGame()" title="Save Game">💾</button>
-        <button class="btn btn-sm btn-red" onclick="Game.showTitle()" title="Quit to Title">✕</button>
-      </div>
-    </div>
-
-    <div class="game-body">
-
-      <!-- LEFT: Stats panel (desktop) -->
-      <div id="panel-stats">
-        <div class="panel-header">Outworlder</div>
-        <div class="stat-section char-portrait">
-          <span class="portrait-icon" id="stat-portrait">🌀</span>
-          <div class="char-name-dsp" id="stat-name">Hero</div>
-          <div class="char-cls-dsp" id="stat-class">Paladin · Lv.1</div>
-          <div class="char-faction-dsp" id="stat-faction-dsp">—</div>
-        </div>
-        <div class="stat-section">
-          <div class="bar-wrap">
-            <div class="bar-label-row"><span class="lbl">❤️ HP</span><span class="val" id="stat-hp">—</span></div>
-            <div class="main-bar">
-              <div class="main-bar-fill hp-fill" id="hp-bar" style="width:100%"></div>
-            </div>
-          </div>
-          <div class="bar-wrap">
-            <div class="bar-label-row"><span class="lbl">🔮 MP</span><span class="val" id="stat-mp">—</span></div>
-            <div class="main-bar">
-              <div class="main-bar-fill mp-fill" id="mp-bar" style="width:100%"></div>
-            </div>
-          </div>
-          <div class="bar-wrap">
-            <div class="bar-label-row"><span class="lbl">⭐ XP</span><span class="val" id="stat-xp">—</span></div>
-            <div class="main-bar">
-              <div class="main-bar-fill xp-fill" id="xp-bar" style="width:0%"></div>
-            </div>
-          </div>
-        </div>
-        <div class="stat-section">
-          <div class="stat-grid">
-            <div class="stat-item"><span class="sn">STR</span><span class="sv" id="s-str">—</span></div>
-            <div class="stat-item"><span class="sn">INT</span><span class="sv" id="s-int">—</span></div>
-            <div class="stat-item"><span class="sn">WIS</span><span class="sv" id="s-wis">—</span></div>
-            <div class="stat-item"><span class="sn">AGI</span><span class="sv" id="s-agi">—</span></div>
-            <div class="stat-item"><span class="sn">VIT</span><span class="sv" id="s-vit">—</span></div>
-            <div class="stat-item"><span class="sn">DEF</span><span class="sv" id="s-def">—</span></div>
-            <div class="stat-item"><span class="sn">CRIT</span><span class="sv" id="s-crit">—</span></div>
-          </div>
-        </div>
-        <div class="gold-row">🪙 <span id="stat-gold">0</span> Gold</div>
-
-        <!-- NEW: Companions Section in Sidebar -->
-        <div id="panel-companions" style="margin-top:20px; border-top:1px solid var(--border); padding-top:10px;">
-          <div
-            style="font-family:'Cinzel',serif; font-size:10px; color:var(--violet-lt); margin-bottom:10px; letter-spacing:1px;">
-            ACTIVE PARTY</div>
-          <div id="companion-list-sidebar">
-            <div style="color:var(--text-dim); font-size:11px; font-style:italic;">No companions.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CENTRE -->
-      <div id="panel-centre">
-        <div id="panel-log">
-          <div class="panel-header">The Veil Chronicle</div>
-          <div id="text-log"></div>
-        </div>
-        <div id="panel-actions">
-          <div class="location-bar">📍 <span id="location-name">Ashfall Coast</span></div>
-          <div class="action-area">
-            <div id="combat-enemy-area" style="display:none;">
-              <div class="enemy-name-row">
-                <span class="enemy-name-dsp" id="enemy-name-disp">Enemy</span>
-                <span class="enemy-lvl-dsp" id="enemy-level-disp">Lv.1</span>
-              </div>
-              <div class="bar-wrap">
-                <div class="bar-label-row"><span class="lbl">❤️ Enemy HP</span><span class="val"
-                    id="enemy-hp-disp">—</span></div>
-                <div class="main-bar">
-                  <div class="main-bar-fill hp-fill" id="enemy-hp-bar" style="width:100%"></div>
-                </div>
-              </div>
-            </div>
-            <div class="btn-grid" id="action-btns"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: Sidebar (desktop) -->
-      <div id="panel-right">
-        <div class="tab-bar">
-          <button class="tab-btn active" onclick="UI.switchTab('inventory')" id="tab-inventory">Bag</button>
-          <button class="tab-btn" onclick="UI.switchTab('equipment')" id="tab-equipment">Gear</button>
-          <button class="tab-btn" onclick="UI.switchTab('location')" id="tab-location">Map</button>
-        </div>
-        <div class="tab-content active" id="tc-inventory">
-          <div class="panel-header" style="font-size:9px;">INVENTORY</div>
-          <div class="inv-list" id="inv-list">
-            <div class="inv-empty">Your pack is empty.</div>
-          </div>
-          <div style="padding:6px 10px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);">
-            Slots: <span id="inv-count">0</span>/20
-          </div>
-        </div>
-        <div class="tab-content" id="tc-equipment">
-          <div class="panel-header" style="font-size:9px;">EQUIPMENT</div>
-          <div class="eq-list" id="eq-list"></div>
-        </div>
-        <div class="tab-content" id="tc-location">
-          <div class="panel-header" style="font-size:9px;">ERYNDOR MAP</div>
-          <div class="eq-list" id="map-list"></div>
-        </div>
-      </div>
-
-    </div><!-- end game-body -->
 
     <!-- Mobile bottom nav -->
     <nav id="mobile-nav">
@@ -5397,7 +5395,7 @@
         const icon = document.getElementById('chat-toggle-icon');
         if (!panel) return;
         if (open) {
-          panel.style.maxHeight = '400px';
+          panel.style.height = '400px';
           tabs.style.display = 'block';
           msgs.style.display = 'flex';
           inputRow.style.display = 'flex';
@@ -5410,19 +5408,14 @@
           setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 60);
           // Faster polling when open
           this._startPoll(this._fast);
-          // Add bottom padding so content isn't hidden
-          const gb = document.querySelector('.game-body');
-          if (gb) gb.style.paddingBottom = '405px';
         } else {
-          panel.style.maxHeight = '28px';
+          panel.style.height = '28px';
           tabs.style.display = 'none';
           msgs.style.display = 'none';
           inputRow.style.display = 'none';
           icon.innerHTML = '&#9660;';
           // Slower polling when collapsed
           this._startPoll(this._slow);
-          const gb = document.querySelector('.game-body');
-          if (gb) gb.style.paddingBottom = '32px';
         }
       },
 
