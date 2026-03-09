@@ -1893,6 +1893,39 @@
   <!-- ============================================================
      MODALS
      ============================================================ -->
+  <!-- Stat Points Modal -->
+  <div class="modal-overlay" id="modal-stats">
+    <div class="modal">
+      <div class="modal-title">📊 Player Stats</div>
+      <div id="stat-points-remaining"
+        style="color:var(--violet-lt);font-size:11px;text-align:center;margin-bottom:15px;letter-spacing:1px;font-weight:600;">
+      </div>
+      <div id="stats-list-container" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div style="margin-top:20px;text-align:center;">
+        <button class="btn btn-sm" onclick="UI.closeModal('modal-stats')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skill Trainer Modal -->
+  <div class="modal-overlay" id="modal-trainer">
+    <div class="modal">
+      <div class="modal-title">🏋️ Skill Trainer</div>
+      <div
+        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;background:rgba(255,255,255,.03);padding:8px 12px;border-radius:6px;border:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:16px;">🪙</span> <span
+            id="trainer-gold-display" style="font-family:'Cinzel',serif;color:var(--gold);font-weight:600;">0</span>
+        </div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">Class: <span
+            id="trainer-class-display" style="color:var(--text-lt);">N/A</span></div>
+      </div>
+      <div id="trainer-skills-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      <div style="margin-top:20px;text-align:center;">
+        <button class="btn btn-sm" onclick="UI.closeModal('modal-trainer')">Done</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-shop">
     <div class="modal">
       <div class="modal-title">🏪 Solmara Outpost Market</div>
@@ -2205,37 +2238,37 @@
        ============================================================ */
     const SKILLS = {
       // Paladin
-      divineStrike: { name: 'Divine Strike', icon: '⚡', cost: 10, type: 'damage', mult: 2.3, desc: 'Holy-charged blow (2.3× STR + light damage).' },
-      holyShield: { name: 'Holy Shield', icon: '🛡️', cost: 8, type: 'defend', defense: 5, desc: 'Divine barrier — greatly raises DEF this turn.' },
-      consecrate: { name: 'Consecrate', icon: '✝️', cost: 14, type: 'heal', healMult: 2.0, desc: 'Consecrates the ground, restoring moderate HP.' },
+      divineStrike: { name: 'Divine Strike', icon: '⚡', cost: 10, type: 'damage', dmgType: 'holy', mult: 2.3, desc: 'Holy-charged blow (2.3× STR + light damage).' },
+      holyShield: { name: 'Holy Shield', icon: '🛡️', cost: 8, type: 'defend', dmgType: 'holy', defense: 5, desc: 'Divine barrier — greatly raises DEF this turn.' },
+      consecrate: { name: 'Consecrate', icon: '✝️', cost: 14, type: 'heal', dmgType: 'holy', healMult: 2.0, desc: 'Consecrates the ground, restoring moderate HP.' },
       // Inquisitor
-      purgeFlame: { name: 'Purge Flame', icon: '🔥', cost: 14, type: 'magic', mult: 2.4, desc: 'Purifying fire (2.4× INT). Burns heretics.' },
-      judgement: { name: 'Judgement', icon: '⚖️', cost: 10, type: 'damage', mult: 2.0, alwaysCrit: true, desc: 'Guaranteed crit — divine judgement (2.0× STR).' },
-      lightBind: { name: 'Light Bind', icon: '✨', cost: 8, type: 'defend', defense: 3, desc: 'Wraps enemy in light — reduces incoming damage.' },
+      purgeFlame: { name: 'Purge Flame', icon: '🔥', cost: 14, type: 'magic', dmgType: 'fire', mult: 2.4, desc: 'Purifying fire (2.4× INT). Burns heretics.' },
+      judgement: { name: 'Judgement', icon: '⚖️', cost: 10, type: 'damage', dmgType: 'holy', mult: 2.0, alwaysCrit: true, desc: 'Guaranteed crit — divine judgement (2.0× STR).' },
+      lightBind: { name: 'Light Bind', icon: '✨', cost: 8, type: 'defend', dmgType: 'holy', defense: 3, desc: 'Wraps enemy in light — reduces incoming damage.' },
       // Cleric
-      holyHeal: { name: 'Holy Heal', icon: '💚', cost: 16, type: 'heal', healMult: 2.5, desc: 'Restores significant HP with holy light.' },
-      smite: { name: 'Smite', icon: '☀️', cost: 12, type: 'magic', mult: 2.0, desc: 'Holy energy strike (2.0× INT).' },
-      divineFavor: { name: 'Divine Favor', icon: '🌟', cost: 20, type: 'heal', healMult: 1.5, desc: 'Heals and cleanses corruption.' },
+      holyHeal: { name: 'Holy Heal', icon: '💚', cost: 16, type: 'heal', dmgType: 'holy', healMult: 2.5, desc: 'Restores significant HP with holy light.' },
+      smite: { name: 'Smite', icon: '☀️', cost: 12, type: 'magic', dmgType: 'holy', mult: 2.0, desc: 'Holy energy strike (2.0× INT).' },
+      divineFavor: { name: 'Divine Favor', icon: '🌟', cost: 20, type: 'heal', dmgType: 'holy', healMult: 1.5, desc: 'Heals and cleanses corruption.' },
       // Lightbinder
-      radiantBlast: { name: 'Radiant Blast', icon: '💫', cost: 15, type: 'magic', mult: 2.6, desc: 'Focused beam of pure light (2.6× INT).' },
-      holyNova: { name: 'Holy Nova', icon: '✨', cost: 12, type: 'magic', mult: 1.8, desc: 'Burst of sacred energy (1.8× INT).' },
-      solarFlare: { name: 'Solar Flare', icon: '🌞', cost: 22, type: 'magic', mult: 3.2, desc: 'Devastating solar explosion (3.2× INT).' },
+      radiantBlast: { name: 'Radiant Blast', icon: '💫', cost: 15, type: 'magic', dmgType: 'holy', mult: 2.6, desc: 'Focused beam of pure light (2.6× INT).' },
+      holyNova: { name: 'Holy Nova', icon: '✨', cost: 12, type: 'magic', dmgType: 'holy', mult: 1.8, desc: 'Burst of sacred energy (1.8× INT).' },
+      solarFlare: { name: 'Solar Flare', icon: '🌞', cost: 22, type: 'magic', dmgType: 'fire', mult: 3.2, desc: 'Devastating solar explosion (3.2× INT).' },
       // Necromancer
-      deathBolt: { name: 'Death Bolt', icon: '💀', cost: 14, type: 'magic', mult: 2.5, desc: 'Bolt of necrotic energy (2.5× INT).' },
-      soulDrain: { name: 'Soul Drain', icon: '🌑', cost: 12, type: 'drain', mult: 1.8, desc: 'Drains enemy HP and restores your own.' },
-      raiseDead: { name: 'Raise Dead', icon: '💀', cost: 20, type: 'summon', strBonus: 6, desc: 'Raises a skeletal warrior that fights alongside you each turn!' },
+      deathBolt: { name: 'Death Bolt', icon: '💀', cost: 14, type: 'magic', dmgType: 'shadow', mult: 2.5, desc: 'Bolt of necrotic energy (2.5× INT).' },
+      soulDrain: { name: 'Soul Drain', icon: '🌑', cost: 12, type: 'drain', dmgType: 'shadow', mult: 1.8, desc: 'Drains enemy HP and restores your own.' },
+      raiseDead: { name: 'Raise Dead', icon: '💀', cost: 20, type: 'summon', dmgType: 'shadow', strBonus: 6, desc: 'Raises a skeletal warrior that fights alongside you each turn!' },
       // Warlock
-      demonicPact: { name: 'Demonic Pact', icon: '😈', cost: 0, type: 'pact', desc: 'Sacrifice 15 HP for 20 MP. Dangerous power.' },
-      shadowBolt: { name: 'Shadow Bolt', icon: '🌑', cost: 12, type: 'magic', mult: 2.2, desc: 'Demonic shadow energy (2.2× INT).' },
-      hellfire: { name: 'Hellfire', icon: '🔥', cost: 20, type: 'magic', mult: 3.0, desc: 'Hellfire eruption (3.0× INT). Costs your soul.' },
+      demonicPact: { name: 'Demonic Pact', icon: '😈', cost: 0, type: 'pact', dmgType: 'shadow', desc: 'Sacrifice 15 HP for 20 MP. Dangerous power.' },
+      shadowBolt: { name: 'Shadow Bolt', icon: '🌑', cost: 12, type: 'magic', dmgType: 'shadow', mult: 2.2, desc: 'Demonic shadow energy (2.2× INT).' },
+      hellfire: { name: 'Hellfire', icon: '🔥', cost: 20, type: 'magic', dmgType: 'fire', mult: 3.0, desc: 'Hellfire eruption (3.0× INT). Costs your soul.' },
       // Barbarian
-      berserkRage: { name: 'Berserk Rage', icon: '😡', cost: 10, type: 'buff', strBonus: 8, desc: 'Unleashes rage — +8 STR for 3 turns.' },
-      brutalSlam: { name: 'Brutal Slam', icon: '💥', cost: 8, type: 'damage', mult: 2.4, desc: 'Ground-splitting strike (2.4× STR).' },
-      bloodFury: { name: 'Blood Fury', icon: '🩸', cost: 6, type: 'damage', mult: 1.6, doubleHit: true, desc: 'Frenzied double strike (1.6× STR each).' },
+      berserkRage: { name: 'Berserk Rage', icon: '😡', cost: 10, type: 'buff', dmgType: 'physical', strBonus: 8, desc: 'Unleashes rage — +8 STR for 3 turns.' },
+      brutalSlam: { name: 'Brutal Slam', icon: '💥', cost: 8, type: 'damage', dmgType: 'physical', mult: 2.4, desc: 'Ground-splitting strike (2.4× STR).' },
+      bloodFury: { name: 'Blood Fury', icon: '🩸', cost: 6, type: 'damage', dmgType: 'physical', mult: 1.6, doubleHit: true, desc: 'Frenzied double strike (1.6× STR each).' },
       // Assassin
-      shadowStrike: { name: 'Shadow Strike', icon: '🗡️', cost: 10, type: 'damage', mult: 2.8, alwaysCrit: true, desc: 'Guaranteed crit from the shadows (2.8× STR).' },
-      venomBlade: { name: 'Venom Blade', icon: '🐍', cost: 8, type: 'damage', mult: 1.8, desc: 'Poisoned strike — deals 1.8× STR damage.' },
-      smokeBomb: { name: 'Smoke Bomb', icon: '💨', cost: 8, type: 'escape', desc: 'Vanish in shadow smoke — guaranteed escape.' }
+      shadowStrike: { name: 'Shadow Strike', icon: '🗡️', cost: 10, type: 'damage', dmgType: 'shadow', mult: 2.8, alwaysCrit: true, desc: 'Guaranteed crit from the shadows (2.8× STR).' },
+      venomBlade: { name: 'Venom Blade', icon: '🐍', cost: 8, type: 'damage', dmgType: 'poison', mult: 1.8, desc: 'Poisoned strike — deals 1.8× STR damage.' },
+      smokeBomb: { name: 'Smoke Bomb', icon: '💨', cost: 8, type: 'escape', dmgType: 'shadow', desc: 'Vanish in shadow smoke — guaranteed escape.' }
     };
 
     /* ============================================================
@@ -2278,18 +2311,21 @@
       // Ashfall Coast (lv 1-2)
       veilWraith: {
         name: 'Veil Wraith', icon: '👻', level: 1, hp: 28, maxHp: 28, str: 5, def: 2, agi: 9, crit: 6, xp: 20, gold: [3, 12], isBoss: false,
+        enemyType: 'undead',
         loot: [{ item: 'manaPotion', chance: .18 }],
         desc: 'A soul consumed by the Veil — it screams without sound.',
         attacks: ['phases through', 'slashes at', 'wails at']
       },
       corruptWolf: {
         name: 'Corrupted Wolf', icon: '🐺', level: 2, hp: 38, maxHp: 38, str: 7, def: 3, agi: 13, crit: 8, xp: 30, gold: [0, 6], isBoss: false,
+        enemyType: 'corrupted',
         loot: [],
         desc: 'A wolf warped by Veil energy — its eyes glow violet.',
         attacks: ['bites', 'claws at', 'pounces on']
       },
       lostOutworlder: {
         name: 'Lost Outworlder', icon: '🧟', level: 2, hp: 42, maxHp: 42, str: 8, def: 3, agi: 6, crit: 5, xp: 35, gold: [5, 18], isBoss: false,
+        enemyType: 'corrupted',
         loot: [{ item: 'healthPotion', chance: .2 }],
         desc: 'An Outworlder who lost their mind to the Veil. They attack on instinct.',
         attacks: ['claws at', 'bites', 'slams into']
@@ -2297,12 +2333,14 @@
       // Frostvein Highlands (lv 3-4)
       frostGiant: {
         name: 'Frost Giant', icon: '🧊', level: 3, hp: 80, maxHp: 80, str: 14, def: 8, agi: 4, crit: 6, xp: 60, gold: [10, 25], isBoss: false,
+        enemyType: 'giant',
         loot: [{ item: 'covenantmail', chance: .08 }],
         desc: 'A colossal giant wandering the frozen highlands of its ancestors.',
         attacks: ['smashes', 'hurls ice at', 'crushes']
       },
       iceRevenant: {
         name: 'Ice Revenant', icon: '❄️', level: 4, hp: 65, maxHp: 65, str: 10, def: 6, agi: 7, crit: 9, xp: 55, gold: [8, 20], isBoss: false,
+        enemyType: 'undead',
         loot: [{ item: 'manaPotion', chance: .25 }],
         desc: 'An undead spirit of the ancient giants, frozen in eternal hatred.',
         attacks: ['blasts frost at', 'chills the bones of', 'slams into']
@@ -2310,12 +2348,14 @@
       // Black Marsh (lv 4-5)
       rottingKnight: {
         name: 'Rotting Knight', icon: '💀', level: 4, hp: 70, maxHp: 70, str: 11, def: 7, agi: 5, crit: 6, xp: 60, gold: [12, 28], isBoss: false,
+        enemyType: 'undead',
         loot: [{ item: 'healthPotion', chance: .2 }],
         desc: 'An undead soldier risen from old wars — rusted armour, endless rage.',
         attacks: ['strikes with a rusted blade', 'shields bashes', 'slashes at']
       },
       boneSerpent: {
         name: 'Bone Serpent', icon: '🐍', level: 5, hp: 75, maxHp: 75, str: 12, def: 5, agi: 14, crit: 12, xp: 75, gold: [15, 35], isBoss: false,
+        enemyType: 'undead',
         loot: [{ item: 'bloodVial', chance: .2 }],
         desc: 'A massive serpent skeleton driven by necromantic hunger.',
         attacks: ['bites venomously', 'coils around', 'strikes at']
@@ -2323,12 +2363,14 @@
       // Emberfall / Ruins (lv 5-6)
       veilAberration: {
         name: 'Veil Aberration', icon: '🌀', level: 5, hp: 70, maxHp: 70, str: 9, def: 4, agi: 10, crit: 12, xp: 80, gold: [18, 40], isBoss: false,
+        enemyType: 'corrupted',
         loot: [{ item: 'manaPotion', chance: .3 }, { item: 'veilstaff', chance: .04 }],
         desc: 'Reality bends around this creature. It should not exist.',
         attacks: ['tears at reality near', 'blasts veil energy at', 'distorts space around']
       },
       bloodCultist: {
         name: 'Blood Cultist', icon: '🩸', level: 6, hp: 80, maxHp: 80, str: 13, def: 6, agi: 9, crit: 14, xp: 95, gold: [20, 50], isBoss: false,
+        enemyType: 'humanoid',
         loot: [{ item: 'bloodVial', chance: .35 }, { item: 'shadowmantle', chance: .05 }],
         desc: 'A devotee of the Ashen Dominion, drunk on blood magic.',
         attacks: ['hexes', 'slashes at', 'hurls a blood curse at']
@@ -2336,18 +2378,21 @@
       // Hollow Wilds / Bloodspire (lv 6-7)
       corruptTreant: {
         name: 'Corrupted Treant', icon: '🌳', level: 6, hp: 110, maxHp: 110, str: 16, def: 10, agi: 3, crit: 5, xp: 110, gold: [25, 55], isBoss: false,
+        enemyType: 'corrupted',
         loot: [{ item: 'healthPotion', chance: .25 }],
         desc: 'An ancient tree-spirit consumed by Veil corruption. It roars in agony.',
         attacks: ['smashes with branches', 'entangles', 'slams the earth near']
       },
       darkMage: {
         name: 'Veil-Touched Mage', icon: '🧙', level: 7, hp: 85, maxHp: 85, str: 8, def: 5, agi: 8, crit: 12, xp: 120, gold: [25, 60], isBoss: false,
+        enemyType: 'humanoid',
         loot: [{ item: 'veilstaff', chance: .06 }, { item: 'manaPotion', chance: .3 }],
         desc: 'A mage who opened their mind to the Veil — and lost it.',
         attacks: ['blasts with veil energy', 'curses', 'fires a shadow bolt at']
       },
       heretic: {
         name: 'Covenant Heretic', icon: '⚔️', level: 7, hp: 90, maxHp: 90, str: 14, def: 8, agi: 10, crit: 11, xp: 115, gold: [20, 55], isBoss: false,
+        enemyType: 'humanoid',
         loot: [{ item: 'healthPotion', chance: .2 }, { item: 'covenantmail', chance: .06 }],
         desc: 'A Saint who abandoned the Covenant — now hunted by both factions.',
         attacks: ['slashes at', 'charges', 'hurls a light lance at']
@@ -2355,18 +2400,21 @@
       // World Bosses
       frostKing: {
         name: 'The Frost King', icon: '👑', level: 8, hp: 220, maxHp: 220, str: 20, def: 14, agi: 4, crit: 9, xp: 280, gold: [90, 160], isBoss: true,
+        enemyType: 'undead',
         loot: [{ item: 'ashplate', chance: .5 }, { item: 'holyRelic', chance: .4 }],
         desc: 'A giant ruler who refused to leave Frostvein. Now corrupted into an undead titan!',
         attacks: ['unleashes a blizzard on', 'smashes with a frozen fist at', 'shatters the ground beneath']
       },
       plagueMother: {
         name: 'The Plague Mother', icon: '🦠', level: 9, hp: 260, maxHp: 260, str: 18, def: 12, agi: 5, crit: 10, xp: 380, gold: [120, 200], isBoss: true,
+        enemyType: 'undead',
         loot: [{ item: 'devourerorb', chance: .25 }, { item: 'bloodVial', chance: .6 }],
         desc: 'An ancient horror buried in the Black Marsh — mother of undead armies!',
         attacks: ['spews plague at', 'corrupts the soul of', 'slams a rotten limb into']
       },
       devouringKing: {
         name: 'Devouring King Fragment', icon: '😈', level: 10, hp: 300, maxHp: 300, str: 25, def: 12, agi: 12, crit: 18, xp: 500, gold: [160, 250], isBoss: true,
+        enemyType: 'corrupted',
         loot: [{ item: 'devourerorb', chance: .6 }, { item: 'shadowmantle', chance: .5 }],
         desc: 'A fragment of the Devouring King\'s true power breaks through the Veil! The world shakes!',
         attacks: ['consumes the soul of', 'tears reality beside', 'unleashes the Veil\'s fury on']
@@ -2448,9 +2496,9 @@
           'The stench of dark rituals drifts from a fortress above.']
       },
       velkaris: {
-        name: 'Ruins of Velkaris', icon: '🏚️', isTown: false,
+        name: 'Ruins of Velkaris', icon: '🏚️', isTown: true,
         minLevel: 70, maxLevel: 100,
-        desc: 'Where the Shattered Summoning happened. Reality is unstable here. Only the most powerful survive.',
+        desc: 'Where the Shattered Summoning happened. Reality is unstable — but a master trainer remains among the echoes.',
         enemies: ['veilAberration', 'darkMage', 'bloodCultist', 'frostKing', 'plagueMother', 'devouringKing'], encounterChance: .80,
         events: ['You see a version of yourself walking the opposite direction.',
           'A clock tower counts backwards. Then stops.',
@@ -2485,7 +2533,8 @@
         gold: 60,
         inventory: [{ id: 'healthPotion', qty: 2 }, { id: 'manaPotion', qty: 1 }],
         equipment: { weapon: null, armor: null },
-        skills: cls.skills,
+        skills: cls.skills.reduce((acc, sk) => { acc[sk] = 1; return acc; }, {}), // { skillKey: level }
+        statPoints: 0,
         permadeath,   // saved on player — survives load
         kills: 0
       };
@@ -2514,6 +2563,7 @@
     function effectiveMaxHp() {
       const p = G.player; let ex = 0;
       if (p.equipment.armor && ITEMS[p.equipment.armor].vitBonus) ex += ITEMS[p.equipment.armor].vitBonus * 5;
+      // Vit already included in maxHp via levelUp and stat spending (p.maxHp += 5 per vit)
       return p.maxHp + ex;
     }
     function factionLabel(f) {
@@ -2591,7 +2641,7 @@
       },
 
       refreshInventory() {
-        const p = G.player, total = p.inventory.reduce((a, i) => a + i.qty, 0);
+        const p = G.player, total = p.inventory.length; // 1 slot per stack
         const html = p.inventory.length
           ? p.inventory.map(e => { const item = ITEMS[e.id]; return `<div class="inv-item" onclick="UI.showItemModal('${e.id}')"><span class="item-name">${item.icon} ${item.name}</span><span class="item-qty">×${e.qty}</span></div>`; }).join('')
           : '<div class="inv-empty">Your pack is empty.</div>';
@@ -2725,6 +2775,8 @@
         const gLabel = (G.player && G.player.guildName) ? `🏰 ${G.player.guildName}` : '🏰 Guild';
         UI.setActions([
           { label: '🏪 Market', fn: "Explore.openShop()", cls: 'btn-gold' },
+          { label: '🏋️ Trainer', fn: "Explore.openTrainer()", cls: 'btn-violet' },
+          { label: '📊 Stats', fn: "Explore.openStats()", cls: 'btn-blue' },
           { label: compLabel, fn: "Explore.openTavern()", cls: 'btn-green' },
           { label: gLabel, fn: "GuildSystem.open()", cls: 'btn-violet btn-sm' },
           { label: '🏆 World', fn: "WorldServer.openLeaderboard()", cls: 'btn-violet btn-sm' },
@@ -2860,6 +2912,75 @@
         UI.refresh();
       },
 
+      // ── STATS & SKILLS ──
+      openStats() {
+        const p = G.player;
+        document.getElementById('stat-points-remaining').textContent = `AVAILABLE POINTS: ${p.statPoints || 0}`;
+        const container = document.getElementById('stats-list-container');
+        const stats = [
+          { key: 'str', name: 'Strength', icon: '⚔️', desc: 'Increases physical damage.' },
+          { key: 'int', name: 'Intelligence', icon: '🪄', desc: 'Boosts magic and healing.' },
+          { key: 'agi', name: 'Agility', icon: '💨', desc: 'Improves dodge and crit chance.' },
+          { key: 'vit', name: 'Vitality', icon: '❤️', desc: 'Increases maximum Health.' },
+          { key: 'def', name: 'Defense', icon: '🛡️', desc: 'Reduces incoming damage.' }
+        ];
+        container.innerHTML = stats.map(s => {
+          const val = p[s.key] || 0;
+          return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-lt);">${s.icon} ${s.name}: <span style="color:var(--violet-lt);">${val}</span></div>
+              <div style="font-size:10px;color:var(--text-dim);">${s.desc}</div>
+            </div>
+            ${p.statPoints > 0 ? `<button class="btn btn-sm btn-violet" onclick="Explore.spendStatPoint('${s.key}')">+</button>` : ''}
+          </div>`;
+        }).join('');
+        UI.openModal('modal-stats');
+      },
+
+      spendStatPoint(stat) {
+        const p = G.player;
+        if (!p.statPoints || p.statPoints <= 0) return;
+        p.statPoints--;
+        p[stat]++;
+        if (stat === 'vit') p.maxHp += 5;
+        Log.add(`✨ Your <strong>${stat.toUpperCase()}</strong> increased!`, 'success');
+        this.openStats();
+        UI.refresh();
+      },
+
+      openTrainer() {
+        const p = G.player;
+        document.getElementById('trainer-gold-display').textContent = p.gold;
+        document.getElementById('trainer-class-display').textContent = CLASSES[p.classKey].name;
+        const container = document.getElementById('trainer-skills-list');
+        const pSkills = p.skills || {};
+        container.innerHTML = Object.keys(pSkills).map(sk => {
+          const skill = SKILLS[sk];
+          const lv = pSkills[sk];
+          const cost = lv * 100;
+          return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-lt);">${skill.icon} ${skill.name} <span style="color:var(--violet-lt);font-size:10px;">(Lv.${lv})</span></div>
+              <div style="font-size:10px;color:var(--text-dim);">${skill.desc}</div>
+            </div>
+            <button class="btn btn-sm btn-gold" onclick="Explore.upgradeSkill('${sk}')" ${p.gold < cost ? 'disabled' : ''}>Upgrade (${cost}g)</button>
+          </div>`;
+        }).join('');
+        UI.openModal('modal-trainer');
+      },
+
+      upgradeSkill(sk) {
+        const p = G.player;
+        const lv = p.skills[sk];
+        const cost = lv * 100;
+        if (p.gold < cost) return;
+        p.gold -= cost;
+        p.skills[sk]++;
+        Log.add(`🔥 <strong>${SKILLS[sk].name}</strong> upgraded to level ${p.skills[sk]}!`, 'success');
+        this.openTrainer();
+        UI.refresh();
+      },
+
       openShop() {
         document.getElementById('shop-gold').textContent = G.player.gold;
         document.getElementById('shop-items').innerHTML = SHOP_ITEMS.map(id => {
@@ -2886,6 +3007,7 @@
       start(enemyKey) {
         const base = ENEMIES[enemyKey];
         G.currentEnemy = this.scaleEnemy(base);
+        G.currentEnemy.status = {}; // { stun: 0, poison: 0 }
         G.inCombat = true; G.playerDefending = false; G.combatBuffs = {}; G.turnCount = 0;
         Log.divider();
         if (G.currentEnemy.isBoss) {
@@ -2901,7 +3023,7 @@
 
       showCombatActions() {
         const p = G.player;
-        const skillBtns = p.skills.map(sk => {
+        const skillBtns = Object.keys(p.skills).map(sk => {
           const s = SKILLS[sk], hasMp = s.type === 'pact' || (p.mp >= s.cost);
           return { label: `${s.icon} ${s.name}${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`, fn: `Combat.useSkill('${sk}')`, cls: hasMp ? 'btn-violet' : '', disabled: !hasMp };
         });
@@ -2940,34 +3062,56 @@
         if (p.mp < skill.cost) { Log.add('Not enough mana!', 'system'); return; }
         p.mp -= skill.cost;
 
+        // Apply skill level modifier (15% per level above 1)
+        const skLevel = (p.skills && p.skills[skillKey]) || 1;
+        const lvMult = 1 + (skLevel - 1) * 0.15;
+
+        // Type bonuses (e.g. Holy vs Undead)
+        let typeMult = 1.0;
+        if (skill.dmgType === 'holy' && (enemy.enemyType === 'undead' || enemy.enemyType === 'corrupted')) {
+          typeMult = 1.5;
+          Log.add(`☀️ <strong>Holy bonus!</strong> The ${enemy.name} shudders under the light (+50% damage).`, 'success');
+        }
+
         if (skill.type === 'damage') {
-          let dmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult) - enemy.def);
+          let dmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
           const crit = skill.alwaysCrit || Math.random() * 100 < p.crit;
           if (crit && !skill.alwaysCrit) dmg = Math.floor(dmg * 1.8);
+
+          // Apply Status Effects from Skills
+          if (skillKey === 'lightBind') {
+            enemy.status.stun = 1;
+            Log.add(`✨ <strong>Light Bind!</strong> The ${enemy.name} is blinded and will skip their next turn.`, 'success');
+          }
+          if (skillKey === 'venomBlade') {
+            enemy.status.poison = 3;
+            Log.add(`🐍 <strong>Venom Blade!</strong> The ${enemy.name} is poisoned!`, 'success');
+          }
+
           if (skill.doubleHit) {
-            const dmg2 = Math.max(1, Math.floor(effectiveStat('str') * skill.mult) - enemy.def);
+            const dmg2 = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
             enemy.hp -= dmg + dmg2;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong>! You strike twice for <strong>${dmg}</strong> and <strong>${dmg2}</strong>!`, 'player');
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! You strike twice for <strong>${dmg}</strong> and <strong>${dmg2}</strong>!`, 'player');
           } else {
             enemy.hp -= dmg;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong>! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
           }
         } else if (skill.type === 'magic') {
-          let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult) - Math.floor(enemy.def / 2));
+          let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult * lvMult * typeMult) - Math.floor(enemy.def / 2));
           const crit = Math.random() * 100 < p.crit;
           if (crit) dmg = Math.floor(dmg * 1.6);
           enemy.hp -= dmg;
-          Log.add(`${skill.icon} <strong>${skill.name}</strong>! <strong>${dmg}</strong> arcane damage${crit ? ' (CRIT!)' : ''}!`, 'player');
+          Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong> arcane damage${crit ? ' (CRIT!)' : ''}!`, 'player');
           if (enemy.isBoss) UI.veilFlash();
         } else if (skill.type === 'drain') {
-          let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult) - Math.floor(enemy.def / 2));
+          let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult * lvMult * typeMult) - Math.floor(enemy.def / 2));
           const heal = Math.floor(dmg * 0.5);
           enemy.hp -= dmg; p.hp = Math.min(effectiveMaxHp(), p.hp + heal);
-          Log.add(`${skill.icon} <strong>${skill.name}</strong>! Drained <strong>${dmg}</strong> HP, restored <strong>${heal}</strong>.`, 'heal');
+          Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! Drained <strong>${dmg}</strong> HP, restored <strong>${heal}</strong>.`, 'heal');
         } else if (skill.type === 'heal') {
-          const amt = Math.floor((effectiveStat('int') + p.vit) * skill.healMult);
+          const amt = Math.floor((effectiveStat('int') + p.vit) * skill.healMult * lvMult);
           p.hp = Math.min(effectiveMaxHp(), p.hp + amt);
-          Log.add(`${skill.icon} <strong>${skill.name}</strong>! Restored <strong>${amt}</strong> HP.`, 'heal');
+          Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! Restored <strong>${amt}</strong> HP.`, 'heal');
         } else if (skill.type === 'defend') {
           G.combatBuffs.defenseBonus = skill.defense; G.playerDefending = true;
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! Defensive stance taken.`, 'player');
@@ -3020,6 +3164,22 @@
 
       enemyTurn() {
         const p = G.player, enemy = G.currentEnemy;
+
+        // Handle Status Effects
+        if (enemy.status.poison > 0) {
+          const poiDmg = Math.floor(enemy.maxHp * 0.08);
+          enemy.hp -= poiDmg;
+          enemy.status.poison--;
+          Log.add(`🤢 The ${enemy.name} takes <strong>${poiDmg}</strong> poison damage!`, 'combat');
+          if (enemy.hp <= 0) { this.afterPlayerTurn(); return; }
+        }
+
+        if (enemy.status.stun > 0) {
+          enemy.status.stun--;
+          Log.add(`💫 The ${enemy.name} is stunned and cannot move!`, 'combat');
+          this.afterEnemyTurn(); return;
+        }
+
         const atk = enemy.attacks[Math.floor(Math.random() * enemy.attacks.length)];
         // Dodge nerfed: max 25%, base 4%, and AGI advantage matters less
         const dodge = Math.min(.25, (effectiveStat('agi') - enemy.agi) * .015 + .04);
@@ -3135,10 +3295,11 @@
         const cls = CLASSES[p.classKey], g = cls.growth;
         p.level++; p.maxHp += g.hp; p.maxMp += g.mp; p.hp = effectiveMaxHp(); p.mp = p.maxMp;
         p.str += g.str; p.int += g.int; p.agi += g.agi; p.vit += g.vit; p.def += g.def; p.crit += g.crit;
+        p.statPoints = (p.statPoints || 0) + 5;
         p.xpToNext = Math.floor(p.xpToNext * 1.6); // Steeper XP curve
         Log.divider();
         Log.add(`🌀 <strong>LEVEL ${p.level}${p.level === MAX_LEVEL ? ' — MAX!' : ''}!</strong> The Veil responds to your growing power.`, 'levelup');
-        Log.add(`All stats increased. HP and MP fully restored.`, 'levelup');
+        Log.add(`All stats increased. +5 Stat Points granted. HP/MP restored.`, 'levelup');
         UI.showLevelUpBanner(p.level);
         // Submit updated score to world leaderboard (async)
         WorldServer.submitScore();
