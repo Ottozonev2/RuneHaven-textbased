@@ -1909,6 +1909,7 @@
         <div class="tab-bar">
           <button class="tab-btn active" onclick="UI.switchTab('inventory')" id="tab-inventory">Bag</button>
           <button class="tab-btn" onclick="UI.switchTab('equipment')" id="tab-equipment">Gear</button>
+          <button class="tab-btn" onclick="UI.switchTab('skills')" id="tab-skills">Skills</button>
           <button class="tab-btn" onclick="UI.switchTab('location')" id="tab-location">Map</button>
         </div>
         <div class="tab-content active" id="tc-inventory">
@@ -1923,6 +1924,12 @@
         <div class="tab-content" id="tc-equipment">
           <div class="panel-header" style="font-size:9px;">EQUIPMENT</div>
           <div class="eq-list" id="eq-list"></div>
+        </div>
+        <div class="tab-content" id="tc-skills">
+          <div class="panel-header" style="font-size:9px;">SKILLS</div>
+          <div id="skills-list" style="padding:10px;overflow-y:auto;max-height:calc(100vh - 280px);">
+            <!-- Skills will be rendered here -->
+          </div>
         </div>
         <div class="tab-content" id="tc-location">
           <div class="panel-header" style="font-size:9px;">ERYNDOR MAP</div>
@@ -2007,6 +2014,7 @@
     <div class="tab-bar" style="flex-shrink:0;">
       <button class="tab-btn active" id="dtab-inventory" onclick="UI.switchMobileTab('inventory')">Bag</button>
       <button class="tab-btn" id="dtab-equipment" onclick="UI.switchMobileTab('equipment')">Gear</button>
+      <button class="tab-btn" id="dtab-skills" onclick="UI.switchMobileTab('skills')">Skills</button>
       <button class="tab-btn" id="dtab-location" onclick="UI.switchMobileTab('location')">Map</button>
     </div>
     <div class="tab-content active" id="dtc-inventory" style="flex:1;overflow:hidden;">
@@ -2019,6 +2027,11 @@
     </div>
     <div class="tab-content" id="dtc-equipment" style="flex:1;overflow:hidden;">
       <div class="eq-list" id="d-eq-list"></div>
+    </div>
+    <div class="tab-content" id="dtc-skills" style="flex:1;overflow-y:auto;">
+      <div id="d-skills-list" style="padding:10px;">
+        <!-- Skills will be rendered here -->
+      </div>
     </div>
     <div class="tab-content" id="dtc-location" style="flex:1;overflow:hidden;">
       <div class="eq-list" id="d-map-list"></div>
@@ -3026,19 +3039,113 @@
         ['map-list', 'd-map-list'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = html; });
       },
 
+      refreshSkills() {
+        const p = G.player;
+        if (!p || !p.skills) return;
+        const container = document.getElementById('skills-list');
+        if (!container) return;
+
+        const skillsArray = Object.keys(p.skills).map(sk => ({
+          key: sk,
+          skill: SKILLS[sk],
+          level: p.skills[sk]
+        }));
+
+        if (skillsArray.length === 0) {
+          container.innerHTML = `<div style="color:var(--text-dim);text-align:center;padding:20px;font-style:italic;">No skills learned yet.</div>`;
+          return;
+        }
+
+        const html = skillsArray.map(({ key, skill, level }) => {
+          const upgradeCost = level * 100;
+          const canUpgrade = p.gold >= upgradeCost;
+
+          // Calculate skill effectiveness
+          const lvMult = 1 + (level - 1) * 0.15;
+          let effectInfo = '';
+          const effStr = condenseStat(effectiveStat('str'));
+          const effInt = condenseStat(effectiveStat('int'));
+
+          if (skill.type === 'damage') {
+            const dmg = Math.floor(effStr * skill.mult * lvMult);
+            effectInfo = `Dmg: ~${dmg}${skill.doubleHit ? ' x2' : ''}`;
+          } else if (skill.type === 'magic') {
+            const dmg = Math.floor(effInt * skill.mult * lvMult);
+            effectInfo = `Dmg: ~${dmg}`;
+          } else if (skill.type === 'drain') {
+            const dmg = Math.floor(effInt * skill.mult * lvMult);
+            effectInfo = `Dmg: ~${dmg} | Heal: ~${Math.floor(dmg * 0.5)}`;
+          } else if (skill.type === 'heal') {
+            const heal = Math.floor((effInt + p.vit) * skill.healMult * lvMult);
+            effectInfo = `Heal: ~${heal}`;
+          } else if (skill.type === 'summon') {
+            const ct = COMPANION_TYPES['skeleton'];
+            if (ct) {
+              const summonHp = ct.hp + Math.floor(p.level * 15);
+              const summonStr = Math.floor(ct.str + (p.level / 2));
+              effectInfo = `Summon: ${summonHp} HP, ${summonStr} STR`;
+            }
+          } else if (skill.type === 'defend') {
+            effectInfo = `Defense: +${skill.defense || 0}`;
+          } else if (skill.type === 'buff' && skill.strBonus) {
+            effectInfo = `Buff: +${skill.strBonus} STR`;
+          }
+
+          return `
+            <div style="background:rgba(144,96,216,0.08);border:1px solid var(--violet-dk);border-radius:6px;padding:10px;margin-bottom:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;">
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:600;color:var(--violet-lt);margin-bottom:3px;">
+                    ${skill.icon} ${skill.name}
+                  </div>
+                  <div style="font-size:10px;color:var(--violet);font-family:'Cinzel',serif;letter-spacing:0.5px;margin-bottom:4px;">
+                    LEVEL ${level}
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:9px;color:var(--text-dim);margin-bottom:2px;">
+                    Cost: ${skill.type === 'pact' ? '15 HP' : skill.cost + ' MP'}
+                  </div>
+                  ${effectInfo ? `<div style="font-size:9px;color:var(--violet-lt);">${effectInfo}</div>` : ''}
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text);margin-bottom:8px;line-height:1.4;">
+                ${skill.desc}
+              </div>
+              <button class="btn btn-sm btn-violet" 
+                style="width:100%;font-size:10px;" 
+                onclick="UI.upgradeSkillFromPanel('${key}')" 
+                ${!canUpgrade ? 'disabled' : ''}>
+                ${canUpgrade ? `⬆️ Upgrade (${upgradeCost}g)` : `🔒 Need ${upgradeCost}g`}
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <div style="margin-bottom:12px;padding:8px;background:rgba(201,168,76,0.08);border:1px solid var(--gold-dk);border-radius:4px;text-align:center;">
+            <div style="font-size:10px;color:var(--text-dim);margin-bottom:2px;">YOUR GOLD</div>
+            <div style="font-size:16px;color:var(--gold-lt);font-weight:600;font-family:'Cinzel',serif;">🪙 ${p.gold}</div>
+          </div>
+          ${html}
+        `;
+      },
+
       switchTab(tab) {
-        ['inventory', 'equipment', 'location'].forEach(t => {
+        ['inventory', 'equipment', 'skills', 'location'].forEach(t => {
           const b = document.getElementById('tab-' + t), tc = document.getElementById('tc-' + t);
           if (b) b.classList.toggle('active', t === tab); if (tc) tc.classList.toggle('active', t === tab);
         });
+        if (tab === 'skills') this.refreshSkills();
       },
       switchMobileTab(tab) {
-        ['inventory', 'equipment', 'location'].forEach(t => {
+        ['inventory', 'equipment', 'skills', 'location'].forEach(t => {
           const b = document.getElementById('dtab-' + t), tc = document.getElementById('dtc-' + t);
           if (b) b.classList.toggle('active', t === tab); if (tc) tc.classList.toggle('active', t === tab);
         });
-        const titles = { inventory: '🎒 Inventory', equipment: '⚔️ Equipment', location: '🗺️ Eryndor Map' };
+        const titles = { inventory: '🎒 Inventory', equipment: '⚔️ Equipment', skills: '✨ Skills', location: '🗺️ Eryndor Map' };
         const el = document.getElementById('drawer-bag-title'); if (el) el.textContent = titles[tab] || '🎒 Inventory';
+        if (tab === 'skills') this.refreshMobileSkills();
       },
 
       showItemModal(itemId, inventoryIndex) {
@@ -3062,6 +3169,115 @@
 
       openModal(id) { document.getElementById(id).classList.add('open'); },
       closeModal(id) { document.getElementById(id).classList.remove('open'); },
+
+      upgradeSkillFromPanel(skillKey) {
+        const p = G.player;
+        const lv = p.skills[skillKey];
+        const cost = lv * 100;
+        if (p.gold < cost) {
+          Log.add(`❌ Not enough gold. Need ${cost}g to upgrade.`, 'system');
+          return;
+        }
+        p.gold -= cost;
+        p.skills[skillKey]++;
+        Log.add(`🔥 <strong>${SKILLS[skillKey].name}</strong> upgraded to level ${p.skills[skillKey]}!`, 'success');
+        this.refreshSkills();
+        this.refreshMobileSkills();
+        this.refresh();
+        Game.autosave();
+      },
+
+      refreshMobileSkills() {
+        const p = G.player;
+        if (!p || !p.skills) return;
+        const container = document.getElementById('d-skills-list');
+        if (!container) return;
+
+        const skillsArray = Object.keys(p.skills).map(sk => ({
+          key: sk,
+          skill: SKILLS[sk],
+          level: p.skills[sk]
+        }));
+
+        if (skillsArray.length === 0) {
+          container.innerHTML = `<div style="color:var(--text-dim);text-align:center;padding:20px;font-style:italic;">No skills learned yet.</div>`;
+          return;
+        }
+
+        const html = skillsArray.map(({ key, skill, level }) => {
+          const upgradeCost = level * 100;
+          const canUpgrade = p.gold >= upgradeCost;
+
+          // Calculate skill effectiveness
+          const lvMult = 1 + (level - 1) * 0.15;
+          let effectInfo = '';
+          const effStr = condenseStat(effectiveStat('str'));
+          const effInt = condenseStat(effectiveStat('int'));
+
+          if (skill.type === 'damage') {
+            const dmg = Math.floor(effStr * skill.mult * lvMult);
+            effectInfo = `Dmg: ~${dmg}${skill.doubleHit ? ' x2' : ''}`;
+          } else if (skill.type === 'magic') {
+            const dmg = Math.floor(effInt * skill.mult * lvMult);
+            effectInfo = `Dmg: ~${dmg}`;
+          } else if (skill.type === 'drain') {
+            const dmg = Math.floor(effInt * skill.mult * lvMult);
+            effectInfo = `Dmg: ~${dmg} | Heal: ~${Math.floor(dmg * 0.5)}`;
+          } else if (skill.type === 'heal') {
+            const heal = Math.floor((effInt + p.vit) * skill.healMult * lvMult);
+            effectInfo = `Heal: ~${heal}`;
+          } else if (skill.type === 'summon') {
+            const ct = COMPANION_TYPES['skeleton'];
+            if (ct) {
+              const summonHp = ct.hp + Math.floor(p.level * 15);
+              const summonStr = Math.floor(ct.str + (p.level / 2));
+              effectInfo = `Summon: ${summonHp} HP, ${summonStr} STR`;
+            }
+          } else if (skill.type === 'defend') {
+            effectInfo = `Defense: +${skill.defense || 0}`;
+          } else if (skill.type === 'buff' && skill.strBonus) {
+            effectInfo = `Buff: +${skill.strBonus} STR`;
+          }
+
+          return `
+            <div style="background:rgba(144,96,216,0.08);border:1px solid var(--violet-dk);border-radius:6px;padding:10px;margin-bottom:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;">
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:600;color:var(--violet-lt);margin-bottom:3px;">
+                    ${skill.icon} ${skill.name}
+                  </div>
+                  <div style="font-size:10px;color:var(--violet);font-family:'Cinzel',serif;letter-spacing:0.5px;margin-bottom:4px;">
+                    LEVEL ${level}
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:9px;color:var(--text-dim);margin-bottom:2px;">
+                    Cost: ${skill.type === 'pact' ? '15 HP' : skill.cost + ' MP'}
+                  </div>
+                  ${effectInfo ? `<div style="font-size:9px;color:var(--violet-lt);">${effectInfo}</div>` : ''}
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text);margin-bottom:8px;line-height:1.4;">
+                ${skill.desc}
+              </div>
+              <button class="btn btn-sm btn-violet" 
+                style="width:100%;font-size:10px;" 
+                onclick="UI.upgradeSkillFromPanel('${key}')" 
+                ${!canUpgrade ? 'disabled' : ''}>
+                ${canUpgrade ? `⬆️ Upgrade (${upgradeCost}g)` : `🔒 Need ${upgradeCost}g`}
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <div style="margin-bottom:12px;padding:8px;background:rgba(201,168,76,0.08);border:1px solid var(--gold-dk);border-radius:4px;text-align:center;">
+            <div style="font-size:10px;color:var(--text-dim);margin-bottom:2px;">YOUR GOLD</div>
+            <div style="font-size:16px;color:var(--gold-lt);font-weight:600;font-family:'Cinzel',serif;">🪙 ${p.gold}</div>
+          </div>
+          ${html}
+        `;
+      },
 
       showLevelUpBanner(level) {
         const el = document.createElement('div');
