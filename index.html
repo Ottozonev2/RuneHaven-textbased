@@ -2588,8 +2588,11 @@
       inCombat: false, enemies: [], targetIndex: 0,
       playerDefending: false, combatBuffs: {},
       turnCount: 0, canAct: true,
-      companions: [], // Array of { type, name, icon, hp, maxHp, str, turnsLeft }
-      partyInvites: []
+      companions: [], // Mercs and Summons
+      partyCode: '',
+      partyMembers: {}, // { name: { hp, maxHp, level, icon, ts, isCombat } }
+      partyInvites: [],
+      lastPulse: 0
     };
 
     /* ============================================================
@@ -2725,7 +2728,28 @@
           </div>
         `;
 
-        // 2. Show Companions
+        // 2. Show Party Members (Online)
+        if (G.partyCode) {
+          const now = Date.now();
+          Object.entries(G.partyMembers).forEach(([name, data]) => {
+            if (name === p.name) return; // Skip self
+            if (now - data.ts > 60000) return; // Offline (1 min timeout)
+            const hpPct = Math.max(0, (data.hp / data.maxHp) * 100);
+            html += `
+              <div style="background:rgba(184, 144, 255, 0.08); border:1px solid var(--violet-dk); border-radius:4px; padding:6px; margin-bottom:6px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+                  <span style="font-weight:600; color:var(--violet-lt);">${data.icon} ${name}</span>
+                  <span style="color:var(--text-dim); font-size:9px;">Lv.${data.level} ${data.isCombat ? '⚔️' : ''}</span>
+                </div>
+                <div class="main-bar" style="height:4px; background:rgba(0,0,0,0.3);">
+                  <div class="main-bar-fill hp-fill" style="width:${hpPct}%;"></div>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        // 3. Show Mercenaries/Summons
         if (G.companions && G.companions.length > 0) {
           html += G.companions.map((c, idx) => {
             const hpPct = Math.max(0, (c.hp / c.maxHp) * 100);
@@ -2743,15 +2767,15 @@
           }).join('');
         }
 
-        // 3. Party members (Placeholder for now)
+        // 4. Party Label
         if (G.partyCode) {
-          html += `<div style="font-size:9px; color:var(--text-dim); text-align:center; padding:4px; border-top:1px solid rgba(255,255,255,0.05); margin-top:5px;">
-            Party: ${G.partyCode}
+          html += `<div style="font-size:9px; color:var(--violet-lt); text-align:center; padding:4px; border-top:1px solid rgba(184, 144, 255, 0.2); margin-top:5px; font-family:'Cinzel',serif;">
+            PARTY: ${G.partyCode}
           </div>`;
-        }
-
-        if (!G.companions || G.companions.length === 0) {
-          if (!G.partyCode) html += `<div style="color:var(--text-dim); font-size:11px; font-style:italic;">No active party.</div>`;
+        } else {
+          if (!G.companions || G.companions.length === 0) {
+            html += `<div style="color:var(--text-dim); font-size:11px; font-style:italic;">Solo Journey. Join a party!</div>`;
+          }
         }
 
         list.innerHTML = html;
@@ -3186,22 +3210,30 @@
        COMBAT MODULE
        ============================================================ */
     const Combat = {
-      start(enemyKey) {
+      start(enemyKey, forceData = null) {
         const loc = LOCATIONS[G.location];
         const partySize = 1 + (G.companions ? G.companions.length : 0);
         const groupSize = Math.min(4, 1 + Math.floor(Math.random() * partySize));
 
         G.enemies = [];
-        for (let i = 0; i < groupSize; i++) {
-          // If it's a random encounter (key matches loc enemies), pick other types randomly from the same zone
-          let currentKey = enemyKey;
-          if (i > 0 && loc.enemies && loc.enemies.includes(enemyKey)) {
-            currentKey = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+        if (forceData && forceData.enemies) {
+          // Sync with Leader's enemies
+          G.enemies = forceData.enemies;
+        } else {
+          for (let i = 0; i < groupSize; i++) {
+            let currentKey = enemyKey;
+            if (i > 0 && loc.enemies && loc.enemies.includes(enemyKey)) {
+              currentKey = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+            }
+            const base = ENEMIES[currentKey];
+            const e = this.scaleEnemy(base);
+            e.status = {};
+            G.enemies.push(e);
           }
-          const base = ENEMIES[currentKey];
-          const e = this.scaleEnemy(base);
-          e.status = {};
-          G.enemies.push(e);
+          // Shared Combat Broadcast
+          if (G.partyCode) {
+            GlobalChat._broadcastPartyCmd(`/party_battle ${enemyKey} ${JSON.stringify(G.enemies)}`);
+          }
         }
         G.targetIndex = 0;
         G.inCombat = true; G.playerDefending = false; G.combatBuffs = {}; G.turnCount = 0;
@@ -3214,7 +3246,7 @@
           const names = G.enemies.map(e => `<strong>${e.name}</strong>`).join(', ');
           Log.add(`⚔️ A group of ${G.enemies.length} enemies (${names}) bars your path!`, 'combat');
         }
-        Log.add(`<em>${base.desc}</em>`, 'story');
+        Log.add(`<em>${G.enemies[0].desc}</em>`, 'story');
         UI.showEnemyPanel(G.enemies); this.showCombatActions(); UI.refresh();
       },
 
@@ -3251,6 +3283,12 @@
         if (crit) dmg = Math.floor(dmg * 1.8);
         enemy.hp -= dmg;
         Log.add(crit ? `💥 Critical hit! You strike <strong>${enemy.name}</strong> for <strong>${dmg}</strong>!` : `You attack <strong>${enemy.name}</strong> for <strong>${dmg}</strong> damage.`, 'player');
+
+        // Sync damage to party
+        if (G.partyCode) {
+          GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+        }
+
         this.afterPlayerTurn();
       },
 
@@ -4505,16 +4543,38 @@
         try {
           const data = await WorldServer._get(WORLD_CONFIG.chatId);
           this._cache = data.messages || [];
-          // Count unread per channel
+
+          // 1. Send Heartbeat (if in party, every ~15s)
           const now = Date.now();
+          if (G.partyCode && (now - (G.lastPulse || 0) > 15000)) {
+            this._sendPulse();
+            G.lastPulse = now;
+          }
+
+          // 2. Count unread and Process Pulses
           ['global', 'guild', 'party'].forEach(ch => {
             const filtered = this._filterFor(ch);
-            const newCount = filtered.filter(m => m.ts > this._lastTs[ch]).length;
+            const newMsgs = filtered.filter(m => m.ts > this._lastTs[ch]);
+
+            newMsgs.forEach(m => {
+              // Special: Party Commands (Hidden from chat)
+              if (ch === 'party' && m.text.startsWith('/')) {
+                this._handlePartyCmd(m);
+              }
+            });
+
+            const newNormalCount = newMsgs.filter(m => !m.text.startsWith('/')).length;
             if (!this._expanded || this._channel !== ch) {
-              if (newCount > 0) this._unread[ch] += newCount;
+              if (newNormalCount > 0) this._unread[ch] += newNormalCount;
             }
             if (filtered.length) this._lastTs[ch] = Math.max(...filtered.map(m => m.ts));
           });
+
+          // 3. Clear dead party members from UI cache
+          Object.keys(G.partyMembers).forEach(name => {
+            if (now - G.partyMembers[name].ts > 60000) delete G.partyMembers[name];
+          });
+
           // Parse invitations
           if (G.player) {
             const myName = G.player.name.toLowerCase();
@@ -4543,8 +4603,59 @@
           this._updateBadges();
           if (this._expanded) this._renderMessages();
           if (document.getElementById('modal-party').style.display === 'flex') this.refreshPartyMenu();
+          UI.refreshCompanions(); // Update sidebar with new pulses
           this._setDot('green');
-        } catch (e) { this._setDot('red'); }
+        } catch (e) { this._setDot('red'); console.error(e); }
+      },
+
+      _handlePartyCmd(m) {
+        if (m.author === G.player.name) return; // Ignore self
+        if (m.text.startsWith('/party_pulse')) {
+          try {
+            const data = JSON.parse(m.text.replace('/party_pulse ', ''));
+            G.partyMembers[m.author] = { ...data, ts: m.ts };
+          } catch (e) { }
+        } else if (m.text.startsWith('/party_battle')) {
+          const parts = m.text.split(' ');
+          const enemyKey = parts[1];
+          const enemyData = JSON.parse(m.text.substring(m.text.indexOf('{')));
+          if (!G.inCombat) {
+            Log.add(`⚔️ Your party leader initialized combat with <strong>${enemyData[0].name}</strong>!`, 'system');
+            Combat.start(enemyKey, { enemies: enemyData });
+          }
+        } else if (m.text.startsWith('/party_dmg')) {
+          const parts = m.text.split(' ');
+          const idx = parseInt(parts[1]);
+          const dmg = parseInt(parts[2]);
+          if (G.inCombat && G.enemies[idx]) {
+            G.enemies[idx].hp -= dmg;
+            Log.add(`🛡️ <strong>${m.author}</strong> strikes enemy ${idx + 1} for <strong>${dmg}</strong>!`, 'combat');
+            UI.refresh();
+          }
+        }
+      },
+
+      async _sendPulse() {
+        const p = G.player;
+        const pulse = {
+          hp: p.hp, maxHp: effectiveMaxHp(), level: p.level,
+          icon: CLASSES[p.classKey].icon, isCombat: G.inCombat
+        };
+        await this._broadcastPartyCmd(`/party_pulse ${JSON.stringify(pulse)}`);
+      },
+
+      async _broadcastPartyCmd(txt) {
+        if (!G.partyCode) return;
+        const p = G.player;
+        const msg = {
+          ch: 'party', party: G.partyCode,
+          author: p.name, faction: p.faction, text: txt, ts: Date.now()
+        };
+        const data = await WorldServer._get(WORLD_CONFIG.chatId);
+        const messages = data.messages || [];
+        messages.push(msg);
+        if (messages.length > 500) messages.splice(0, messages.length - 500);
+        await WorldServer._put(WORLD_CONFIG.chatId, { messages });
       },
 
       _filterFor(ch) {
