@@ -1899,7 +1899,8 @@
                 </div>
               </div>
             </div>
-            <div class="btn-grid" id="action-btns"></div>
+            <!-- Old action buttons hidden - now in right sidebar -->
+            <div class="btn-grid" id="action-btns" style="display:none;"></div>
           </div>
         </div>
       </div>
@@ -1929,13 +1930,16 @@
           <div class="eq-list" id="map-list"></div>
         </div>
 
-        <!-- Combat Skills Panel - Shows below tabs during combat only -->
+        <!-- Combat Actions & Skills Panel - Replaces action buttons during combat -->
         <div id="combat-skills-panel"
-          style="display:none; margin-top:auto; border-top:1px solid var(--border); padding:10px; background:rgba(144,96,216,0.05); max-height:300px; overflow-y:auto;">
-          <div
-            style="font-family:'Cinzel',serif; font-size:10px; color:var(--violet-lt); margin-bottom:8px; letter-spacing:1px; border-bottom:1px solid var(--violet-dk); padding-bottom:4px;">
-            ✨ YOUR SKILLS
+          style="display:none; margin-top:auto; border-top:1px solid var(--border); padding:10px; background:rgba(144,96,216,0.05); overflow-y:auto; flex-shrink:0;">
+          <!-- Combat action buttons (Attack/Defend/Flee) will appear here -->
+          <div id="combat-action-buttons"
+            style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:10px;">
+            <!-- Buttons rendered by showCombatActions() -->
           </div>
+
+          <!-- Skills list with status -->
           <div id="combat-skills-list">
             <!-- Skills will be rendered here during combat -->
           </div>
@@ -3051,7 +3055,8 @@
           return;
         }
 
-        panel.style.display = 'block';
+        panel.style.display = 'flex';
+        panel.style.flexDirection = 'column';
 
         const skillsArray = Object.keys(p.skills).map(sk => ({
           key: sk,
@@ -3064,7 +3069,12 @@
           return;
         }
 
-        const html = skillsArray.map(({ key, skill, level }) => {
+        // Add divider before skills
+        let html = `<div style="border-top:1px solid var(--violet-dk); margin-bottom:8px; padding-top:8px;">
+          <div style="font-family:'Cinzel',serif; font-size:9px; color:var(--violet); margin-bottom:6px; letter-spacing:1px;">SKILLS STATUS</div>
+        </div>`;
+
+        html += skillsArray.map(({ key, skill, level }) => {
           const hasMp = skill.type === 'pact' || (p.mp >= skill.cost);
 
           // Calculate skill effectiveness
@@ -3186,10 +3196,23 @@
       },
 
       setActions(actions) {
-        document.getElementById('action-btns').innerHTML = actions.map(a => {
-          const tooltipAttr = a.tooltip ? `title="${a.tooltip}"` : '';
-          return `<button class="btn ${a.cls || ''}" onclick="${a.fn}" ${a.disabled ? 'disabled' : ''} ${tooltipAttr} style="touch-action:manipulation;">${a.label}</button>`;
-        }).join('');
+        // Render to old location (below enemies - for backwards compatibility)
+        const oldContainer = document.getElementById('action-btns');
+        if (oldContainer) {
+          oldContainer.innerHTML = actions.map(a => {
+            const tooltipAttr = a.tooltip ? `title="${a.tooltip}"` : '';
+            return `<button class="btn ${a.cls || ''}" onclick="${a.fn}" ${a.disabled ? 'disabled' : ''} ${tooltipAttr} style="touch-action:manipulation;">${a.label}</button>`;
+          }).join('');
+        }
+
+        // Also render to sidebar combat panel
+        const sidebarContainer = document.getElementById('combat-action-buttons');
+        if (sidebarContainer && G.inCombat) {
+          sidebarContainer.innerHTML = actions.map(a => {
+            const tooltipAttr = a.tooltip ? `title="${a.tooltip}"` : '';
+            return `<button class="btn btn-sm ${a.cls || ''}" onclick="${a.fn}" ${a.disabled ? 'disabled' : ''} ${tooltipAttr} style="touch-action:manipulation;width:100%;">${a.label}</button>`;
+          }).join('');
+        }
       },
 
       showEnemyPanel(enemies) {
