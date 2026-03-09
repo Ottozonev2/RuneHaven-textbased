@@ -1899,17 +1899,6 @@
                 </div>
               </div>
             </div>
-            <!-- Combat Skills Info Panel -->
-            <div id="combat-skills-panel"
-              style="display:none; margin-top:12px; padding:10px; background:rgba(144,96,216,0.05); border:1px solid var(--violet-dk); border-radius:6px; max-height:300px; overflow-y:auto;">
-              <div
-                style="font-family:'Cinzel',serif; font-size:10px; color:var(--violet-lt); margin-bottom:8px; letter-spacing:1px; border-bottom:1px solid var(--violet-dk); padding-bottom:4px;">
-                ✨ YOUR SKILLS
-              </div>
-              <div id="combat-skills-list">
-                <!-- Skills will be rendered here during combat -->
-              </div>
-            </div>
             <div class="btn-grid" id="action-btns"></div>
           </div>
         </div>
@@ -1938,6 +1927,18 @@
         <div class="tab-content" id="tc-location">
           <div class="panel-header" style="font-size:9px;">ERYNDOR MAP</div>
           <div class="eq-list" id="map-list"></div>
+        </div>
+
+        <!-- Combat Skills Panel - Shows below tabs during combat only -->
+        <div id="combat-skills-panel"
+          style="display:none; margin-top:auto; border-top:1px solid var(--border); padding:10px; background:rgba(144,96,216,0.05); max-height:300px; overflow-y:auto;">
+          <div
+            style="font-family:'Cinzel',serif; font-size:10px; color:var(--violet-lt); margin-bottom:8px; letter-spacing:1px; border-bottom:1px solid var(--violet-dk); padding-bottom:4px;">
+            ✨ YOUR SKILLS
+          </div>
+          <div id="combat-skills-list">
+            <!-- Skills will be rendered here during combat -->
+          </div>
         </div>
       </div>
 
