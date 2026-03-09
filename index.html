@@ -1626,6 +1626,9 @@
     <div class="title-btns">
       <button class="btn btn-violet btn-lg" onclick="CharSelect.show()">&#127760; Enter Eryndor</button>
     </div>
+    <div style="margin-top:12px;">
+      <button class="btn btn-sm btn-gold" onclick="UI.openModal('modal-updates')">📜 Latest Updates</button>
+    </div>
     <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
       v3.1 &middot; Rune Haven &middot; Mobile &amp; Desktop
     </div>
@@ -2113,6 +2116,107 @@
     </div>
   </div>
 
+  <!-- Stash Modal -->
+  <div class="modal-overlay" id="modal-stash">
+    <div class="modal"
+      style="max-width:500px; height:80vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+      <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
+        <div class="modal-title" style="margin-bottom:8px;">🏦 Personal Stash</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px;">
+          <div style="color:var(--gold);">Gold: <span id="stash-p-gold">0</span></div>
+          <div style="color:var(--violet-lt);">Stash Gold: <span id="stash-s-gold">0</span></div>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:10px;">
+          <input id="stash-gold-input" type="number" placeholder="Amt"
+            style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#fff; padding:4px 8px; font-size:12px; border-radius:4px;">
+          <button class="btn btn-sm btn-gold" onclick="Explore.stashGold(true)">Deposit</button>
+          <button class="btn btn-sm" onclick="Explore.stashGold(false)">Withdraw</button>
+        </div>
+      </div>
+
+      <div style="flex:1; overflow-y:auto; padding:16px;">
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <div style="font-family:'Cinzel',serif; font-size:10px; color:var(--text-dim); margin-bottom:8px;">PACK
+              (<span id="stash-inv-count">0</span>/20)</div>
+            <div id="stash-inv-list" style="display:flex; flex-direction:column; gap:4px;"></div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-family:'Cinzel',serif; font-size:10px; color:var(--text-dim); margin-bottom:8px;">STASH
+              (<span id="stash-count">0</span>/200)</div>
+            <div id="stash-list" style="display:flex; flex-direction:column; gap:4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:12px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
+        <button class="btn btn-violet" style="width:100%;" onclick="UI.closeModal('modal-stash')">Close Stash</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Updates Modal -->
+  <div class="modal-overlay" id="modal-updates">
+    <div class="modal"
+      style="max-width:500px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+      <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
+        <div class="modal-title">📜 Chronological Updates</div>
+        <div style="color:var(--violet-lt); font-size:10px; font-family:'Cinzel',serif; letter-spacing:1px;">LATEST
+          PATCH NOTES</div>
+      </div>
+
+      <div style="flex:1; overflow-y:auto; padding:20px; font-size:13px; line-height:1.7; color:var(--text-dim);">
+        <div style="margin-bottom:24px;">
+          <div
+            style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>v3.5 - The Stash & Hoarder Update</span>
+            <span style="font-size:10px; opacity:0.6;">Mar 9, 2026</span>
+          </div>
+          <ul style="padding-left:18px; margin:0;">
+            <li><strong>Player Stash</strong>: New 200-slot chest in Solmara for storing gear and gold.</li>
+            <li><strong>Jewelry Slot</strong>: Rings, amulets, and gems can now be equipped for powerful scaling
+              bonuses.</li>
+            <li><strong>Level Requirements</strong>: Gear now requires specific levels to equip. Outworlders must grow
+              their power appropriately.</li>
+          </ul>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div
+            style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>v3.4 - Dungeons & Legends</span>
+            <span style="font-size:10px; opacity:0.6;">Mar 9, 2026</span>
+          </div>
+          <ul style="padding-left:18px; margin:0;">
+            <li><strong>World Dungeons</strong>: Travel to the Ancient Catacombs (Lv.5), Iron Garrison (Lv.20), and
+              more.</li>
+            <li><strong>Boss Loot</strong>: Legendary items are now exclusively guarded by dungeon bosses.</li>
+            <li><strong>80+ New Weapons</strong>: Massive arsenal expansion across all classes.</li>
+          </ul>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div
+            style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>v3.3 - Combat & Rarity System</span>
+            <span style="font-size:10px; opacity:0.6;">Mar 9, 2026</span>
+          </div>
+          <ul style="padding-left:18px; margin:0;">
+            <li><strong>Rarity Tiers</strong>: Gear now drops in 6 rarity tiers (Common to Legendary) with random stat
+              rolls.</li>
+            <li><strong>Combat UI</strong>: Rebuilt the attack menu for better skill flow and tooltips.</li>
+            <li><strong>Party Scaling</strong>: Summons and party members now scale dynamically with level.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="padding:12px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
+        <button class="btn btn-violet" style="width:100%;" onclick="UI.closeModal('modal-updates')">Back to
+          Title</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Tavern Modal -->
   <div class="modal-overlay" id="modal-tavern">
     <div class="modal">
@@ -2275,6 +2379,7 @@
   <div class="modal-overlay" id="modal-item">
     <div class="modal">
       <div class="modal-title" id="modal-item-name">Item</div>
+      <div id="modal-item-level" style="font-size:12px;margin-bottom:8px;font-family:'Cinzel',serif;"></div>
       <div id="modal-item-desc" style="color:var(--text-dim);font-style:italic;margin-bottom:16px;line-height:1.6;">
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -2908,7 +3013,9 @@
         skills: cls.skills.reduce((acc, sk) => { acc[sk] = 1; return acc; }, {}),
         statPoints: 0,
         permadeath,
-        kills: 0
+        kills: 0,
+        stash: [],
+        stashGold: 0
       };
     }
 
@@ -3243,6 +3350,17 @@
         const rarName = item.rarity ? item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1) : 'Common';
         document.getElementById('modal-item-name').innerHTML = `${item.icon} ${item.name} <span style="font-size:11px;color:var(--text-dim);opacity:0.7;">[${rarName}]</span>`;
         document.getElementById('modal-item-name').style.color = item.color;
+
+        // Level Requirement Display
+        const lvlEl = document.getElementById('modal-item-level');
+        if (item.type === 'equipment') {
+          const canEquip = G.player.level >= item.level;
+          lvlEl.innerHTML = `Required Level: <span style="color:${canEquip ? 'var(--text-lt)' : 'var(--red)'}">${item.level}</span>`;
+          lvlEl.style.display = 'block';
+        } else {
+          lvlEl.style.display = 'none';
+        }
+
         document.getElementById('modal-item-desc').textContent = item.desc;
         const useBtn = document.getElementById('modal-item-use'), eqBtn = document.getElementById('modal-item-equip');
         useBtn.style.display = item.type === 'consumable' ? '' : 'none';
@@ -3359,6 +3477,7 @@
         const gLabel = (G.player && G.player.guildName) ? `🏰 ${G.player.guildName}` : '🏰 Guild';
         UI.setActions([
           { label: '🏪 Market', fn: "Explore.openShop()", cls: 'btn-gold' },
+          { label: '🏦 Stash', fn: "Explore.openStash()", cls: 'btn-gold' },
           { label: '🏋️ Trainer', fn: "Explore.openTrainer()", cls: 'btn-violet' },
           { label: '📊 Stats', fn: "Explore.openStats()", cls: 'btn-blue' },
           { label: compLabel, fn: "Explore.openTavern()", cls: 'btn-green' },
@@ -3409,6 +3528,77 @@
           { label: '🏛️ Solmara', fn: "Explore.travel('solmara')", cls: '' },
           { label: '💾 Save', fn: "Game.saveGame()", cls: 'btn-sm' }
         ]);
+      },
+
+      // ── STASH ──
+      openStash() {
+        this.refreshStash();
+        UI.openModal('modal-stash');
+      },
+
+      refreshStash() {
+        const p = G.player;
+        if (!p.stash) p.stash = [];
+        if (p.stashGold === undefined) p.stashGold = 0;
+
+        document.getElementById('stash-p-gold').textContent = p.gold;
+        document.getElementById('stash-s-gold').textContent = p.stashGold;
+        document.getElementById('stash-inv-count').textContent = p.inventory.length;
+        document.getElementById('stash-count').textContent = p.stash.length;
+
+        const renderItem = (itemData, idx, isStash) => {
+          const item = getScaledItem(itemData.id, itemData.level, itemData.rarity || 'common');
+          const color = item.color || '#fff';
+          return `<div class="inv-item" onclick="Explore.toggleStashItem(${idx}, ${isStash})" style="border-left:2px solid ${color}; padding:4px 8px; margin-bottom:2px; font-size:11px; cursor:pointer; background:rgba(255,255,255,0.02);">
+            <div style="color:${color}">${item.icon} ${item.name} ${itemData.qty > 1 ? 'x' + itemData.qty : ''}</div>
+          </div>`;
+        };
+
+        document.getElementById('stash-inv-list').innerHTML = p.inventory.length ? p.inventory.map((item, idx) => renderItem(item, idx, false)).join('') : '<div style="color:var(--text-dim);font-size:10px;text-align:center;">Empty</div>';
+        document.getElementById('stash-list').innerHTML = p.stash.length ? p.stash.map((item, idx) => renderItem(item, idx, true)).join('') : '<div style="color:var(--text-dim);font-size:10px;text-align:center;">Empty</div>';
+      },
+
+      toggleStashItem(idx, isStash) {
+        const p = G.player;
+        if (isStash) {
+          // Retireve from stash
+          if (p.inventory.length >= 20) { Log.add('Inventory is full!', 'system'); return; }
+          const item = p.stash.splice(idx, 1)[0];
+          p.inventory.push(item);
+          Log.add(`Retrieved <strong>${ITEMS[item.id].name}</strong> from stash.`, 'system');
+        } else {
+          // Move to stash
+          if (p.stash.length >= 200) { Log.add('Stash is full!', 'system'); return; }
+          const item = p.inventory.splice(idx, 1)[0];
+          p.stash.push(item);
+          Log.add(`Moved <strong>${ITEMS[item.id].name}</strong> to stash.`, 'system');
+        }
+        this.refreshStash();
+        UI.refreshInventory();
+        Game.autosave();
+      },
+
+      stashGold(isDeposit) {
+        const p = G.player;
+        const input = document.getElementById('stash-gold-input');
+        const amt = parseInt(input.value);
+        if (isNaN(amt) || amt <= 0) return;
+
+        if (isDeposit) {
+          if (p.gold < amt) { Log.add('Not enough gold to deposit!', 'system'); return; }
+          p.gold -= amt;
+          p.stashGold += amt;
+          Log.add(`Deposited 🪙${amt} gold into stash.`, 'system');
+        } else {
+          if (p.stashGold < amt) { Log.add('Not enough gold in stash to withdraw!', 'system'); return; }
+          p.stashGold -= amt;
+          p.gold += amt;
+          Log.add(`Withdrew 🪙${amt} gold from stash.`, 'system');
+        }
+        input.value = '';
+        this.refreshStash();
+        UI.refresh();
+        Game.autosave();
       },
 
 
@@ -4197,6 +4387,13 @@
 
         const item = getScaledItem(id, invEntry.level, invEntry.rarity || 'common');
         if (item.type !== 'equipment') return;
+
+        // Level Requirement Check
+        if (p.level < item.level) {
+          Log.add(`❌ Your level is too low (Required: ${item.level}) to equip <strong style="color:${item.color}">${item.name}</strong>!`, 'system');
+          UI.closeModal('modal-item');
+          return;
+        }
 
         const slot = item.slot || 'weapon';
         if (p.equipment[slot]) {
