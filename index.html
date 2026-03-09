@@ -1824,7 +1824,8 @@
             <div class="inv-empty">Your pack is empty.</div>
           </div>
           <div style="padding:6px 10px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);">Slots:
-            <span id="inv-count">0</span>/20</div>
+            <span id="inv-count">0</span>/20
+          </div>
         </div>
         <div class="tab-content" id="tc-equipment">
           <div class="panel-header" style="font-size:9px;">EQUIPMENT</div>
@@ -5362,6 +5363,7 @@
         // Restore party code from session
         const savedCode = localStorage.getItem('runehaven_party_code');
         if (savedCode) G.partyCode = savedCode;
+        G.isPartyLeader = localStorage.getItem('runehaven_is_leader') === 'true';
 
         if (!this._ok()) return;
         this._startPoll(this._slow);
@@ -5489,6 +5491,7 @@
         G.partyCode = val;
         G.isPartyLeader = false;
         localStorage.setItem('runehaven_party_code', val);
+        localStorage.setItem('runehaven_is_leader', 'false');
         Log.add(`⚔️ Joined party: <strong>${val}</strong>`, 'success');
         this._updateChannelTabs();
         this.refresh();
@@ -5542,6 +5545,7 @@
         G.partyCode = code;
         G.isPartyLeader = true;
         localStorage.setItem('runehaven_party_code', code);
+        localStorage.setItem('runehaven_is_leader', 'true'); // Added persistence for isPartyLeader
         const input1 = document.getElementById('party-code-input');
         if (input1) input1.value = code;
         const input2 = document.getElementById('party-menu-code');
@@ -5556,7 +5560,9 @@
         if (this._channel === 'guild') G.guildName = '';
         if (this._channel === 'party') {
           G.partyCode = '';
+          G.isPartyLeader = false;
           localStorage.removeItem('runehaven_party_code');
+          localStorage.removeItem('runehaven_is_leader');
         }
         this._updateChannelTabs();
         this._renderMessages();
@@ -5639,7 +5645,7 @@
 
           // 2. Count unread and Process Pulses
           ['global', 'guild', 'party'].forEach(ch => {
-            const filtered = this._filterFor(ch);
+            const filtered = this._filterFor(ch, true);
             const newMsgs = filtered.filter(m => m.ts > this._lastTs[ch]);
 
             newMsgs.forEach(m => {
@@ -5784,14 +5790,14 @@
         await WorldServer._put(WORLD_CONFIG.chatId, { messages });
       },
 
-      _filterFor(ch) {
+      _filterFor(ch, includeCommands = false) {
         return this._cache.filter(m => {
           // Filter out messages from previous sessions
           if (m.ts < this._sessionStart) return false;
           // Skip obviously corrupted messages (text is raw HTML from a broken build)
           if (!m.text || typeof m.text !== 'string' || m.text.trimStart().startsWith('<')) return false;
-          // Hide internal system commands (like party pulses) from the UI
-          if (m.text.startsWith('/')) return false;
+          // Hide internal system commands from the UI unless specifically requested
+          if (!includeCommands && m.text.startsWith('/')) return false;
           // Treat legacy messages (no ch field) as global
           const mch = m.ch || 'global';
           if (mch !== ch) return false;
@@ -5818,7 +5824,7 @@
           box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">You are not in a party.</div>';
           return;
         }
-        const msgs = this._filterFor(this._channel).slice(-80);
+        const msgs = this._filterFor(this._channel, false).slice(-80);
         if (!msgs.length) {
           box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">No messages yet — say something!</div>';
           return;
