@@ -2344,11 +2344,11 @@
        COMPANIONS — hire in Tavern or summon via Raise Dead
        ============================================================ */
     const COMPANION_TYPES = {
-      skeleton: { name: 'Skeleton Warrior', icon: '💀', str: 8, desc: 'A risen warrior — attacks each turn.' },
-      mercenary: { name: 'Mercenary', icon: '⚔️', str: 10, desc: 'A seasoned fighter with a sharp sword.' },
-      guardsman: { name: 'Guardsman', icon: '🛡️', str: 7, desc: 'A stalwart shield-brother from Solmara.' },
-      cleric: { name: 'Cleric', icon: '⛪', str: 4, desc: 'A holy healer. Heals the player for 10% HP each turn.' },
-      shadowBlade: { name: 'Shadow Blade', icon: '🗡️', str: 12, desc: 'An elite Dominion hunter — costly but deadly.' }
+      skeleton: { name: 'Skeleton Warrior', icon: '💀', str: 8, hp: 40, desc: 'A risen warrior — attacks each turn.' },
+      mercenary: { name: 'Mercenary', icon: '⚔️', str: 10, hp: 100, desc: 'A seasoned fighter with a sharp sword.' },
+      guardsman: { name: 'Guardsman', icon: '🛡️', str: 7, hp: 130, desc: 'A stalwart shield-brother from Solmara.' },
+      cleric: { name: 'Cleric', icon: '⛪', str: 4, hp: 80, desc: 'A holy healer. Heals the player for 10% HP each turn.' },
+      shadowBlade: { name: 'Shadow Blade', icon: '🗡️', str: 12, hp: 90, desc: 'An elite Dominion hunter — costly but deadly.' }
     };
 
     /* ============================================================
@@ -2381,21 +2381,21 @@
     const ENEMIES = {
       // Ashfall Coast (lv 1-2)
       veilWraith: {
-        name: 'Veil Wraith', icon: '👻', level: 1, hp: 28, maxHp: 28, str: 5, def: 2, agi: 9, crit: 6, xp: 20, gold: [3, 12], isBoss: false,
+        name: 'Veil Wraith', icon: '👻', level: 1, hp: 18, maxHp: 18, str: 3, def: 0, agi: 5, crit: 4, xp: 20, gold: [3, 12], isBoss: false,
         enemyType: 'undead',
         loot: [{ item: 'manaPotion', chance: .18 }],
         desc: 'A soul consumed by the Veil — it screams without sound.',
         attacks: ['phases through', 'slashes at', 'wails at']
       },
       corruptWolf: {
-        name: 'Corrupted Wolf', icon: '🐺', level: 2, hp: 38, maxHp: 38, str: 7, def: 3, agi: 13, crit: 8, xp: 30, gold: [0, 6], isBoss: false,
+        name: 'Corrupted Wolf', icon: '🐺', level: 2, hp: 30, maxHp: 30, str: 5, def: 2, agi: 10, crit: 5, xp: 30, gold: [0, 6], isBoss: false,
         enemyType: 'corrupted',
         loot: [],
         desc: 'A wolf warped by Veil energy — its eyes glow violet.',
         attacks: ['bites', 'claws at', 'pounces on']
       },
       lostOutworlder: {
-        name: 'Lost Outworlder', icon: '🧟', level: 2, hp: 42, maxHp: 42, str: 8, def: 3, agi: 6, crit: 5, xp: 35, gold: [5, 18], isBoss: false,
+        name: 'Lost Outworlder', icon: '🧟', level: 2, hp: 35, maxHp: 35, str: 6, def: 2, agi: 4, crit: 3, xp: 35, gold: [5, 18], isBoss: false,
         enemyType: 'corrupted',
         loot: [{ item: 'healthPotion', chance: .2 }],
         desc: 'An Outworlder who lost their mind to the Veil. They attack on instinct.',
@@ -2620,9 +2620,18 @@
     // Helper to get item data scaled to a specific level (Baseline: Level 10)
     function getScaledItem(id, level = 10) {
       const b = ITEMS[id]; if (!b) return null;
-      if (b.type === 'consumable') return { ...b }; // Consumables don't scale yet
       const factor = level / 10;
       const s = { ...b, level };
+
+      if (b.type === 'consumable') {
+        if (b.healAmount) s.healAmount = Math.max(1, Math.round(b.healAmount * factor));
+        if (b.manaAmount) s.manaAmount = Math.max(1, Math.round(b.manaAmount * factor));
+        s.buyPrice = Math.max(1, Math.round(b.buyPrice * factor));
+        s.sellPrice = Math.max(1, Math.round(b.sellPrice * factor));
+        s.name = `${b.name} (Lv.${level})`;
+        return s;
+      }
+
       ['strBonus', 'intBonus', 'agiBonus', 'vitBonus', 'defBonus', 'buyPrice', 'sellPrice'].forEach(stat => {
         if (b[stat]) {
           s[stat] = Math.max(1, Math.round(b[stat] * factor));
@@ -3416,13 +3425,13 @@
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! Defensive stance taken.`, 'player');
         } else if (skill.type === 'summon') {
           const ct = COMPANION_TYPES['skeleton'];
-          const hpOff = Math.floor(G.player.level * 8);
+          const hpOff = Math.floor(G.player.level * 15);
           if (!G.companions) G.companions = [];
           G.companions.push({
             type: 'skeleton', name: ct.name, icon: ct.icon,
             hp: ct.hp + hpOff, maxHp: ct.hp + hpOff,
-            str: ct.str + Math.floor(G.player.level / 3),
-            isSummon: true, turnsLeft: 8
+            str: ct.str + Math.floor(G.player.level / 2),
+            isSummon: true
           });
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! A skeletal warrior rises to fight for you!`, 'veil');
         } else if (skill.type === 'buff') {
@@ -3592,17 +3601,9 @@
         G.turnCount++;
         if (G.combatBuffs.turns > 0) G.combatBuffs.turns--;
 
-        // Summons decay
+        // Summons persist until they die in combat or combat ends
         if (G.companions) {
-          G.companions.forEach((c, idx) => {
-            if (c.isSummon) {
-              c.turnsLeft--;
-              if (c.turnsLeft <= 0) {
-                Log.add(`💀 Your ${c.name} crumbles back into dust.`, 'system');
-                G.companions.splice(idx, 1);
-              }
-            }
-          });
+          // No turn-based expiration for summons anymore, they stay until killed
         }
 
         // Companion attacks after player each turn
@@ -3624,8 +3625,8 @@
           setTimeout(() => {
             this.enemyTurn();
             setTimeout(() => {
+              if (!G.inCombat) return; // Stop if combat ended (death/fled)
               G.playerDefending = false; G.canAct = true;
-              // Clear out dead companions after the turn
               G.companions = G.companions.filter(c => c.hp > 0);
               UI.refresh(); this.showCombatActions();
             }, totalAtkTime);
@@ -3646,10 +3647,14 @@
           } else {
             // Normal death logic
             G.location = 'solmara';
-            G.inCombat = false; // Force combat end
+            G.inCombat = false;
+            G.player.hp = Math.floor(effectiveMaxHp() * 0.25); // Restore 25% hp
+            G.player.mp = Math.floor(G.player.maxMp * 0.15);    // Restore 15% mp
             G.companions = G.companions.filter(c => !c.isSummon); // Wipe summons
-            G.companions.forEach(c => { c.hp = Math.floor(c.maxHp * 0.1); }); // Mercs left at low health
-            UI.refresh(); Game.autosave(); Explore.showTownActions();
+            G.companions.forEach(c => { c.hp = Math.floor(c.maxHp * 0.1); }); // Mercs at low hp
+            UI.refresh();
+            Game.autosave();
+            Explore.showTownActions();
           }
           return;
         }
