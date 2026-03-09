@@ -2456,7 +2456,6 @@
       // factionWarId: '69ae108fd0ea881f40fdfcdd',
       chatId: '69ae1161d0ea881f40fe0037',
       guildId: '69ae1674ae596e708f6e6eeb',
-      partyBinId: '69ae4068ae596e708f6eabc9', // DEDICATED PARTY BIN
       clerkPublishableKey: 'pk_test_ZnVuLXRyZWVmcm9nLTk2LmNsZXJrLmFjY291bnRzLmRldiQ',
       enabled: true
     };
@@ -5791,31 +5790,32 @@
       },
 
       async _updatePartyStore(updateFn) {
-        if (!G.partyCode || !WORLD_CONFIG.partyBinId) return;
+        if (!G.partyCode || !WORLD_CONFIG.chatId) return;
         try {
-          const data = await WorldServer._get(WORLD_CONFIG.partyBinId);
+          const data = await WorldServer._get(WORLD_CONFIG.chatId);
           const state = data || {};
           const partyKey = G.partyCode.toUpperCase();
-          if (!state[partyKey]) state[partyKey] = { members: {}, commands: [] };
+          if (!state.party) state.party = {};
+          if (!state.party[partyKey]) state.party[partyKey] = { members: {}, commands: [] };
 
-          updateFn(state[partyKey]);
+          updateFn(state.party[partyKey]);
 
           // Cleanup old commands (keep last 20)
-          if (state[partyKey].commands.length > 20) {
-            state[partyKey].commands = state[partyKey].commands.slice(-20);
+          if (state.party[partyKey].commands.length > 20) {
+            state.party[partyKey].commands = state.party[partyKey].commands.slice(-20);
           }
 
-          await WorldServer._put(WORLD_CONFIG.partyBinId, state);
-          G.partyState = state[partyKey]; // Update global state
+          await WorldServer._put(WORLD_CONFIG.chatId, state);
+          G.partyState = state.party[partyKey]; // Update global state
         } catch (e) { console.error("Party Update Error", e); }
       },
 
       async _fetchPartyStore() {
-        if (!G.partyCode || !WORLD_CONFIG.partyBinId) return;
+        if (!G.partyCode || !WORLD_CONFIG.chatId) return;
         try {
-          const data = await WorldServer._get(WORLD_CONFIG.partyBinId);
+          const data = await WorldServer._get(WORLD_CONFIG.chatId);
           const partyKey = G.partyCode.toUpperCase();
-          const partyData = data?.[partyKey];
+          const partyData = data?.party?.[partyKey];
           if (!partyData) {
             G.partyState = { members: {}, commands: [] }; // Initialize if not found
             G.partyMembers = {}; // Clear local members if party data is gone
@@ -6051,11 +6051,13 @@
           text, ts: Date.now()
         };
         try {
-          const data = await WorldServer._get(WORLD_CONFIG.chatId);
-          const messages = data.messages || [];
+          const chatData = await WorldServer._get(WORLD_CONFIG.chatId);
+          const messages = chatData.messages || [];
           messages.push(msg);
           if (messages.length > 500) messages.splice(0, messages.length - 500);
-          await WorldServer._put(WORLD_CONFIG.chatId, { messages });
+
+          chatData.messages = messages;
+          await WorldServer._put(WORLD_CONFIG.chatId, chatData);
           this._cache = messages;
           this._renderMessages();
           this._countdown = this._expanded ? this._fast : this._slow;
