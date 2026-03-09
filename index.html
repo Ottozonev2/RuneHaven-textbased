@@ -2465,6 +2465,18 @@
     };
 
     /* ============================================================
+       RARITIES
+       ============================================================ */
+    const RARITIES = {
+      common: { name: 'Common', color: '#ffffff', mult: 1.0, rolls: 1 },
+      uncommon: { name: 'Uncommon', color: '#4a9c6e', mult: 1.2, rolls: 2 },
+      magic: { name: 'Magic', color: '#4a70cf', mult: 1.5, rolls: 3 },
+      rare: { name: 'Rare', color: '#2a3a8a', mult: 1.8, rolls: 4 },
+      epic: { name: 'Epic', color: '#9060d8', mult: 2.2, rolls: 5 },
+      legendary: { name: 'Legendary', color: '#c9a84c', mult: 3.0, rolls: 6 }
+    };
+
+    /* ============================================================
        ITEMS (Eryndor-flavoured)
        ============================================================ */
     const ITEMS = {
@@ -2493,7 +2505,94 @@
       covenantmail: { id: 'covenantmail', name: 'Covenant Mail', icon: '🛡️', type: 'equipment', slot: 'armor', defBonus: 5, vitBonus: 2, buyPrice: 80, sellPrice: 35, desc: 'Holy-blessed chain armour from Solmara. +5 DEF, +2 VIT.' },
       ashplate: { id: 'ashplate', name: 'Ash Warlord Plate', icon: '⛓️', type: 'equipment', slot: 'armor', defBonus: 10, vitBonus: 5, buyPrice: 180, sellPrice: 80, desc: 'Brutal Ashen Dominion armour. +10 DEF, +5 VIT.' },
       veilrobe: { id: 'veilrobe', name: 'Veil-Woven Robe', icon: '🧥', type: 'equipment', slot: 'armor', defBonus: 2, intBonus: 5, buyPrice: 110, sellPrice: 50, desc: 'Robe threaded with Veil energy. +2 DEF, +5 INT.' },
-      shadowmantle: { id: 'shadowmantle', name: 'Shadow Mantle', icon: '🪬', type: 'equipment', slot: 'armor', defBonus: 3, agiBonus: 5, buyPrice: 130, sellPrice: 60, desc: 'Woven from shadowstuff. +3 DEF, +5 AGI.' }
+      shadowmantle: { id: 'shadowmantle', name: 'Shadow Mantle', icon: '🪬', type: 'equipment', slot: 'armor', defBonus: 3, agiBonus: 5, buyPrice: 130, sellPrice: 60, desc: 'Woven from shadowstuff. +3 DEF, +5 AGI.' },
+
+      // --- Expanded Armor (10 Total) ---
+      leatherVest: { id: 'leatherVest', name: 'Hardened Leather', icon: '🧥', type: 'equipment', slot: 'armor', defBonus: 4, agiBonus: 2, buyPrice: 50, sellPrice: 20, desc: 'Reliable scout gear. +4 DEF, +2 AGI.' },
+      ironPlate: { id: 'ironPlate', name: 'Iron Plate', icon: '🛡️', type: 'equipment', slot: 'armor', defBonus: 8, vitBonus: 4, buyPrice: 120, sellPrice: 50, desc: 'Heavy iron protection. +8 DEF, +4 VIT.' },
+      scaledMail: { id: 'scaledMail', name: 'Drake-Scaled Mail', icon: '⛓️', type: 'equipment', slot: 'armor', defBonus: 12, vitBonus: 6, buyPrice: 250, sellPrice: 110, desc: 'Scales of a lesser drake. +12 DEF, +6 VIT.' },
+      veilsilkRobe: { id: 'veilsilkRobe', name: 'Veilsilk Robe', icon: '👘', type: 'equipment', slot: 'armor', defBonus: 3, intBonus: 8, buyPrice: 200, sellPrice: 90, desc: 'Thin but magically dense. +3 DEF, +8 INT.' },
+      guardianBrace: { id: 'guardianBrace', name: 'Guardian Plate', icon: '🏰', type: 'equipment', slot: 'armor', defBonus: 15, strBonus: 5, buyPrice: 400, sellPrice: 180, desc: 'Solmaran elite armor. +15 DEF, +5 STR.' },
+      bloodthread: { id: 'bloodthread', name: 'Bloodthread Vest', icon: '🩸', type: 'equipment', slot: 'armor', defBonus: 5, vitBonus: 10, buyPrice: 350, sellPrice: 150, desc: 'Woven with dark sacrifice. +5 DEF, +10 VIT.' },
+      templarHalk: { id: 'templarHalk', name: 'Templar Hauberk', icon: '⛪', type: 'equipment', slot: 'armor', defBonus: 10, wisBonus: 5, buyPrice: 300, sellPrice: 130, desc: 'Holy-blessed steel. +10 DEF, +5 WIS.' },
+      voidCloak: { id: 'voidCloak', name: 'Void Cloak', icon: '🌌', type: 'equipment', slot: 'armor', defBonus: 2, intBonus: 12, buyPrice: 500, sellPrice: 220, desc: 'Absorbs the light around it. +2 DEF, +12 INT.' },
+      ashenGarbs: { id: 'ashenGarbs', name: 'Ashen Garbs', icon: '🧥', type: 'equipment', slot: 'armor', defBonus: 6, agiBonus: 8, buyPrice: 280, sellPrice: 120, desc: 'Standard Dominion scout gear. +6 DEF, +8 AGI.' },
+      saintlyPlate: { id: 'saintlyPlate', name: "Saint's Aegis", icon: '✨', type: 'equipment', slot: 'armor', defBonus: 20, vitBonus: 10, buyPrice: 800, sellPrice: 350, desc: 'The ultimate protection. +20 DEF, +10 VIT.' },
+
+      // --- Jewelry (10 Total) ---
+      copperRing: { id: 'copperRing', name: 'Copper Ring', icon: '💍', type: 'equipment', slot: 'jewelry', strBonus: 1, buyPrice: 40, sellPrice: 15, desc: 'Simple copper band. +1 STR.' },
+      sagePendant: { id: 'sagePendant', name: 'Sage Pendant', icon: '📿', type: 'equipment', slot: 'jewelry', intBonus: 2, buyPrice: 60, sellPrice: 25, desc: 'Increases mana focus. +2 INT.' },
+      vitalityGem: { id: 'vitalityGem', name: 'Vitality Gem', icon: '💎', type: 'equipment', slot: 'jewelry', vitBonus: 3, buyPrice: 80, sellPrice: 35, desc: 'Pulsing with life. +3 VIT.' },
+      windEarring: { id: 'windEarring', name: 'Wind Earring', icon: '👂', type: 'equipment', slot: 'jewelry', agiBonus: 2, buyPrice: 70, sellPrice: 30, desc: 'Light as a breeze. +2 AGI.' },
+      holyRosary: { id: 'holyRosary', name: 'Holy Rosary', icon: '⛪', type: 'equipment', slot: 'jewelry', wisBonus: 4, buyPrice: 120, sellPrice: 50, desc: 'Solmaran prayer beads. +4 WIS.' },
+      bloodAmulet: { id: 'bloodAmulet', name: 'Blood Amulet', icon: '🩸', type: 'equipment', slot: 'jewelry', strBonus: 4, buyPrice: 150, sellPrice: 65, desc: 'Ashen Dominion relic. +4 STR.' },
+      arcaneLoop: { id: 'arcaneLoop', name: 'Arcane Loop', icon: '💫', type: 'equipment', slot: 'jewelry', intBonus: 5, buyPrice: 200, sellPrice: 90, desc: 'Loop of pure energy. +5 INT.' },
+      shadowRing: { id: 'shadowRing', name: 'Shadow Ring', icon: '🌑', type: 'equipment', slot: 'jewelry', agiBonus: 6, buyPrice: 250, sellPrice: 110, desc: 'Fades into the darkness. +6 AGI.' },
+      dragonTear: { id: 'dragonTear', name: 'Dragon Tear', icon: '💧', type: 'equipment', slot: 'jewelry', vitBonus: 8, buyPrice: 400, sellPrice: 180, desc: 'A crystallized drake tear. +8 VIT.' },
+      kingsMedal: { id: 'kingsMedal', name: "King's Medal", icon: '🥇', type: 'equipment', slot: 'jewelry', strBonus: 5, intBonus: 5, buyPrice: 600, sellPrice: 280, desc: 'Relic of an ancient king. +5 STR, +5 INT.' },
+
+      // --- Weapons: Paladin/Inquisitor (Holy) ---
+      hallowedMace: { id: 'hallowedMace', name: 'Hallowed Mace', icon: '🪓', type: 'equipment', slot: 'weapon', strBonus: 6, wisBonus: 2, buyPrice: 120, sellPrice: 50, desc: 'Blessed iron mace. +6 STR, +2 WIS.' },
+      dawnsword: { id: 'dawnsword', name: 'Dawnsword', icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 8, wisBonus: 4, buyPrice: 250, sellPrice: 110, desc: 'A blade that glows at sunrise. +8 STR, +4 WIS.' },
+      justicarHammer: { id: 'justicarHammer', name: 'Justicar Hammer', icon: '🔨', type: 'equipment', slot: 'weapon', strBonus: 12, vitBonus: 5, buyPrice: 400, sellPrice: 180, desc: 'Heavier than sin. +12 STR, +5 VIT.' },
+      sunScepter: { id: 'sunScepter', name: 'Sun Scepter', icon: '🔱', type: 'equipment', slot: 'weapon', strBonus: 5, wisBonus: 10, buyPrice: 350, sellPrice: 150, desc: 'Focuses the Saints light. +5 STR, +10 WIS.' },
+      holyGreatsword: { id: 'holyGreatsword', name: 'Exalted Greatsword', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 15, wisBonus: 8, buyPrice: 600, sellPrice: 280, desc: 'Requires pure heart. +15 STR, +8 WIS.' },
+      martyrSpear: { id: 'martyrSpear', name: 'Martyr Spear', icon: '🔱', type: 'equipment', slot: 'weapon', strBonus: 10, vitBonus: 8, buyPrice: 450, sellPrice: 200, desc: 'Fortified by faith. +10 STR, +8 VIT.' },
+      saintlyFlail: { id: 'saintlyFlail', name: 'Saintly Flail', icon: '⛓️', type: 'equipment', slot: 'weapon', strBonus: 14, wisBonus: 6, buyPrice: 550, sellPrice: 240, desc: 'Swings with holy justice. +14 STR, +6 WIS.' },
+      divineRapier: { id: 'divineRapier', name: 'Divine Rapier', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 7, agiBonus: 12, buyPrice: 500, sellPrice: 220, desc: 'Fast as light. +7 STR, +12 AGI.' },
+      covenantAxe: { id: 'covenantAxe', name: 'Covenant Axe', icon: '🪓', type: 'equipment', slot: 'weapon', strBonus: 18, vitBonus: 4, buyPrice: 700, sellPrice: 310, desc: 'Executioner of heretics. +18 STR, +4 VIT.' },
+      seraphimBlade: { id: 'seraphimBlade', name: 'Seraphim Blade', icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 25, wisBonus: 15, buyPrice: 1200, sellPrice: 550, desc: 'Forged in the sun. +25 STR, +15 WIS.' },
+
+      // --- Weapons: Cleric/Lightbinder/Mage (Staff/Orb) ---
+      willowStaff: { id: 'willowStaff', name: 'Willow Wand', icon: '🪄', type: 'equipment', slot: 'weapon', intBonus: 4, wisBonus: 4, buyPrice: 80, sellPrice: 35, desc: 'Simple arcane focus. +4 INT, +4 WIS.' },
+      prismOrb: { id: 'prismOrb', name: 'Prism Orb', icon: '🔮', type: 'equipment', slot: 'offhand', intBonus: 8, buyPrice: 150, sellPrice: 60, desc: 'Splits the light. +8 INT.' },
+      celestialStaff: { id: 'celestialStaff', name: 'Celestial Staff', icon: '🪄', type: 'equipment', slot: 'weapon', intBonus: 12, wisBonus: 10, buyPrice: 450, sellPrice: 200, desc: 'Etched with starlight. +12 INT, +10 WIS.' },
+      radiantCodex: { id: 'radiantCodex', name: 'Radiant Codex', icon: '📖', type: 'equipment', slot: 'offhand', intBonus: 15, buyPrice: 350, sellPrice: 150, desc: 'Lost pages of Solmara. +15 INT.' },
+      archonStaff: { id: 'archonStaff', name: 'Archon Staff', icon: '🪄', type: 'equipment', slot: 'weapon', intBonus: 20, vitBonus: 5, buyPrice: 800, sellPrice: 350, desc: 'Power of the Masters. +20 INT, +5 VIT.' },
+      veilFocus: { id: 'veilFocus', name: 'Veil Focus', icon: '💫', type: 'equipment', slot: 'weapon', intBonus: 18, agiBonus: 10, buyPrice: 700, sellPrice: 310, desc: 'Tapped into the Veil. +18 INT, +10 AGI.' },
+      seraphScepter: { id: 'seraphScepter', name: 'Seraph Scepter', icon: '🔱', type: 'equipment', slot: 'weapon', intBonus: 22, wisBonus: 18, buyPrice: 1000, sellPrice: 450, desc: 'Godly magic focus. +22 INT, +18 WIS.' },
+      voidPrism: { id: 'voidPrism', name: 'Void Prism', icon: '🔮', type: 'equipment', slot: 'offhand', intBonus: 25, buyPrice: 900, sellPrice: 400, desc: 'Darkness condensed. +25 INT.' },
+      saintStaff: { id: 'saintStaff', name: "Saint's Pillar", icon: '🪄', type: 'equipment', slot: 'weapon', intBonus: 30, wisBonus: 20, buyPrice: 1500, sellPrice: 700, desc: 'The ultimate tool. +30 INT, +20 WIS.' },
+
+      // --- Weapons: Necromancer/Warlock (Shadow) ---
+      boneScepter: { id: 'boneScepter', name: 'Bone Scepter', icon: '🦴', type: 'equipment', slot: 'weapon', intBonus: 6, vitBonus: 2, buyPrice: 120, sellPrice: 50, desc: 'Carved from an outlier. +6 INT, +2 VIT.' },
+      deathScythe: { id: 'deathScythe', name: 'Death Scythe', icon: '🗡️', type: 'equipment', slot: 'weapon', intBonus: 10, strBonus: 5, buyPrice: 300, sellPrice: 130, desc: 'Reaps the living. +10 INT, +5 STR.' },
+      skullTome: { id: 'skullTome', name: 'Skull Tome', icon: '💀', type: 'equipment', slot: 'offhand', intBonus: 12, buyPrice: 280, sellPrice: 120, desc: 'Whispers dark secrets. +12 INT.' },
+      soulEater: { id: 'soulEater', name: 'Soul Eater', icon: '🔮', type: 'equipment', slot: 'weapon', intBonus: 18, vitBonus: 8, buyPrice: 600, sellPrice: 270, desc: 'Grows with every kill. +18 INT, +8 VIT.' },
+      voidBlade: { id: 'voidBlade', name: 'Void Blade', icon: '⚔️', type: 'equipment', slot: 'weapon', intBonus: 14, agiBonus: 12, buyPrice: 550, sellPrice: 240, desc: 'Cutting through space. +14 INT, +12 AGI.' },
+      lichStaff: { id: 'lichStaff', name: "Lich's Spine", icon: '🪄', type: 'equipment', slot: 'weapon', intBonus: 25, vitBonus: 12, buyPrice: 1100, sellPrice: 500, desc: 'Icy cold to the touch. +25 INT, +12 VIT.' },
+      demonTalon: { id: 'demonTalon', name: 'Demon Talon', icon: '🗡️', type: 'equipment', slot: 'weapon', intBonus: 20, strBonus: 15, buyPrice: 950, sellPrice: 420, desc: 'Cursed flesh. +20 INT, +15 STR.' },
+
+      // --- Weapons: Barbarian/Assassin (Physical) ---
+      battleAxe: { id: 'battleAxe', name: 'Battle Axe', icon: '🪓', type: 'equipment', slot: 'weapon', strBonus: 8, buyPrice: 100, sellPrice: 40, desc: 'Sharp and heavy. +8 STR.' },
+      warHammer: { id: 'warHammer', name: 'War Hammer', icon: '🔨', type: 'equipment', slot: 'weapon', strBonus: 12, vitBonus: 4, buyPrice: 320, sellPrice: 140, desc: 'Bone-crushing weight. +12 STR, +4 VIT.' },
+      dualDaggers: { id: 'dualDaggers', name: 'Dual Shadesticks', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 5, agiBonus: 10, buyPrice: 280, sellPrice: 120, desc: 'Twin blurs of steel. +5 STR, +10 AGI.' },
+      bloodLetter: { id: 'bloodLetter', name: 'Blood Letter', icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 15, vitBonus: 10, buyPrice: 650, sellPrice: 290, desc: 'Feasts on the wounded. +15 STR, +10 VIT.' },
+      shadowEdge: { id: 'shadowEdge', name: 'Shadow Edge', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 10, agiBonus: 18, buyPrice: 750, sellPrice: 330, desc: 'Silent but deadly. +10 STR, +18 AGI.' },
+      titanMaul: { id: 'titanMaul', name: 'Titan Maul', icon: '🔨', type: 'equipment', slot: 'weapon', strBonus: 25, vitBonus: 15, buyPrice: 1400, sellPrice: 650, desc: 'Shatters the earth. +25 STR, +15 VIT.' },
+      wraithBlade: { id: 'wraithBlade', name: 'Wraith Blade', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 12, agiBonus: 25, buyPrice: 1200, sellPrice: 550, desc: 'Faster than sound. +12 STR, +25 AGI.' },
+
+      // --- Weapons: Expansion to 10 per class (Cleric/Lightbinder/Necro/Warlock) ---
+      ritualDagger: { id: 'ritualDagger', name: 'Ritual Dagger', icon: '🗡️', type: 'equipment', slot: 'weapon', intBonus: 5, agiBonus: 3, buyPrice: 110, sellPrice: 45, desc: 'Sacrificial tool. +5 INT, +3 AGI.' },
+      tomeOfSaints: { id: 'tomeOfSaints', name: 'Tome of Saints', icon: '📖', type: 'equipment', slot: 'offhand', wisBonus: 6, buyPrice: 140, sellPrice: 60, desc: 'Sacred records. +6 WIS.' },
+      voidScepter: { id: 'voidScepter', name: 'Void Scepter', icon: '🔱', type: 'equipment', slot: 'weapon', intBonus: 14, wisBonus: 6, buyPrice: 380, sellPrice: 160, desc: 'Cracked reality. +14 INT, +6 WIS.' },
+      shadowOrb: { id: 'shadowOrb', name: 'Shadow Orb', icon: '🔮', type: 'equipment', slot: 'offhand', intBonus: 12, agiBonus: 5, buyPrice: 320, sellPrice: 140, desc: 'Pulsing darkness. +12 INT, +5 AGI.' },
+      soulStaff: { id: 'soulStaff', name: 'Soul-Bound Staff', icon: '🪄', type: 'equipment', slot: 'weapon', intBonus: 22, vitBonus: 10, buyPrice: 950, sellPrice: 420, desc: 'Bound to your life. +22 INT, +10 VIT.' },
+      arcaneCrest: { id: 'arcaneCrest', name: 'Arcane Crest', icon: '🏵️', type: 'equipment', slot: 'offhand', intBonus: 18, wisBonus: 8, buyPrice: 500, sellPrice: 220, desc: 'Master focus. +18 INT, +8 WIS.' },
+
+      // --- Weapons: Expansion to 10 per class (Barbarian/Assassin) ---
+      serratedKukri: { id: 'serratedKukri', name: 'Serrated Kukri', icon: '🔪', type: 'equipment', slot: 'weapon', strBonus: 6, agiBonus: 6, buyPrice: 150, sellPrice: 65, desc: 'Cruel edges. +6 STR, +6 AGI.' },
+      heavyCleaver: { id: 'heavyCleaver', name: 'Heavy Cleaver', icon: '🪓', type: 'equipment', slot: 'weapon', strBonus: 14, buyPrice: 300, sellPrice: 130, desc: 'Crude but effective. +14 STR.' },
+      boneCracker: { id: 'boneCracker', name: 'Bone Cracker', icon: '🔨', type: 'equipment', slot: 'weapon', strBonus: 16, vitBonus: 5, buyPrice: 450, sellPrice: 200, desc: 'Heavy impacts. +16 STR, +5 VIT.' },
+      poisonNeedle: { id: 'poisonNeedle', name: 'Poison Needle', icon: '🗡️', type: 'equipment', slot: 'weapon', agiBonus: 12, buyPrice: 250, sellPrice: 110, desc: 'Silent injection. +12 AGI.' },
+      behemothAxe: { id: 'behemothAxe', name: 'Behemoth Axe', icon: '🪓', type: 'equipment', slot: 'weapon', strBonus: 22, vitBonus: 12, buyPrice: 1100, sellPrice: 500, desc: 'Slayer of giants. +22 STR, +12 VIT.' },
+      masterRapier: { id: 'masterRapier', name: "Duelist's Rapier", icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 10, agiBonus: 22, buyPrice: 900, sellPrice: 400, desc: 'Perfect balance. +10 STR, +22 AGI.' },
+
+      // --- Jewelry Expansion (Totaling ~20 Jewelry now) ---
+      sapphireRing: { id: 'sapphireRing', name: 'Sapphire Ring', icon: '💍', type: 'equipment', slot: 'jewelry', intBonus: 10, buyPrice: 500, sellPrice: 220, desc: 'Deep blue magic. +10 INT.' },
+      rubyNecklace: { id: 'rubyNecklace', name: 'Ruby Necklace', icon: '📿', type: 'equipment', slot: 'jewelry', strBonus: 12, buyPrice: 550, sellPrice: 240, desc: 'Fire in the stone. +12 STR.' },
+      onyxBand: { id: 'onyxBand', name: 'Onyx Band', icon: '💍', type: 'equipment', slot: 'jewelry', agiBonus: 15, buyPrice: 700, sellPrice: 310, desc: 'Shadow-bonded. +15 AGI.' },
+      emeraldSeal: { id: 'emeraldSeal', name: 'Emerald Seal', icon: '💎', type: 'equipment', slot: 'jewelry', vitBonus: 18, buyPrice: 850, sellPrice: 380, desc: 'Nature’s breath. +18 VIT.' }
     };
 
     const SHOP_ITEMS = ['healthPotion', 'manaPotion', 'elixir', 'holyRelic', 'bloodVial', 'veilblade', 'runesword', 'veilstaff', 'apprenticeorb', 'devourerorb', 'covenantmail', 'ashplate', 'veilrobe', 'shadowmantle'];
@@ -2599,6 +2698,35 @@
         desc: 'A giant ruler who refused to leave Frostvein. Now corrupted into an undead titan!',
         attacks: ['unleashes a blizzard on', 'smashes with a frozen fist at', 'shatters the ground beneath']
       },
+      // --- Dungeon Bosses ---
+      cryptLord: {
+        name: 'The Crypt Lord', icon: '🕷️', level: 10, hp: 350, maxHp: 350, str: 25, def: 18, agi: 6, crit: 10, xp: 500, gold: [150, 300], isBoss: true,
+        enemyType: 'undead',
+        loot: [{ item: 'soulEater', chance: .4 }, { item: 'boneScepter', chance: .6 }],
+        desc: 'Master of the Ancient Catacombs. He feeds on the souls of trespassers.',
+        attacks: ['summons a wave of spiders at', 'stabs with venomous legs at', 'unleashes a soul-chilling scream on']
+      },
+      ironGeneral: {
+        name: 'General Krol', icon: '💂', level: 30, hp: 1200, maxHp: 1200, str: 60, def: 45, agi: 15, crit: 12, xp: 2500, gold: [800, 1500], isBoss: true,
+        enemyType: 'humanoid',
+        loot: [{ item: 'guardianBrace', chance: .4 }, { item: 'warHammer', chance: .6 }],
+        desc: 'Commander of the Iron Garrison. His fortress has never been breached.',
+        attacks: ['charges with a massive shield at', 'slams his warhammer into', 'orders a volley of arrows at']
+      },
+      voidReaver: {
+        name: 'Void Reaver', icon: '🌌', level: 50, hp: 3000, maxHp: 3000, str: 120, def: 80, agi: 40, crit: 20, xp: 8000, gold: [3000, 6000], isBoss: true,
+        enemyType: 'aberration',
+        loot: [{ item: 'voidCloak', chance: .4 }, { item: 'voidPrism', chance: .6 }],
+        desc: 'A creature formed from the raw chaos of the Rift.',
+        attacks: ['rips through the reality of', 'blasts void energy at', 'teleports behind and strikes']
+      },
+      obsidianEmperor: {
+        name: 'The Obsidian Emperor', icon: '☄️', level: 60, hp: 8000, maxHp: 8000, str: 250, def: 150, agi: 80, crit: 25, xp: 25000, gold: [10000, 20000], isBoss: true,
+        enemyType: 'corrupted',
+        loot: [{ item: 'saintlyPlate', chance: .3 }, { item: 'seraphimBlade', chance: .3 }, { item: 'saintStaff', chance: .3 }],
+        desc: 'The final ruler of Eryndor, corrupted by the ultimate power of the Veil.',
+        attacks: ['unleashes an meteor strike on', 'slashes with a blade of pure shadow at', 'crushes the very existence of']
+      },
       plagueMother: {
         name: 'The Plague Mother', icon: '🦠', level: 9, hp: 260, maxHp: 260, str: 18, def: 12, agi: 5, crit: 10, xp: 380, gold: [120, 200], isBoss: true,
         enemyType: 'undead',
@@ -2680,14 +2808,44 @@
           'Ancient roots pulse with dark light beneath the soil.']
       },
       bloodspire: {
-        name: 'Bloodspire Mountains', icon: '⛰️', isTown: false,
-        minLevel: 45, maxLevel: 80,
-        desc: 'Home of demon war clans and blood cults. Fortress cities carved into the rock.',
-        enemies: ['bloodCultist', 'heretic', 'darkMage'], encounterChance: .75,
-        events: ['War drums echo between the peaks.',
-          'A demon-clan banner is staked through a Covenant soldier.',
-          'Rivers of blood run down channels carved into the stone.',
-          'The stench of dark rituals drifts from a fortress above.']
+        name: 'Bloodspire Fortress', icon: '🏰', minLevel: 7, maxLevel: 8, enemies: ['bloodCultist', 'darkMage', 'heretic'],
+        desc: 'The heart of Dominion power. Blood runs in the gutters.',
+        flavor: ['The air smells of iron and sacrifice.',
+          'Dark banners flutter in the cold wind.',
+          'Shadowy figures watch from the battlements.']
+      },
+      // --- Dungeons ---
+      catacombs: {
+        name: 'Ancient Catacombs', icon: '🕸️', minLevel: 5, maxLevel: 10, enemies: ['veilWraith', 'lostOutworlder', 'boneSerpent', 'cryptLord'],
+        desc: 'Dungeon (Lv 5-10). A labyrinth of the dead beneath Solmara.',
+        isDungeon: true, boss: 'cryptLord',
+        flavor: ['Webs brush against your face.',
+          'The rattling of bones echoes in the dark.',
+          'A cold draft smells of ancient dust.']
+      },
+      garrison: {
+        name: 'Iron Garrison', icon: '🛡️', minLevel: 20, maxLevel: 30, enemies: ['heretic', 'rottingKnight', 'ironGeneral'],
+        desc: 'Dungeon (Lv 20-30). A fortified stronghold of the Ashen Dominion.',
+        isDungeon: true, boss: 'ironGeneral',
+        flavor: ['The sound of marching feet vibrates through the walls.',
+          'Massive iron gates bar the way.',
+          'The smell of oil and hot metal fills the air.']
+      },
+      voidrift: {
+        name: 'Void Rift', icon: '🌌', minLevel: 40, maxLevel: 50, enemies: ['veilAberration', 'darkMage', 'voidReaver'],
+        desc: 'Dungeon (Lv 40-50). A tear in the fabric of existence itself.',
+        isDungeon: true, boss: 'voidReaver',
+        flavor: ['Reality shimmers and breaks around you.',
+          'Whispers of the void fill your mind.',
+          'Gravity feels light and strange here.']
+      },
+      throne: {
+        name: 'The Obsidian Throne', icon: '☄️', minLevel: 60, maxLevel: 60, enemies: ['bloodCultist', 'veilAberration', 'obsidianEmperor'],
+        desc: 'Final Dungeon (Lv 60). The seat of the Obsidian Emperor.',
+        isDungeon: true, boss: 'obsidianEmperor',
+        flavor: ['The floor is made of pure, polished obsidian.',
+          'The Emperor awaits at the end of the long hall.',
+          'This is where it all ends.']
       },
       velkaris: {
         name: 'Ruins of Velkaris', icon: '🏚️', isTown: true,
@@ -2740,11 +2898,12 @@
           { id: 'healthPotion', qty: 2, level: 1 },
           { id: 'manaPotion', qty: 1, level: 1 }
         ],
-        // Equipment slots: { id, level }
+        // Equipment slots: { id, level, rarity }
         equipment: {
-          weapon: { id: wId, level: 1 },
-          offhand: { id: oId, level: 1 },
-          armor: { id: aId, level: 1 }
+          weapon: { id: wId, level: 1, rarity: 'common' },
+          offhand: { id: oId, level: 1, rarity: 'common' },
+          armor: { id: aId, level: 1, rarity: 'common' },
+          jewelry: null
         },
         skills: cls.skills.reduce((acc, sk) => { acc[sk] = 1; return acc; }, {}),
         statPoints: 0,
@@ -2753,37 +2912,59 @@
       };
     }
 
-    // Helper to get item data scaled to a specific level (Baseline: Level 10)
-    function getScaledItem(id, level = 10) {
+    // Helper to get item data scaled to a specific level and rarity
+    function getScaledItem(id, level = 10, rarity = 'common', isDropped = false) {
       const b = ITEMS[id]; if (!b) return null;
+      const rare = RARITIES[rarity] || RARITIES.common;
+
+      // Base scaling factor
       const factor = level / 10;
-      const s = { ...b, level };
+      // Dropped items are 20% stronger than shop items
+      const qualityMult = isDropped ? 1.2 : 1.0;
+      // Rarity multiplier stacks
+      const totalMult = factor * rare.mult * qualityMult;
+
+      const s = { ...b, level, rarity };
 
       if (b.type === 'consumable') {
-        if (b.healAmount) s.healAmount = Math.max(1, Math.round(b.healAmount * factor));
-        if (b.manaAmount) s.manaAmount = Math.max(1, Math.round(b.manaAmount * factor));
-        s.buyPrice = Math.max(1, Math.round(b.buyPrice * factor));
-        s.sellPrice = Math.max(1, Math.round(b.sellPrice * factor));
+        if (b.healAmount) s.healAmount = Math.max(1, Math.round(b.healAmount * totalMult));
+        if (b.manaAmount) s.manaAmount = Math.max(1, Math.round(b.manaAmount * totalMult));
+        s.buyPrice = Math.max(1, Math.round(b.buyPrice * totalMult));
+        s.sellPrice = Math.max(1, Math.round(b.sellPrice * totalMult));
         s.name = `${b.name} (Lv.${level})`;
         return s;
       }
 
       ['strBonus', 'intBonus', 'wisBonus', 'agiBonus', 'vitBonus', 'defBonus', 'buyPrice', 'sellPrice'].forEach(stat => {
         if (b[stat]) {
-          s[stat] = Math.max(1, Math.round(b[stat] * factor));
+          s[stat] = Math.max(1, Math.round(b[stat] * totalMult));
         }
       });
-      // Custom display name
+
+      // Randomized stat variance for dropped items
+      if (isDropped) {
+        ['strBonus', 'intBonus', 'wisBonus', 'agiBonus', 'vitBonus', 'defBonus'].forEach(stat => {
+          if (s[stat]) {
+            const variance = 0.9 + (Math.random() * 0.3); // 90% to 120%
+            s[stat] = Math.max(1, Math.round(s[stat] * variance));
+          }
+        });
+      }
+
       s.name = `${b.name} (Lv.${level})`;
+      if (rarity !== 'common') s.name = `${rare.name} ${s.name}`;
+
       // Update desc with scaled stats
       let newDesc = b.desc;
-      if (s.strBonus) newDesc = newDesc.replace(/\+\d+ STR/, `+${s.strBonus} STR`);
-      if (s.intBonus) newDesc = newDesc.replace(/\+\d+ INT/, `+${s.intBonus} INT`);
-      if (s.wisBonus) newDesc = newDesc.replace(/\+\d+ WIS/, `+${s.wisBonus} WIS`);
-      if (s.defBonus) newDesc = newDesc.replace(/\+\d+ DEF/, `+${s.defBonus} DEF`);
-      if (s.vitBonus) newDesc = newDesc.replace(/\+\d+ VIT/, `+${s.vitBonus} VIT`);
-      if (s.agiBonus) newDesc = newDesc.replace(/\+\d+ AGI/, `+${s.agiBonus} AGI`);
+      ['str', 'int', 'wis', 'def', 'vit', 'agi'].forEach(key => {
+        const bonusKey = key + 'Bonus';
+        if (s[bonusKey]) {
+          const regex = new RegExp(`\\+\\d+ ${key.toUpperCase()}`);
+          newDesc = newDesc.replace(regex, `+${s[bonusKey]} ${key.toUpperCase()}`);
+        }
+      });
       s.desc = newDesc;
+      s.color = rare.color;
       return s;
     }
 
@@ -2793,7 +2974,7 @@
        ============================================================ */
     function effectiveStat(stat) {
       const p = G.player; let val = p[stat] || 0;
-      for (const s of ['weapon', 'offhand', 'armor']) {
+      for (const s of ['weapon', 'offhand', 'armor', 'jewelry']) {
         const eq = p.equipment[s];
         if (eq && eq.id) {
           const item = getScaledItem(eq.id, eq.level);
@@ -2805,9 +2986,12 @@
     }
     function effectiveDef() {
       const p = G.player; let val = p.def;
-      if (p.equipment.armor && p.equipment.armor.id) {
-        const item = getScaledItem(p.equipment.armor.id, p.equipment.armor.level);
-        if (item && item.defBonus) val += item.defBonus;
+      for (const s of ['armor', 'jewelry']) {
+        const eq = p.equipment[s];
+        if (eq && eq.id) {
+          const item = getScaledItem(eq.id, eq.level, eq.rarity || 'common');
+          if (item && item.defBonus) val += item.defBonus;
+        }
       }
       if (G.playerDefending) val += 6;
       if (G.combatBuffs.defenseBonus) val += G.combatBuffs.defenseBonus;
@@ -2815,15 +2999,18 @@
     }
     function effectiveMaxHp() {
       const p = G.player; let ex = 0;
-      if (p.equipment.armor && p.equipment.armor.id) {
-        const item = getScaledItem(p.equipment.armor.id, p.equipment.armor.level);
-        if (item && item.vitBonus) ex += item.vitBonus * 5;
+      for (const s of ['armor', 'jewelry']) {
+        const eq = p.equipment[s];
+        if (eq && eq.id) {
+          const item = getScaledItem(eq.id, eq.level, eq.rarity || 'common');
+          if (item && item.vitBonus) ex += item.vitBonus * 5;
+        }
       }
       return p.maxHp + ex;
     }
     function effectiveMaxMp() {
       const p = G.player; let ex = 0;
-      for (const s of ['weapon', 'offhand', 'armor']) {
+      for (const s of ['weapon', 'offhand', 'armor', 'jewelry']) {
         const eq = p.equipment[s];
         if (eq && eq.id) {
           const item = getScaledItem(eq.id, eq.level);
@@ -2992,11 +3179,19 @@
       },
 
       refreshInventory() {
-        const p = G.player, total = p.inventory.length; // 1 slot per stack
+        const p = G.player;
+        let total = 0;
         const html = !p.inventory.length ? `<div style="color:var(--text-dim);padding:16px;text-align:center;">Empty</div>` :
-          p.inventory.map((e, idx) => {
-            const item = getScaledItem(e.id, e.level);
-            return `<div class="inv-item" onclick="UI.showItemModal('${e.id}', ${idx})"><span class="item-name">${item.icon} ${item.name}</span><span class="item-qty">${e.qty > 1 ? 'x' + e.qty : ''}</span></div>`;
+          p.inventory.map((invItem, idx) => {
+            const item = getScaledItem(invItem.id, invItem.level, invItem.rarity || 'common', false);
+            total += invItem.qty;
+            const color = item.color || '#fff';
+            return `<div class="inv-item" onclick="UI.showItemModal('${invItem.id}', ${idx})" style="border-left:2px solid ${color};">
+              <div class="inv-item-info">
+                <div class="item-nm" style="color:${color}">${item.icon} ${item.name}</div>
+                <div class="item-qty">${invItem.qty > 1 ? 'x' + invItem.qty : ''}</div>
+              </div>
+            </div>`;
           }).join('');
         ['inv-list', 'd-inv-list'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = html; });
         ['inv-count', 'd-inv-count'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = total; });
@@ -3007,13 +3202,14 @@
         const slots = [
           { key: 'weapon', label: 'Weapon' },
           { key: 'offhand', label: 'Off-hand' },
-          { key: 'armor', label: 'Armour' }
+          { key: 'armor', label: 'Armour' },
+          { key: 'jewelry', label: 'Jewelry' }
         ];
         const html = slots.map(s => {
           const eq = p.equipment[s.key];
-          const item = eq ? getScaledItem(eq.id, eq.level) : null;
+          const item = eq ? getScaledItem(eq.id, eq.level, eq.rarity || 'common') : null;
           const bonus = item ? Object.entries(item).filter(([k]) => k.endsWith('Bonus')).map(([k, v]) => `+${v} ${k.replace('Bonus', '').toUpperCase()}`).join(', ') : '';
-          return `<div class="eq-slot"><div class="eq-slot-name">${s.label}</div><div class="eq-slot-item ${item ? '' : 'empty'}">${item ? item.icon + ' ' + item.name : '— Empty —'}</div>${bonus ? `<div class="eq-bonus">${bonus}</div>` : ''}${item ? `<button class="btn btn-sm btn-red" style="margin-top:6px;width:100%;" onclick="Combat.unequip('${s.key}')">Unequip</button>` : ''}</div>`;
+          return `<div class="eq-slot"><div class="eq-slot-name">${s.label}</div><div class="eq-slot-item ${item ? '' : 'empty'}" style="color:${item ? item.color : ''}">${item ? item.icon + ' ' + item.name : '— Empty —'}</div>${bonus ? `<div class="eq-bonus">${bonus}</div>` : ''}${item ? `<button class="btn btn-sm btn-red" style="margin-top:6px;width:100%;" onclick="Combat.unequip('${s.key}')">Unequip</button>` : ''}</div>`;
         }).join('');
         ['eq-list', 'd-eq-list'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = html; });
       },
@@ -3043,8 +3239,10 @@
 
       showItemModal(itemId, inventoryIndex) {
         const invItem = G.player.inventory[inventoryIndex];
-        const item = getScaledItem(itemId, invItem ? invItem.level : G.player.level);
-        document.getElementById('modal-item-name').textContent = item.icon + ' ' + item.name;
+        const item = getScaledItem(itemId, invItem ? invItem.level : G.player.level, invItem.rarity || 'common');
+        const rarName = item.rarity ? item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1) : 'Common';
+        document.getElementById('modal-item-name').innerHTML = `${item.icon} ${item.name} <span style="font-size:11px;color:var(--text-dim);opacity:0.7;">[${rarName}]</span>`;
+        document.getElementById('modal-item-name').style.color = item.color;
         document.getElementById('modal-item-desc').textContent = item.desc;
         const useBtn = document.getElementById('modal-item-use'), eqBtn = document.getElementById('modal-item-equip');
         useBtn.style.display = item.type === 'consumable' ? '' : 'none';
@@ -3403,27 +3601,31 @@
       openShop() {
         const p = G.player;
         document.getElementById('shop-gold').textContent = p.gold;
-        document.getElementById('shop-items').innerHTML = SHOP_ITEMS.map(id => {
+        const shopItems = SHOP_ITEMS.concat(['leatherVest', 'copperRing', 'ironPlate', 'sagePendant', 'battleAxe', 'willowStaff', 'boneScepter']).filter((v, i, a) => a.indexOf(v) === i);
+        document.getElementById('shop-items').innerHTML = shopItems.map(id => {
           const item = getScaledItem(id, p.level);
+          // Shops only sell Common or Uncommon gear
+          const rarity = Math.random() < 0.2 ? 'uncommon' : 'common';
+          const finalItem = getScaledItem(id, p.level, rarity, false);
           return `<div class="shop-item">
             <div class="shop-item-info">
-              <div class="item-nm">${item.icon} ${item.name}</div>
-              <div class="item-dsc">${item.desc}</div>
+              <div class="item-nm" style="color:${finalItem.color}">${finalItem.icon} ${finalItem.name}</div>
+              <div class="item-dsc">${finalItem.desc}</div>
             </div>
-            <span class="shop-item-price">🪙${item.buyPrice}</span>
-            <button class="btn btn-sm btn-gold" onclick="Explore.buyItem('${id}')" style="touch-action:manipulation;">Buy</button>
+            <span class="shop-item-price">🪙${finalItem.buyPrice}</span>
+            <button class="btn btn-sm btn-gold" onclick="Explore.buyItem('${id}', '${rarity}')" style="touch-action:manipulation;">Buy</button>
           </div>`;
         }).join('');
         UI.openModal('modal-shop');
       },
 
-      buyItem(id) {
+      buyItem(id, rarity = 'common') {
         const p = G.player;
-        const item = getScaledItem(id, p.level);
+        const item = getScaledItem(id, p.level, rarity, false);
         if (p.gold < item.buyPrice) { Log.add('Not enough gold!', 'system'); return; }
         p.gold -= item.buyPrice;
-        Combat.addToInventory(id, 1, p.level);
-        Log.add(`Purchased <strong>${item.name}</strong> for 🪙${item.buyPrice}.`, 'loot');
+        Combat.addToInventory(id, 1, p.level, rarity);
+        Log.add(`Purchased <strong style="color:${item.color}">${item.name}</strong> for 🪙${item.buyPrice}.`, 'loot');
         document.getElementById('shop-gold').textContent = p.gold;
         UI.refresh();
       }
@@ -3531,10 +3733,13 @@
             tooltip += ` | ${effectStr}`;
           }
 
+          const itColor = hasMp ? 'btn-violet' : '';
+          const rarColor = s.color || '#fff';
+
           return {
-            label: `${s.icon} ${s.name}${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`,
+            label: `<span style="color:${rarColor}">${s.icon} ${s.name}</span>${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`,
             fn: `Combat.useSkill('${sk}')`,
-            cls: hasMp ? 'btn-violet' : '',
+            cls: itColor,
             disabled: !hasMp,
             tooltip: tooltip
           };
@@ -3699,12 +3904,12 @@
         const p = G.player;
         const invEntry = inventoryIndex !== undefined ? p.inventory[inventoryIndex] : p.inventory.find(e => e.id === id);
         if (!invEntry) return;
-        const item = getScaledItem(id, invEntry.level);
+        const item = getScaledItem(id, invEntry.level, invEntry.rarity || 'common');
         if (!item || item.type !== 'consumable') return;
         const maxHp = effectiveMaxHp();
         if (item.subtype === 'heal' || item.subtype === 'both') { const prev = p.hp; p.hp = Math.min(maxHp, p.hp + item.healAmount); Log.add(`Used ${item.icon} <strong>${item.name}</strong>. +${p.hp - prev} HP.`, 'heal'); }
         if (item.subtype === 'mana' || item.subtype === 'both') { const prev = p.mp; p.mp = Math.min(effectiveMaxMp(), p.mp + item.manaAmount); Log.add(`Used ${item.icon} <strong>${item.name}</strong>. +${p.mp - prev} MP.`, 'heal'); }
-        this.removeFromInventory(id, 1, invEntry.level); UI.refresh();
+        this.removeFromInventory(id, 1, invEntry.level, invEntry.rarity); UI.refresh();
       },
 
       defend() {
@@ -3906,13 +4111,52 @@
             totalGold += e.gold[0] + Math.floor(Math.random() * (e.gold[1] - e.gold[0] + 1));
             // Record faction kill
             WorldServer.recordKill(G.player.faction);
-            // Drop loot
-            e.loot.forEach(d => {
-              if (Math.random() < d.chance) {
-                this.addToInventory(d.item, 1, G.player.level);
-                Log.add(`🎁 The <strong>${e.name}</strong> dropped <strong>${ITEMS[d.item].name}</strong>!`, 'loot');
+            const lootItems = e.loot;
+            lootItems.forEach(l => {
+              if (Math.random() < l.chance) {
+                // Gear dropping logic with rarity
+                let rarity = 'common';
+                const roll = Math.random();
+
+                // Rarity Tiers:
+                // Dungeon Bosses give EPIC/LEGENDARY. 
+                // Normal enemies: Uncommon (20%), Magic (10%), Rare (5%), Epic (1%)
+                const loc = LOCATIONS[G.location];
+                if (e.isBoss && loc.isDungeon) {
+                  if (roll < 0.2) rarity = 'legendary';
+                  else if (roll < 0.5) rarity = 'epic';
+                  else rarity = 'rare';
+                } else if (e.isBoss) {
+                  // World Bosses (no legendary)
+                  if (roll < 0.3) rarity = 'epic';
+                  else rarity = 'rare';
+                } else {
+                  if (roll < 0.01) rarity = 'epic';
+                  else if (roll < 0.05) rarity = 'rare';
+                  else if (roll < 0.15) rarity = 'magic';
+                  else if (roll < 0.35) rarity = 'uncommon';
+                }
+
+                this.addToInventory(l.item, 1, e.level, rarity);
+                const it = getScaledItem(l.item, e.level, rarity, true);
+                Log.add(`🎁 <strong>Loot!</strong> You found <strong style="color:${it.color}">${it.name}</strong>.`, 'loot');
               }
             });
+
+            // Random World Loot (chance to drop common/uncommon gear of any type)
+            if (Math.random() < 0.15) {
+              const allEquip = Object.keys(ITEMS).filter(k => ITEMS[k].type === 'equipment');
+              const randomId = allEquip[Math.floor(Math.random() * allEquip.length)];
+              const roll = Math.random();
+              let rarity = 'common';
+              if (roll < 0.05) rarity = 'rare';
+              else if (roll < 0.15) rarity = 'magic';
+              else if (roll < 0.40) rarity = 'uncommon';
+
+              this.addToInventory(randomId, 1, e.level, rarity);
+              const it = getScaledItem(randomId, e.level, rarity, true);
+              Log.add(`🎁 <strong>Loot!</strong> You scavenged <strong style="color:${it.color}">${it.name}</strong> from the battlefield.`, 'loot');
+            }
           });
           G.player.gold += totalGold;
           G.player.kills = (G.player.kills || 0) + G.enemies.length;
@@ -3951,7 +4195,7 @@
         const invEntry = inventoryIndex !== -1 ? p.inventory[inventoryIndex] : p.inventory.find(e => e.id === id);
         if (!invEntry) return;
 
-        const item = getScaledItem(id, invEntry.level);
+        const item = getScaledItem(id, invEntry.level, invEntry.rarity || 'common');
         if (item.type !== 'equipment') return;
 
         const slot = item.slot || 'weapon';
@@ -3960,15 +4204,15 @@
         }
 
         // We need to re-fetch invEntry index after unequip!
-        const finalIdx = p.inventory.findIndex(e => e.id === id && e.level === invEntry.level);
-        p.equipment[slot] = { id: id, level: invEntry.level };
-        this.removeFromInventory(id, 1, invEntry.level);
-        Log.add(`Equipped <strong>${item.name}</strong>.`, 'success');
+        const finalIdx = p.inventory.findIndex(e => e.id === id && e.level === invEntry.level && e.rarity === invEntry.rarity);
+        p.equipment[slot] = { id: id, level: invEntry.level, rarity: invEntry.rarity };
+        this.removeFromInventory(id, 1, invEntry.level, invEntry.rarity);
+        Log.add(`Equipped <strong style="color:${item.color}">${item.name}</strong>.`, 'success');
         UI.refresh();
       },
       unequip(slot) {
         const p = G.player, eq = p.equipment[slot]; if (!eq) return;
-        this.addToInventory(eq.id, 1, eq.level); p.equipment[slot] = null;
+        this.addToInventory(eq.id, 1, eq.level, eq.rarity); p.equipment[slot] = null;
         const baseItem = ITEMS[eq.id];
         Log.add(`Unequipped ${baseItem.name} (Lv.${eq.level}).`, 'system'); UI.refresh();
       },
@@ -3976,19 +4220,26 @@
         const p = G.player;
         const invEntry = inventoryIndex !== -1 ? p.inventory[inventoryIndex] : p.inventory.find(e => e.id === id);
         if (!invEntry) return;
-        const item = getScaledItem(id, invEntry.level);
-        this.removeFromInventory(id, 1, invEntry.level); p.gold += item.sellPrice;
-        Log.add(`Sold ${item.name} for 🪙${item.sellPrice}.`, 'loot');
+        const item = getScaledItem(id, invEntry.level, invEntry.rarity || 'common');
+        this.removeFromInventory(id, 1, invEntry.level, invEntry.rarity); p.gold += item.sellPrice;
+        Log.add(`Sold <strong style="color:${item.color}">${item.name}</strong> for 🪙${item.sellPrice}.`, 'loot');
         UI.refresh();
       },
-      addToInventory(id, qty, level = 1) {
-        const ex = G.player.inventory.find(e => e.id === id && e.level === level);
-        ex ? ex.qty += qty : G.player.inventory.push({ id, qty, level });
+      addToInventory(itemId, qty = 1, level = 1, rarity = 'common') {
+        const p = G.player;
+        const base = ITEMS[itemId];
+        if (base.type === 'equipment') {
+          p.inventory.push({ id: itemId, qty: 1, level, rarity });
+        } else {
+          const existing = p.inventory.find(i => i.id === itemId && i.level === level);
+          if (existing) existing.qty += qty;
+          else p.inventory.push({ id: itemId, qty, level, rarity });
+        }
         UI.refreshInventory();
       },
-      removeFromInventory(id, qty, level = null) {
+      removeFromInventory(id, qty, level = null, rarity = 'common') {
         const p = G.player;
-        const idx = p.inventory.findIndex(e => e.id === id && (level === null || e.level === level));
+        const idx = p.inventory.findIndex(e => e.id === id && (level === null || e.level === level) && (rarity === null || e.rarity === rarity));
         if (idx === -1) return;
         p.inventory[idx].qty -= qty;
         if (p.inventory[idx].qty <= 0) p.inventory.splice(idx, 1);
