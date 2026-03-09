@@ -1,20 +1,17 @@
-[build.environment]
-  NETLIFY_USE_YARN = "true"
-  YARN_VERSION = "1.22.17"
-
 [build]
-  command = "yarn build"
-  publish = "dist"
-
-[context.deploy-preview]
-  command = "yarn build:preview"
+  functions = "netlify/functions"
+  publish = "."
 
 [dev]
-  framework = "hugo"
-  targetPort = 3000
+  port = 8888
 
-[[plugins]]
-  package = "netlify-plugin-cypress"
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
 
-  [plugins.inputs]
-    record = true
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

@@ -1,0 +1,4474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Rune Haven</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rune Haven">
+  <meta name="theme-color" content="#08060f">
+  <meta name="description" content="Rune Haven — A dark RPG set in the dying world of Eryndor.">
+  <link rel="manifest" href="manifest.json">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Courier+Prime:wght@400;700&display=swap"
+    rel="stylesheet">
+  <!-- Netlify Identity Widget — handles login/signup/JWT -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+  <style>
+    /* ============================================================
+   DESIGN TOKENS — Eryndor dark/violet palette
+   ============================================================ */
+    :root {
+      --bg: #08060f;
+      --bg-panel: #110d1a;
+      --bg-mid: #1a1526;
+      --bg-raised: #241d32;
+      --border: #3a2d52;
+      --border-lt: #5a4880;
+
+      /* Violet / arcane gold palette fitting the Veil theme */
+      --gold: #c9a84c;
+      --gold-lt: #e8c96a;
+      --gold-dk: #7a6230;
+      --violet: #9060d8;
+      --violet-lt: #b890ff;
+      --violet-dk: #4a2880;
+      --red: #c94050;
+      --red-dk: #8a2030;
+      --green: #4a9c6e;
+      --green-dk: #2a6040;
+      --blue: #4a70cf;
+      --blue-dk: #2a3a8a;
+      --teal: #40b0a0;
+      --teal-dk: #206858;
+
+      --text: #d4c4e0;
+      --text-dim: #7a6890;
+      --text-lt: #f0e8ff;
+
+      --tap-min: 48px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+    }
+
+    /* ============================================================
+   RESET & BASE
+   ============================================================ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overscroll-behavior: none;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IM Fell English', Georgia, serif;
+      font-size: 14px;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      overflow: hidden;
+    }
+
+    #text-log,
+    input {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    /* Veil crack — subtle animated violet glow at top of screen */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, var(--violet) 30%, var(--violet-lt) 50%, var(--violet) 70%, transparent 100%);
+      opacity: 0.6;
+      animation: veilCrack 4s ease-in-out infinite;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    @keyframes veilCrack {
+
+      0%,
+      100% {
+        opacity: .3;
+        filter: blur(1px);
+      }
+
+      50% {
+        opacity: .8;
+        filter: blur(0px);
+      }
+    }
+
+    /* ============================================================
+   SCREENS
+   ============================================================ */
+    .screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* ============================================================
+   TITLE SCREEN
+   ============================================================ */
+    #screen-title {
+      align-items: center;
+      justify-content: center;
+      background-image: linear-gradient(rgba(8, 6, 15, 0.2) 0%, rgba(8, 6, 15, 0.6) 40%, rgba(8, 6, 15, 0.95) 90%), url('menu-bg.png');
+      background-size: 100% auto;
+      background-position: top center;
+      background-repeat: no-repeat;
+      background-color: var(--bg);
+      text-align: center;
+      padding: 24px 20px;
+      padding-bottom: calc(24px + var(--safe-bottom));
+      overflow-y: auto;
+      gap: 0;
+    }
+
+    @media (max-width: 767px) {
+      #screen-title {
+        background-size: auto 100%;
+        background-position: center top;
+      }
+    }
+
+    .title-emblem {
+      width: 110px;
+      height: 110px;
+      border: 2px solid var(--violet);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 40px rgba(144, 96, 216, .5), inset 0 0 20px rgba(0, 0, 0, .6);
+      animation: emblemPulse 3s ease-in-out infinite;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    @keyframes emblemPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 30px rgba(144, 96, 216, .4), inset 0 0 20px rgba(0, 0, 0, .6);
+      }
+
+      50% {
+        box-shadow: 0 0 70px rgba(184, 144, 255, .7), inset 0 0 20px rgba(0, 0, 0, .6);
+      }
+    }
+
+    .title-main {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(26px, 6vw, 56px);
+      font-weight: 700;
+      color: var(--violet-lt);
+      text-shadow: 0 0 30px rgba(184, 144, 255, .6), 2px 2px 0 #000;
+      letter-spacing: 4px;
+      margin-bottom: 4px;
+      flex-shrink: 0;
+    }
+
+    .title-sub {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(9px, 2vw, 13px);
+      color: var(--text-dim);
+      letter-spacing: 6px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .title-world {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(10px, 1.8vw, 13px);
+      color: var(--gold-dk);
+      letter-spacing: 3px;
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+
+    .title-story {
+      max-width: 540px;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.85;
+      margin-bottom: 10px;
+      padding: 18px 22px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, .5);
+      border-radius: 4px;
+      font-size: clamp(12px, 2.5vw, 14px);
+      flex-shrink: 0;
+    }
+
+    .faction-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 540px;
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+
+    .faction-pill {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .faction-saints {
+      background: rgba(201, 168, 76, .1);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+    }
+
+    .faction-demons {
+      background: rgba(201, 64, 80, .1);
+      border: 1px solid var(--red);
+      color: #e08088;
+    }
+
+    .title-btns {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+   CHARACTER CREATION
+   ============================================================ */
+    #screen-create {
+      background: var(--bg);
+      padding-top: calc(16px + var(--safe-top));
+      padding-bottom: calc(16px + var(--safe-bottom));
+      overflow-y: auto;
+      align-items: center;
+    }
+
+    .create-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(18px, 4vw, 30px);
+      color: var(--violet-lt);
+      text-align: center;
+      margin-bottom: 4px;
+      letter-spacing: 2px;
+      padding: 0 16px;
+    }
+
+    .create-subtitle {
+      color: var(--text-dim);
+      font-style: italic;
+      text-align: center;
+      margin-bottom: 18px;
+      padding: 0 16px;
+      font-size: 13px;
+    }
+
+    .faction-select-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding: 0 16px;
+      width: 100%;
+      max-width: 500px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .faction-select-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 10px 16px;
+      min-height: var(--tap-min);
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      letter-spacing: 1px;
+      border: 2px solid var(--border);
+      background: var(--bg-mid);
+      color: var(--text-dim);
+      transition: all .2s;
+      touch-action: manipulation;
+    }
+
+    .faction-select-btn.saints-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201, 168, 76, .08);
+    }
+
+    .faction-select-btn.demons-btn.active {
+      border-color: var(--red);
+      color: #e08088;
+      background: rgba(201, 64, 80, .08);
+    }
+
+    .faction-select-btn:active {
+      transform: scale(.97);
+    }
+
+    .name-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+      width: 100%;
+      max-width: 500px;
+      padding: 0 16px;
+    }
+
+    .name-row label {
+      color: var(--violet-lt);
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .name-row input {
+      flex: 1;
+      background: var(--bg-mid);
+      border: 1px solid var(--border);
+      color: var(--text-lt);
+      padding: 12px 14px;
+      font-family: 'IM Fell English', serif;
+      font-size: 16px;
+      border-radius: 4px;
+      outline: none;
+      min-height: var(--tap-min);
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    .name-row input:focus {
+      border-color: var(--violet);
+    }
+
+    .class-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 12px;
+      width: 100%;
+      max-width: 880px;
+      padding: 0 16px;
+      margin-bottom: 22px;
+    }
+
+    .class-card {
+      background: var(--bg-panel);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+      min-height: 155px;
+      touch-action: manipulation;
+    }
+
+    .class-card:hover,
+    .class-card:active {
+      border-color: var(--border-lt);
+      transform: translateY(-2px);
+    }
+
+    .class-card.selected {
+      border-color: var(--violet);
+      background: var(--bg-raised);
+    }
+
+    .class-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      color: var(--violet-lt);
+      font-size: 16px;
+    }
+
+    .class-card.saints-class.selected {
+      border-color: var(--gold);
+    }
+
+    .class-card.saints-class.selected::after {
+      color: var(--gold);
+    }
+
+    .class-card.demons-class.selected {
+      border-color: var(--red);
+    }
+
+    .class-card.demons-class.selected::after {
+      color: #e08088;
+    }
+
+    .class-icon {
+      font-size: 30px;
+      margin-bottom: 6px;
+    }
+
+    .class-name {
+      font-family: 'Cinzel', serif;
+      color: var(--text-lt);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .class-faction-tag {
+      font-size: 10px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      font-family: 'Cinzel', serif;
+    }
+
+    .tag-saints {
+      color: var(--gold-dk);
+    }
+
+    .tag-demons {
+      color: #a04048;
+    }
+
+    .class-desc {
+      color: var(--text-dim);
+      font-size: 10px;
+      font-style: italic;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .stat-bar-row {
+      margin-bottom: 3px;
+    }
+
+    .stat-bar-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+
+    .stat-bar-track {
+      height: 5px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .3s;
+    }
+
+    .bar-red {
+      background: linear-gradient(90deg, #8a2030, #c94050);
+    }
+
+    .bar-blue {
+      background: linear-gradient(90deg, #2a3a8a, #4a70cf);
+    }
+
+    .bar-gold {
+      background: linear-gradient(90deg, #7a6230, #c9a84c);
+    }
+
+    .bar-violet {
+      background: linear-gradient(90deg, #4a2880, #9060d8);
+    }
+
+    .bar-green {
+      background: linear-gradient(90deg, #2a6040, #4a9c6e);
+    }
+
+    .create-btns {
+      display: flex;
+      gap: 12px;
+      padding: 0 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    /* ============================================================
+   MAIN GAME SCREEN
+   ============================================================ */
+    #screen-game {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .topbar {
+      background: var(--bg-panel);
+      border-bottom: 2px solid var(--border);
+      padding: 6px 12px;
+      padding-top: calc(6px + var(--safe-top));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .topbar-title {
+      font-family: 'Cinzel', serif;
+      color: var(--violet-lt);
+      font-size: 14px;
+      letter-spacing: 2px;
+    }
+
+    .topbar-info {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .topbar-stat {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .topbar-stat span {
+      color: var(--text-lt);
+      font-weight: bold;
+    }
+
+    .topbar-faction {
+      font-size: 10px;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 1px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .topbar-faction.saints {
+      color: var(--gold);
+      border: 1px solid var(--gold-dk);
+    }
+
+    .topbar-faction.demons {
+      color: #e08088;
+      border: 1px solid var(--red-dk);
+    }
+
+    .topbar-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Game body layout */
+    .game-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    #panel-stats {
+      width: 210px;
+      flex-shrink: 0;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    #panel-centre {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    #panel-log {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #panel-actions {
+      flex-shrink: 0;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    #panel-right {
+      width: 190px;
+      flex-shrink: 0;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Mobile layout */
+    @media (max-width: 767px) {
+      .game-body {
+        flex-direction: column;
+      }
+
+      #panel-stats,
+      #panel-right {
+        display: none;
+      }
+
+      #panel-centre {
+        flex: 1;
+        min-height: 0;
+      }
+
+      #mobile-nav {
+        display: flex;
+        background: var(--bg-panel);
+        border-top: 2px solid var(--border);
+        flex-shrink: 0;
+        padding-bottom: var(--safe-bottom);
+        z-index: 20;
+      }
+
+      .mob-nav-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        min-height: var(--tap-min);
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        font-family: 'Cinzel', serif;
+        font-size: 9px;
+        letter-spacing: .5px;
+        cursor: pointer;
+        padding: 6px 4px;
+        border-top: 2px solid transparent;
+        transition: all .15s;
+        -webkit-touch-callout: none;
+        touch-action: manipulation;
+      }
+
+      .mob-nav-btn .nav-icon {
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .mob-nav-btn:active {
+        background: rgba(255, 255, 255, .05);
+      }
+
+      .mob-nav-btn.active {
+        color: var(--violet-lt);
+        border-top-color: var(--violet);
+      }
+
+      .mobile-drawer {
+        position: fixed;
+        inset: 0;
+        background: var(--bg-panel);
+        z-index: 500;
+        display: none;
+        flex-direction: column;
+        overflow-y: auto;
+        padding-top: var(--safe-top);
+        padding-bottom: var(--safe-bottom);
+      }
+
+      .mobile-drawer.open {
+        display: flex;
+      }
+
+      .drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-mid);
+        flex-shrink: 0;
+      }
+
+      .drawer-header-title {
+        font-family: 'Cinzel', serif;
+        color: var(--violet-lt);
+        font-size: 14px;
+        letter-spacing: 1px;
+      }
+
+      .drawer-close {
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        font-size: 22px;
+        cursor: pointer;
+        min-width: var(--tap-min);
+        min-height: var(--tap-min);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    @media (min-width: 768px) {
+      #mobile-nav {
+        display: none;
+      }
+
+      .mobile-drawer {
+        display: none !important;
+      }
+    }
+
+    /* Panel internals */
+    .panel-header {
+      background: var(--bg-mid);
+      border-bottom: 1px solid var(--border);
+      padding: 7px 12px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--violet-dk);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .stat-section {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .char-portrait {
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    .portrait-icon {
+      font-size: 44px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .char-name-dsp {
+      font-family: 'Cinzel', serif;
+      color: var(--violet-lt);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .char-cls-dsp {
+      color: var(--text-dim);
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    .char-faction-dsp {
+      font-size: 10px;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+
+    .bar-wrap {
+      margin-bottom: 7px;
+    }
+
+    .bar-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+
+    .bar-label-row .lbl {
+      color: var(--text-dim);
+    }
+
+    .bar-label-row .val {
+      color: var(--text-lt);
+    }
+
+    .main-bar {
+      height: 9px;
+      border-radius: 5px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .main-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width .4s ease;
+    }
+
+    .hp-fill {
+      background: linear-gradient(90deg, #8a2030, #e05060);
+    }
+
+    .mp-fill {
+      background: linear-gradient(90deg, #4a2880, #9060d8);
+    }
+
+    .xp-fill {
+      background: linear-gradient(90deg, #7a6230, #e0b050);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px 8px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(58, 45, 82, .4);
+    }
+
+    .stat-item .sn {
+      color: var(--text-dim);
+    }
+
+    .stat-item .sv {
+      color: var(--text-lt);
+      font-family: 'Courier Prime', monospace;
+    }
+
+    .gold-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--gold-lt);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Text log */
+    #text-log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      scroll-behavior: smooth;
+      overscroll-behavior: contain;
+    }
+
+    #text-log::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    #text-log::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    #text-log::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .log-entry {
+      padding: 2px 0;
+      line-height: 1.65;
+      animation: fadeIn .25s ease;
+      font-size: 13px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(3px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .log-entry.normal {
+      color: var(--text);
+    }
+
+    .log-entry.combat {
+      color: #e08088;
+    }
+
+    .log-entry.player {
+      color: #90b8f0;
+    }
+
+    .log-entry.loot {
+      color: var(--gold);
+    }
+
+    .log-entry.system {
+      color: var(--text-dim);
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    .log-entry.story {
+      color: #c0a8e0;
+      font-style: italic;
+    }
+
+    .log-entry.levelup {
+      color: var(--violet-lt);
+      font-weight: bold;
+      font-family: 'Cinzel', serif;
+    }
+
+    .log-entry.divider {
+      color: var(--border);
+      user-select: none;
+    }
+
+    .log-entry.heal {
+      color: #70d898;
+    }
+
+    .log-entry.death {
+      color: var(--red);
+      font-family: 'Cinzel', serif;
+    }
+
+    .log-entry.success {
+      color: #90d070;
+    }
+
+    .log-entry.veil {
+      color: var(--violet-lt);
+      font-style: italic;
+    }
+
+    .log-entry.saints {
+      color: var(--gold);
+    }
+
+    .log-entry.demons {
+      color: #e08088;
+    }
+
+    /* Actions panel */
+    .location-bar {
+      padding: 5px 12px;
+      background: var(--bg-mid);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .location-bar span {
+      color: var(--violet-lt);
+      font-family: 'Cinzel', serif;
+    }
+
+    .action-area {
+      padding: 8px 10px;
+      overflow-y: auto;
+      max-height: 220px;
+    }
+
+    @media (max-width:767px) {
+      .action-area {
+        max-height: 260px;
+      }
+    }
+
+    .btn-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    /* Enemy strip */
+    #combat-enemy-area {
+      background: var(--bg-mid);
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .enemy-name-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .enemy-name-dsp {
+      font-family: 'Cinzel', serif;
+      color: #e08088;
+      font-size: 14px;
+    }
+
+    .enemy-lvl-dsp {
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    /* Right panel */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 4px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: .5px;
+      transition: all .2s;
+      border-bottom: 2px solid transparent;
+      min-height: var(--tap-min);
+      touch-action: manipulation;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      color: var(--violet-lt);
+      border-bottom-color: var(--violet);
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    .inv-list,
+    .eq-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      overscroll-behavior: contain;
+    }
+
+    .inv-list::-webkit-scrollbar,
+    .eq-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .inv-list::-webkit-scrollbar-thumb,
+    .eq-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .inv-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      min-height: var(--tap-min);
+      border-radius: 4px;
+      margin-bottom: 4px;
+      background: var(--bg-mid);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all .15s;
+      font-size: 13px;
+      touch-action: manipulation;
+    }
+
+    .inv-item:hover,
+    .inv-item:active {
+      border-color: var(--border-lt);
+      background: var(--bg-raised);
+    }
+
+    .inv-item .item-name {
+      color: var(--text);
+    }
+
+    .inv-item .item-qty {
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    .eq-slot {
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      background: var(--bg-mid);
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .eq-slot-name {
+      color: var(--text-dim);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+
+    .eq-slot-item {
+      color: var(--text-lt);
+    }
+
+    .eq-slot-item.empty {
+      color: var(--border);
+      font-style: italic;
+    }
+
+    .eq-bonus {
+      color: var(--green);
+      font-size: 11px;
+    }
+
+    .inv-empty {
+      color: var(--text-dim);
+      font-style: italic;
+      font-size: 12px;
+      padding: 12px;
+    }
+
+    /* ============================================================
+   BUTTONS
+   ============================================================ */
+    .btn {
+      background: var(--bg-mid);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      min-height: var(--tap-min);
+      cursor: pointer;
+      font-family: 'IM Fell English', serif;
+      font-size: 13px;
+      border-radius: 4px;
+      transition: all .15s;
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:hover {
+      border-color: var(--border-lt);
+      color: var(--text-lt);
+    }
+
+    .btn:active {
+      transform: scale(.96);
+      filter: brightness(1.15);
+    }
+
+    .btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-gold {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .btn-gold:hover {
+      background: rgba(201, 168, 76, .12);
+      border-color: var(--gold-lt);
+      color: var(--gold-lt);
+    }
+
+    .btn-violet {
+      border-color: var(--violet-dk);
+      color: var(--violet-lt);
+    }
+
+    .btn-violet:hover {
+      background: rgba(144, 96, 216, .14);
+      border-color: var(--violet);
+    }
+
+    .btn-red {
+      border-color: var(--red-dk);
+      color: #e08088;
+    }
+
+    .btn-red:hover {
+      background: rgba(201, 64, 80, .12);
+      border-color: var(--red);
+    }
+
+    .btn-green {
+      border-color: var(--green-dk);
+      color: #80c898;
+    }
+
+    .btn-green:hover {
+      background: rgba(74, 156, 110, .12);
+      border-color: var(--green);
+    }
+
+    .btn-blue {
+      border-color: var(--blue-dk);
+      color: #80a8f0;
+    }
+
+    .btn-blue:hover {
+      background: rgba(74, 112, 207, .12);
+      border-color: var(--blue);
+    }
+
+    .btn-teal {
+      border-color: var(--teal-dk);
+      color: var(--teal);
+    }
+
+    .btn-teal:hover {
+      background: rgba(64, 176, 160, .12);
+      border-color: var(--teal);
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 11px;
+      min-height: 36px;
+    }
+
+    .btn-lg {
+      padding: 13px 28px;
+      font-size: 16px;
+      letter-spacing: 1px;
+      min-height: 52px;
+    }
+
+    /* ============================================================
+   MODALS
+   ============================================================ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .9);
+      z-index: 800;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    @media (min-width:768px) {
+      .modal-overlay {
+        align-items: center;
+        padding: 20px;
+      }
+    }
+
+    .modal {
+      background: var(--bg-panel);
+      border: 2px solid var(--border);
+      border-radius: 12px 12px 0 0;
+      padding: 20px;
+      padding-bottom: calc(20px + var(--safe-bottom));
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      box-shadow: 0 -8px 40px rgba(0, 0, 0, .9);
+    }
+
+    @media (min-width:768px) {
+      .modal {
+        border-radius: 8px;
+        max-width: 500px;
+        padding-bottom: 20px;
+      }
+    }
+
+    .modal::before {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+
+    @media (min-width:768px) {
+      .modal::before {
+        display: none;
+      }
+    }
+
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      color: var(--violet-lt);
+      font-size: 17px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .shop-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+
+    .shop-item-info .item-nm {
+      color: var(--text-lt);
+      font-size: 14px;
+    }
+
+    .shop-item-info .item-dsc {
+      color: var(--text-dim);
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    .shop-item-price {
+      color: var(--gold);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    /* ============================================================
+   LEVEL UP BANNER
+   ============================================================ */
+    .levelup-banner {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #1a0a30, #2a1060);
+      border: 2px solid var(--violet);
+      color: var(--violet-lt);
+      font-family: 'Cinzel', serif;
+      font-size: clamp(13px, 4vw, 17px);
+      padding: 12px 24px;
+      border-radius: 4px;
+      z-index: 5000;
+      box-shadow: 0 0 30px rgba(144, 96, 216, .6);
+      animation: bannerAnim 2.5s ease forwards;
+      pointer-events: none;
+      white-space: nowrap;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    @keyframes bannerAnim {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+      }
+
+      20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      80% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+      }
+    }
+
+    /* Veil flash on big hits */
+    .veil-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(144, 96, 216, .15);
+      pointer-events: none;
+      z-index: 4000;
+      animation: veilFlash .4s ease forwards;
+    }
+
+    @keyframes veilFlash {
+      0% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================================
+     TITLE SCREEN
+     ============================================================ -->
+  <div id="screen-title" class="screen active">
+    <!-- Netlify Identity Auth Header -->
+    <div id="auth-header"
+      style="position:absolute; top:12px; right:12px; z-index:100; display:flex; align-items:center; gap:10px;">
+      <div id="user-info"
+        style="color:var(--text-dim); font-size:11px; font-family:'Cinzel',serif; text-align:right; display:none;">
+        <div style="color:var(--violet-lt); font-weight:bold;" id="user-email"></div>
+        <div style="font-size:9px;">Cloud Sync Active</div>
+      </div>
+      <div data-netlify-identity-button class="btn btn-sm" style="min-width: 80px;">Login</div>
+    </div>
+
+    <div class="title-world" style="margin-top: min(45vh, 400px); text-shadow: 0 0 10px #000;">World of Eryndor</div>
+    <div class="title-story">
+      The Veil between worlds is broken. Violet lightning tears the sky.
+      The dead walk freely and entire kingdoms have warped into unnatural wastelands.
+      You are an <em>Outworlder</em> — a soul dragged through the Veil during the
+      failed Shattered Summoning — cast into the dying world of <strong>Eryndor</strong>
+      with no memory of how or why.
+      <br><br>
+      Two great factions war for the soul of this world. The <em>Luminous Covenant</em>
+      would reopen the Veil and restore the gods. The <em>Ashen Dominion</em> worships
+      the <em>Devouring King</em> — the entity that slipped through during the summoning.
+      <br><br>
+      Choose your allegiance. Shape the fate of Eryndor.
+    </div>
+    <div class="faction-row">
+      <span class="faction-pill faction-saints">☀ The Luminous Covenant</span>
+      <span class="faction-pill faction-demons">💀 The Ashen Dominion</span>
+    </div>
+    <div class="title-btns">
+      <button class="btn btn-violet btn-lg" onclick="CharSelect.show()">&#127760; Enter Eryndor</button>
+    </div>
+    <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
+      v3.1 &middot; Rune Haven &middot; Mobile &amp; Desktop
+    </div>
+  </div>
+
+  <!-- ============================================================
+     CHARACTER SELECT SCREEN
+     ============================================================ -->
+  <div id="screen-charselect" class="screen">
+    <div
+      style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--bg-panel);">
+      <div style="font-family:'Cinzel',serif;color:var(--violet-lt);font-size:16px;letter-spacing:2px;">🌀 Chronicles of
+        Eryndor</div>
+      <button class="btn btn-sm" onclick="Game.showTitle()">&#8592; Back</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:14px;">
+      <div style="color:var(--text-dim);font-style:italic;font-size:12px;text-align:center;margin-bottom:4px;">Select a
+        Chronicle to continue, or create a new Outworlder.</div>
+      <div id="slot-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+     CHARACTER CREATION
+     ============================================================ -->
+  <div id="screen-create" class="screen">
+    <div class="create-title" style="padding-top:16px;">Choose Your Path</div>
+    <div class="create-subtitle">Select your faction, name your Outworlder, and choose a class</div>
+
+    <!-- Faction selection -->
+    <div class="faction-select-row">
+      <button class="faction-select-btn saints-btn active" id="faction-saints-btn"
+        onclick="Game.selectFaction('saints')">
+        ☀ Luminous Covenant<br><span style="font-size:10px;color:var(--text-dim);font-family:serif;">Light · Faith ·
+          Purification</span>
+      </button>
+      <button class="faction-select-btn demons-btn" id="faction-demons-btn" onclick="Game.selectFaction('demons')">
+        💀 Ashen Dominion<br><span style="font-size:10px;color:var(--text-dim);font-family:serif;">Shadow · Blood ·
+          Chaos</span>
+      </button>
+    </div>
+
+    <div class="name-row">
+      <label>NAME:</label>
+      <input type="text" id="char-name-input" placeholder="Enter your name…" maxlength="20" value="Outworlder"
+        autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+
+    <div class="class-grid" id="class-grid"></div>
+
+    <!-- Permadeath option -->
+    <div id="permadeath-row"
+      style="margin:14px 16px 0;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-mid);transition:border-color .2s,background .2s;">
+      <label style="display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;">
+        <input type="checkbox" id="permadeath-toggle" onchange="Game.togglePermadeath(this.checked)"
+          style="width:18px;height:18px;accent-color:#e08088;cursor:pointer;flex-shrink:0;">
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--text-lt);letter-spacing:.5px;">
+            💀 PERMADEATH — Hardcore Mode
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">
+            If you die, your character is permanently deleted. No second chances.
+          </div>
+        </div>
+      </label>
+      <div id="permadeath-warning"
+        style="display:none;margin-top:10px;padding:8px 10px;background:rgba(224,128,136,.1);border:1px solid #e08088;border-radius:6px;color:#e08088;font-size:11px;line-height:1.5;">
+        ⚠️ <strong>WARNING:</strong> You have enabled Permadeath. When this character dies, their save file will be
+        <strong>permanently erased</strong>. This cannot be undone. Are you certain you want to walk into Eryndor with
+        no return?
+      </div>
+    </div>
+
+    <div class="create-btns">
+      <button class="btn btn-violet btn-lg" onclick="Game.startGame()">Enter Eryndor →</button>
+      <button class="btn btn-lg" onclick="Game.showTitle()">← Back</button>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+     MAIN GAME SCREEN
+     ============================================================ -->
+  <div id="screen-game" class="screen">
+
+    <!-- ======================================================
+         PERSISTENT WORLD CHAT PANEL (bottom of game screen)
+         ====================================================== -->
+    <div id="chat-panel" style="
+        position:absolute; bottom:0; left:0; right:0; z-index:80;
+        background:var(--bg-panel); border-top:1px solid var(--border);
+        display:flex; flex-direction:column; max-height:280px;
+        transition:max-height .25s ease;
+      ">
+      <!-- Header bar (click to expand/collapse) -->
+      <div onclick="GlobalChat.toggle()" style="
+          display:flex; align-items:center; gap:8px; padding:5px 12px;
+          cursor:pointer; user-select:none; flex-shrink:0;
+          background:var(--bg-mid); min-height:28px;
+        ">
+        <span style="font-size:12px;">&#128172;</span>
+        <span style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--violet-lt);flex:1;">WORLD
+          CHAT</span>
+        <span id="chat-unread-g"
+          style="display:none;background:#7c3aed;color:#fff;font-size:9px;border-radius:8px;padding:0 5px;margin-right:2px;"></span>
+        <span id="chat-unread-gu"
+          style="display:none;background:#d97706;color:#fff;font-size:9px;border-radius:8px;padding:0 5px;margin-right:2px;"></span>
+        <span id="chat-unread-p"
+          style="display:none;background:#2563eb;color:#fff;font-size:9px;border-radius:8px;padding:0 5px;margin-right:2px;"></span>
+        <span id="chat-status-dot"
+          style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#555;"></span>
+        <span id="chat-countdown" style="font-size:9px;color:var(--text-dim);min-width:20px;text-align:right;"></span>
+        <span id="chat-toggle-icon" style="color:var(--text-dim);font-size:11px;">&#9660;</span>
+      </div>
+      <!-- Channel tabs -->
+      <div id="chat-tabs" style="display:none;flex-shrink:0;display:none;border-bottom:1px solid var(--border);">
+        <div style="display:flex;">
+          <button id="cht-g" onclick="GlobalChat.setChannel('global')"
+            style="flex:1;padding:5px 4px;font-size:11px;background:var(--bg-mid);border:none;border-right:1px solid var(--border);color:var(--violet-lt);cursor:pointer;font-family:'Cinzel',serif;letter-spacing:.5px;">&#127760;
+            Global</button>
+          <button id="cht-gu" onclick="GlobalChat.setChannel('guild')"
+            style="flex:1;padding:5px 4px;font-size:11px;background:var(--bg);border:none;border-right:1px solid var(--border);color:var(--text-dim);cursor:pointer;font-family:'Cinzel',serif;letter-spacing:.5px;">&#129490;
+            Guild</button>
+          <button id="cht-p" onclick="GlobalChat.setChannel('party')"
+            style="flex:1;padding:5px 4px;font-size:11px;background:var(--bg);border:none;color:var(--text-dim);cursor:pointer;font-family:'Cinzel',serif;letter-spacing:.5px;">&#9876;&#65039;
+            Party</button>
+        </div>
+        <!-- Guild join bar (shown when guild tab active and no guild set) -->
+        <div id="chat-guild-join"
+          style="display:none;padding:6px 10px;display:none;gap:6px;border-top:1px solid var(--border);">
+          <input id="guild-name-input" type="text" maxlength="20" placeholder="Enter guild name to join..."
+            style="flex:1;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:6px 8px;font-size:12px;border-radius:4px;outline:none;"
+            onkeydown="if(event.key==='Enter')GlobalChat.joinGuild()">
+          <button class="btn btn-sm btn-gold" onclick="GlobalChat.joinGuild()">Join</button>
+        </div>
+        <!-- Party join bar (shown when party tab active and no party set) -->
+        <div id="chat-party-join" style="display:none;padding:6px 10px;gap:6px;border-top:1px solid var(--border);">
+          <input id="party-code-input" type="text" maxlength="8" placeholder="Enter party code..."
+            style="flex:1;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:6px 8px;font-size:12px;border-radius:4px;outline:none;"
+            onkeydown="if(event.key==='Enter')GlobalChat.joinParty()">
+          <button class="btn btn-sm btn-blue" onclick="GlobalChat.joinParty()">Join</button>
+          <button class="btn btn-sm" onclick="GlobalChat.createParty()">New</button>
+        </div>
+        <!-- Active guild/party display -->
+        <div id="chat-channel-info"
+          style="display:none;padding:4px 10px;font-size:10px;color:var(--text-dim);border-top:1px solid var(--border);display:none;justify-content:space-between;align-items:center;">
+          <span id="chat-channel-name"></span>
+          <button onclick="GlobalChat.leaveChannel()"
+            style="background:none;border:none;color:#e08088;font-size:10px;cursor:pointer;">Leave</button>
+        </div>
+      </div>
+      <!-- Messages list -->
+      <div id="chat-messages"
+        style="flex:1;overflow-y:auto;padding:5px 10px;display:none;flex-direction:column;gap:2px;font-size:12px;">
+      </div>
+      <!-- Input row -->
+      <div id="chat-input-row"
+        style="padding:5px 10px 7px;display:none;gap:6px;flex-shrink:0;border-top:1px solid var(--border);">
+        <input id="chat-input" type="text" maxlength="140" placeholder="Message..."
+          style="flex:1;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:7px 10px;font-family:'IM Fell English',serif;font-size:12px;border-radius:4px;outline:none;"
+          onkeydown="if(event.key==='Enter')GlobalChat.send()" autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="btn btn-violet btn-sm" onclick="GlobalChat.send()" style="min-width:48px;">Send</button>
+      </div>
+    </div>
+
+    <div class="topbar">
+      <div class="topbar-title">🌀 RUNE HAVEN</div>
+      <div class="topbar-info">
+        <div class="topbar-stat">Lv <span id="top-level">1</span></div>
+        <div class="topbar-stat">HP <span id="top-hp">—</span></div>
+        <div class="topbar-stat">🪙<span id="top-gold">0</span></div>
+        <span class="topbar-faction" id="top-faction">—</span>
+      </div>
+      <div class="topbar-btns">
+        <button class="btn btn-sm btn-gold" onclick="Game.saveGame()">💾</button>
+        <button class="btn btn-sm" onclick="Game.loadGame()">📂</button>
+        <button class="btn btn-sm btn-red" onclick="Game.showTitle()">✕</button>
+      </div>
+    </div>
+
+    <div class="game-body">
+
+      <!-- LEFT: Stats panel (desktop) -->
+      <div id="panel-stats">
+        <div class="panel-header">Outworlder</div>
+        <div class="stat-section char-portrait">
+          <span class="portrait-icon" id="stat-portrait">🌀</span>
+          <div class="char-name-dsp" id="stat-name">Hero</div>
+          <div class="char-cls-dsp" id="stat-class">Paladin · Lv.1</div>
+          <div class="char-faction-dsp" id="stat-faction-dsp">—</div>
+        </div>
+        <div class="stat-section">
+          <div class="bar-wrap">
+            <div class="bar-label-row"><span class="lbl">❤️ HP</span><span class="val" id="stat-hp">—</span></div>
+            <div class="main-bar">
+              <div class="main-bar-fill hp-fill" id="hp-bar" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-label-row"><span class="lbl">🔮 MP</span><span class="val" id="stat-mp">—</span></div>
+            <div class="main-bar">
+              <div class="main-bar-fill mp-fill" id="mp-bar" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar-label-row"><span class="lbl">⭐ XP</span><span class="val" id="stat-xp">—</span></div>
+            <div class="main-bar">
+              <div class="main-bar-fill xp-fill" id="xp-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-section">
+          <div class="stat-grid">
+            <div class="stat-item"><span class="sn">STR</span><span class="sv" id="s-str">—</span></div>
+            <div class="stat-item"><span class="sn">INT</span><span class="sv" id="s-int">—</span></div>
+            <div class="stat-item"><span class="sn">AGI</span><span class="sv" id="s-agi">—</span></div>
+            <div class="stat-item"><span class="sn">VIT</span><span class="sv" id="s-vit">—</span></div>
+            <div class="stat-item"><span class="sn">DEF</span><span class="sv" id="s-def">—</span></div>
+            <div class="stat-item"><span class="sn">CRIT</span><span class="sv" id="s-crit">—</span></div>
+          </div>
+        </div>
+        <div class="gold-row">🪙 <span id="stat-gold">0</span> Gold</div>
+      </div>
+
+      <!-- CENTRE -->
+      <div id="panel-centre">
+        <div id="panel-log">
+          <div class="panel-header">The Veil Chronicle</div>
+          <div id="text-log"></div>
+        </div>
+        <div id="panel-actions">
+          <div class="location-bar">📍 <span id="location-name">Ashfall Coast</span></div>
+          <div class="action-area">
+            <div id="combat-enemy-area" style="display:none;">
+              <div class="enemy-name-row">
+                <span class="enemy-name-dsp" id="enemy-name-disp">Enemy</span>
+                <span class="enemy-lvl-dsp" id="enemy-level-disp">Lv.1</span>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar-label-row"><span class="lbl">❤️ Enemy HP</span><span class="val"
+                    id="enemy-hp-disp">—</span></div>
+                <div class="main-bar">
+                  <div class="main-bar-fill hp-fill" id="enemy-hp-bar" style="width:100%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="btn-grid" id="action-btns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Sidebar (desktop) -->
+      <div id="panel-right">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="UI.switchTab('inventory')" id="tab-inventory">Bag</button>
+          <button class="tab-btn" onclick="UI.switchTab('equipment')" id="tab-equipment">Gear</button>
+          <button class="tab-btn" onclick="UI.switchTab('location')" id="tab-location">Map</button>
+        </div>
+        <div class="tab-content active" id="tc-inventory">
+          <div class="panel-header" style="font-size:9px;">INVENTORY</div>
+          <div class="inv-list" id="inv-list">
+            <div class="inv-empty">Your pack is empty.</div>
+          </div>
+          <div style="padding:6px 10px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);">
+            Slots: <span id="inv-count">0</span>/20
+          </div>
+        </div>
+        <div class="tab-content" id="tc-equipment">
+          <div class="panel-header" style="font-size:9px;">EQUIPMENT</div>
+          <div class="eq-list" id="eq-list"></div>
+        </div>
+        <div class="tab-content" id="tc-location">
+          <div class="panel-header" style="font-size:9px;">ERYNDOR MAP</div>
+          <div class="eq-list" id="map-list"></div>
+        </div>
+      </div>
+
+    </div><!-- end game-body -->
+
+    <!-- Mobile bottom nav -->
+    <nav id="mobile-nav">
+      <button class="mob-nav-btn active" id="nav-log" onclick="MobileNav.show('log')">
+        <span class="nav-icon">📜</span>LOG
+      </button>
+      <button class="mob-nav-btn" id="nav-stats" onclick="MobileNav.show('stats')">
+        <span class="nav-icon">⚔️</span>STATS
+      </button>
+      <button class="mob-nav-btn" id="nav-bag" onclick="MobileNav.show('bag')">
+        <span class="nav-icon">🎒</span>BAG
+      </button>
+      <button class="mob-nav-btn" id="nav-map" onclick="MobileNav.show('map')">
+        <span class="nav-icon">🗺️</span>MAP
+      </button>
+    </nav>
+  </div><!-- end screen-game -->
+
+  <!-- ============================================================
+     MOBILE DRAWERS
+     ============================================================ -->
+
+  <!-- Stats drawer -->
+  <div class="mobile-drawer" id="drawer-stats">
+    <div class="drawer-header">
+      <span class="drawer-header-title" id="drawer-stats-title">⚔️ Outworlder</span>
+      <button class="drawer-close" onclick="MobileNav.closeDrawer('drawer-stats')">✕</button>
+    </div>
+    <div style="padding:14px 16px;overflow-y:auto;flex:1;">
+      <div class="bar-wrap">
+        <div class="bar-label-row"><span class="lbl">❤️ HP</span><span class="val" id="d-stat-hp">—</span></div>
+        <div class="main-bar">
+          <div class="main-bar-fill hp-fill" id="d-hp-bar" style="width:100%"></div>
+        </div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-label-row"><span class="lbl">🔮 MP</span><span class="val" id="d-stat-mp">—</span></div>
+        <div class="main-bar">
+          <div class="main-bar-fill mp-fill" id="d-mp-bar" style="width:100%"></div>
+        </div>
+      </div>
+      <div class="bar-wrap" style="margin-bottom:14px;">
+        <div class="bar-label-row"><span class="lbl">⭐ XP</span><span class="val" id="d-stat-xp">—</span></div>
+        <div class="main-bar">
+          <div class="main-bar-fill xp-fill" id="d-xp-bar" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="stat-grid" style="margin-bottom:14px;">
+        <div class="stat-item"><span class="sn">STR</span><span class="sv" id="d-s-str">—</span></div>
+        <div class="stat-item"><span class="sn">INT</span><span class="sv" id="d-s-int">—</span></div>
+        <div class="stat-item"><span class="sn">AGI</span><span class="sv" id="d-s-agi">—</span></div>
+        <div class="stat-item"><span class="sn">VIT</span><span class="sv" id="d-s-vit">—</span></div>
+        <div class="stat-item"><span class="sn">DEF</span><span class="sv" id="d-s-def">—</span></div>
+        <div class="stat-item"><span class="sn">CRIT</span><span class="sv" id="d-s-crit">—</span></div>
+      </div>
+      <div class="gold-row" style="border-top:1px solid var(--border);border-bottom:none;padding:10px 0;">
+        🪙 <span id="d-stat-gold">0</span> Gold
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-sm btn-gold" onclick="Game.saveGame();MobileNav.closeDrawer('drawer-stats')">💾
+          Save</button>
+        <button class="btn btn-sm" onclick="Game.loadGame();MobileNav.closeDrawer('drawer-stats')">📂 Load</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bag/Gear/Map drawer -->
+  <div class="mobile-drawer" id="drawer-bag">
+    <div class="drawer-header">
+      <span class="drawer-header-title" id="drawer-bag-title">🎒 Inventory</span>
+      <button class="drawer-close" onclick="MobileNav.closeDrawer('drawer-bag')">✕</button>
+    </div>
+    <div class="tab-bar" style="flex-shrink:0;">
+      <button class="tab-btn active" id="dtab-inventory" onclick="UI.switchMobileTab('inventory')">Bag</button>
+      <button class="tab-btn" id="dtab-equipment" onclick="UI.switchMobileTab('equipment')">Gear</button>
+      <button class="tab-btn" id="dtab-location" onclick="UI.switchMobileTab('location')">Map</button>
+    </div>
+    <div class="tab-content active" id="dtc-inventory" style="flex:1;overflow:hidden;">
+      <div class="inv-list" id="d-inv-list">
+        <div class="inv-empty">Your pack is empty.</div>
+      </div>
+      <div style="padding:6px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);">
+        Slots: <span id="d-inv-count">0</span>/20
+      </div>
+    </div>
+    <div class="tab-content" id="dtc-equipment" style="flex:1;overflow:hidden;">
+      <div class="eq-list" id="d-eq-list"></div>
+    </div>
+    <div class="tab-content" id="dtc-location" style="flex:1;overflow:hidden;">
+      <div class="eq-list" id="d-map-list"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+     MODALS
+     ============================================================ -->
+  <div class="modal-overlay" id="modal-shop">
+    <div class="modal">
+      <div class="modal-title">🏪 Solmara Outpost Market</div>
+      <div style="color:var(--text-dim);font-style:italic;margin-bottom:12px;font-size:12px;">
+        Your gold: <span id="shop-gold" style="color:var(--gold);font-size:14px;">0</span>
+      </div>
+      <div id="shop-items"></div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-violet" style="width:100%;" onclick="UI.closeModal('modal-shop')">Leave Market</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tavern Modal -->
+  <div class="modal-overlay" id="modal-tavern">
+    <div class="modal">
+      <div class="modal-title">🍺 The Tattered Veil Tavern</div>
+      <div style="color:var(--text-dim);font-style:italic;margin-bottom:4px;font-size:12px;">
+        Gold: <span id="tavern-gold-display" style="color:var(--gold);">0</span>
+      </div>
+      <div id="tavern-companion-status" style="margin-bottom:14px;"></div>
+
+      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--violet-lt);margin-bottom:10px;">🍽️ Eat &amp;
+        Rest</div>
+      <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+        <button class="btn btn-green" style="flex:1;" onclick="Explore.eat()">🍖 Eat a Meal<br><span
+            style="font-size:11px;color:var(--text-dim);">10 gold · 35% HP &amp; MP</span></button>
+        <button class="btn btn-blue" style="flex:1;" onclick="Explore.rest()">🛏 Rest the Night<br><span
+            style="font-size:11px;color:var(--text-dim);">20 gold · Full HP &amp; MP</span></button>
+      </div>
+
+      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--violet-lt);margin-bottom:10px;">⚔️ Hire a
+        Companion</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <div class="item-nm">🛡️ Guardsman</div>
+            <div class="item-dsc">A reliable shield-brother. Attacks every combat turn.</div>
+          </div>
+          <span class="shop-item-price">🪙50</span>
+          <button class="btn btn-sm btn-gold" onclick="Explore.hireCompanion('guardsman')">Hire</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <div class="item-nm">⚔️ Mercenary</div>
+            <div class="item-dsc">A seasoned fighter with a sharp sword.</div>
+          </div>
+          <span class="shop-item-price">🪙80</span>
+          <button class="btn btn-sm btn-gold" onclick="Explore.hireCompanion('mercenary')">Hire</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <div class="item-nm">🗡️ Shadow Blade</div>
+            <div class="item-dsc">An elite Dominion hunter. Deadly but pricey.</div>
+          </div>
+          <span class="shop-item-price">🪙150</span>
+          <button class="btn btn-sm btn-gold" onclick="Explore.hireCompanion('shadowBlade')">Hire</button>
+        </div>
+      </div>
+
+      <button class="btn" style="width:100%;" onclick="UI.closeModal('modal-tavern')">Leave Tavern</button>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div class="modal-overlay" id="modal-leaderboard">
+    <div class="modal">
+      <div class="modal-title">🏆 Eryndor Leaderboard</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-sm btn-gold active" id="lb-tab-level" onclick="WorldServer.switchLbTab('level')">By
+          Level</button>
+        <button class="btn btn-sm" id="lb-tab-kills" onclick="WorldServer.switchLbTab('kills')">By Kills</button>
+      </div>
+      <div id="lb-faction-war"
+        style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:14px;">
+        <div
+          style="font-family:'Cinzel',serif;font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px;">
+          FACTION WAR</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span style="color:var(--gold);font-size:12px;min-width:80px;">☀ Covenant</span>
+          <div
+            style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--border);">
+            <div id="lb-saints-bar"
+              style="height:100%;background:linear-gradient(90deg,var(--gold-dk),var(--gold));border-radius:4px;width:50%;transition:width .5s;">
+            </div>
+          </div>
+          <span style="color:#e08088;font-size:12px;min-width:80px;text-align:right;">💀 Dominion</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--text-dim);">
+          <span id="lb-saints-count">0 kills</span>
+          <span id="lb-demons-count">0 kills</span>
+        </div>
+      </div>
+      <div id="lb-list" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;"></div>
+      <div id="lb-status" style="color:var(--text-dim);font-size:11px;text-align:center;margin-top:8px;"></div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn btn-violet" style="flex:1;" onclick="WorldServer.refresh()">&#8635; Refresh</button>
+        <button class="btn" style="flex:1;" onclick="UI.closeModal('modal-leaderboard')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zone Notes Modal -->
+  <div class="modal-overlay" id="modal-zonenotes">
+    <div class="modal">
+      <div class="modal-title" id="zonenotes-title">📝 Zone Notes</div>
+      <div id="zonenotes-list"
+        style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+      <div
+        style="font-family:'Cinzel',serif;font-size:11px;color:var(--violet-lt);margin-bottom:6px;letter-spacing:1px;">
+        LEAVE A NOTE</div>
+      <textarea id="zonenotes-input" maxlength="120" placeholder="Leave a message for other Outworlders... (120 chars)"
+        style="width:100%;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:10px;font-family:'IM Fell English',serif;font-size:13px;border-radius:4px;resize:none;height:60px;outline:none;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn btn-gold" style="flex:1;" onclick="WorldServer.postNote()">&#128394; Post Note</button>
+        <button class="btn" style="flex:1;" onclick="UI.closeModal('modal-zonenotes')">Close</button>
+      </div>
+    </div>
+  </div>
+  <!-- Guild Hall Modal -->
+  <div class="modal-overlay" id="modal-guild">
+    <div class="modal"
+      style="max-width:480px;height:88vh;max-height:600px;display:flex;flex-direction:column;padding:0;overflow:hidden;">
+      <div
+        style="padding:12px 14px;background:var(--bg-mid);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <span style="font-size:20px;">&#127968;</span>
+        <div style="font-family:'Cinzel',serif;color:var(--violet-lt);font-size:15px;flex:1;">Guild Hall</div>
+        <button class="btn btn-sm" onclick="UI.closeModal('modal-guild')">&#x2715;</button>
+      </div>
+      <div style="display:flex;flex-shrink:0;border-bottom:1px solid var(--border);">
+        <button id="gtab-mine" onclick="GuildSystem.showTab('mine')"
+          style="flex:1;padding:8px 4px;background:var(--bg-mid);border:none;border-right:1px solid var(--border);color:var(--violet-lt);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;">&#127984;
+          My Guild</button>
+        <button id="gtab-browse" onclick="GuildSystem.showTab('browse')"
+          style="flex:1;padding:8px 4px;background:var(--bg);border:none;border-right:1px solid var(--border);color:var(--text-dim);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;">&#128269;
+          Browse</button>
+        <button id="gtab-create" onclick="GuildSystem.showTab('create')"
+          style="flex:1;padding:8px 4px;background:var(--bg);border:none;color:var(--text-dim);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;">+
+          Create</button>
+      </div>
+      <div id="guild-content" style="flex:1;overflow-y:auto;padding:14px;"></div>
+      <div id="guild-status"
+        style="padding:6px 14px;font-size:11px;color:var(--text-dim);border-top:1px solid var(--border);background:var(--bg-mid);flex-shrink:0;">
+        Ready.</div>
+    </div>
+  </div>
+
+  <!-- Map Modal — fully separate from guild modal -->
+  <div class="modal-overlay" id="modal-map">
+    <div class="modal"
+      style="max-width:460px;height:85vh;max-height:580px;display:flex;flex-direction:column;padding:0;overflow:hidden;">
+      <div
+        style="padding:12px 16px;background:var(--bg-mid);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <span style="font-size:20px;">&#128506;</span>
+        <div style="font-family:'Cinzel',serif;color:var(--violet-lt);font-size:15px;flex:1;">World Map &#8212; Eryndor
+        </div>
+        <button class="btn btn-sm" onclick="UI.closeModal('modal-map')">&#x2715;</button>
+      </div>
+      <div id="map-modal-list" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="color:var(--text-dim);text-align:center;padding:16px;">Loading map&#8230;</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-item">
+    <div class="modal">
+      <div class="modal-title" id="modal-item-name">Item</div>
+      <div id="modal-item-desc" style="color:var(--text-dim);font-style:italic;margin-bottom:16px;line-height:1.6;">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-green" id="modal-item-use" style="flex:1;">Use</button>
+        <button class="btn btn-blue" id="modal-item-equip" style="flex:1;display:none;">Equip</button>
+        <button class="btn btn-gold" id="modal-item-sell" style="flex:1;">Sell</button>
+        <button class="btn" style="flex:1;" onclick="UI.closeModal('modal-item')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-gameover">
+    <div class="modal" style="text-align:center;">
+      <div style="font-size:52px;margin-bottom:10px;">💀</div>
+      <div class="modal-title" style="text-align:center;color:var(--red);">The Veil Claims You</div>
+      <div style="color:var(--text-dim);font-style:italic;margin-bottom:20px;line-height:1.6;">
+        Your soul dissolves into the Veil. The darkness swallows you whole…<br>
+        but Outworlders are hard to kill. You awaken at Solmara.
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-violet" style="flex:1;" onclick="Game.respawn()">🌀 Crawl Back to Solmara</button>
+        <button class="btn btn-red" style="flex:1;" onclick="Game.showTitle()">✕ Abandon</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permadeath Game Over — character is deleted on confirm -->
+  <div class="modal-overlay" id="modal-permadeath">
+    <div class="modal" style="text-align:center;border-color:#e08088;">
+      <div style="font-size:60px;margin-bottom:10px;">💀</div>
+      <div class="modal-title" style="text-align:center;color:#e08088;font-size:20px;">PERMANENTLY DEAD</div>
+      <div style="color:#e08088;font-style:italic;margin:0 0 8px;font-size:13px;font-family:'Cinzel',serif;">
+        Hardcore · Permadeath
+      </div>
+      <div style="color:var(--text-dim);margin-bottom:16px;line-height:1.7;font-size:13px;">
+        <span id="permadeath-killer"></span> has taken everything from you.<br>
+        Your chronicle has been <strong style="color:#e08088;">permanently erased</strong> from Eryndor.<br>
+        <em>There is no return from the Veil for the fallen.</em>
+      </div>
+      <div
+        style="background:rgba(224,128,136,.07);border:1px solid rgba(224,128,136,.3);border-radius:6px;padding:10px;margin-bottom:16px;font-size:11px;color:var(--text-dim);">
+        <strong style="color:#e08088;" id="permadeath-epitaph"></strong>
+      </div>
+      <button class="btn btn-red" style="width:100%;" onclick="Game.permadeathEnd()">
+        ✕ Accept Your Fate
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* PWA manifest is loaded via <link rel="manifest" href="manifest.json"> in <head> */
+
+    /* ============================================================
+       WORLD CONFIG — fill in your JSONBin IDs & API key here
+       ============================================================ */
+    const WORLD_CONFIG = {
+      apiKey: '$2a$10$q71P.RPpUWj.LnnZlDZN.O/vNa7iyygv15GYBvi4SFuqBmIjVEW8a',
+      leaderboardId: '69ae1073ae596e708f6e58e3',
+      notesId: '69ae1081ae596e708f6e591d',
+      factionWarId: '69ae108fd0ea881f40fdfcdd',
+      chatId: '69ae1161d0ea881f40fe0037',
+      guildId: '69ae1674ae596e708f6e6eeb',
+      enabled: true
+    };
+
+    /* ============================================================
+       CLASSES
+       Saints: Paladin, Inquisitor, Cleric, Lightbinder
+       Demons: Necromancer, Warlock, Barbarian, Assassin
+       ============================================================ */
+    const CLASSES = {
+      // ── SAINTS ──
+      paladin: {
+        name: 'Paladin', icon: '⚔️', faction: 'saints',
+        desc: 'Holy warrior of the Covenant. Wields divine light and unbreakable faith.',
+        base: { hp: 130, mp: 50, str: 13, int: 8, agi: 7, vit: 13, def: 11, crit: 7 },
+        growth: { hp: 20, mp: 6, str: 3, int: 1, agi: 1, vit: 2, def: 2, crit: .4 },
+        skills: ['divineStrike', 'holyShield', 'consecrate'],
+        bars: { hp: 95, mp: 40, str: 80, int: 45, agi: 35, def: 80 }
+      },
+      inquisitor: {
+        name: 'Inquisitor', icon: '🔱', faction: 'saints',
+        desc: 'Ruthless hunter of heretics. Combines blade, light magic, and interrogation.',
+        base: { hp: 100, mp: 70, str: 11, int: 11, agi: 10, vit: 9, def: 8, crit: 14 },
+        growth: { hp: 14, mp: 10, str: 2, int: 2, agi: 2, vit: 1, def: 1, crit: .8 },
+        skills: ['purgeFlame', 'judgement', 'lightBind'],
+        bars: { hp: 70, mp: 55, str: 65, int: 65, agi: 60, def: 50 }
+      },
+      cleric: {
+        name: 'Cleric', icon: '✝️', faction: 'saints',
+        desc: 'Devoted healer of the Covenant. Restores allies and smites with holy light.',
+        base: { hp: 105, mp: 90, str: 8, int: 13, agi: 8, vit: 11, def: 8, crit: 8 },
+        growth: { hp: 15, mp: 14, str: 1, int: 3, agi: 1, vit: 2, def: 2, crit: .4 },
+        skills: ['holyHeal', 'smite', 'divineFavor'],
+        bars: { hp: 75, mp: 70, str: 40, int: 78, agi: 40, def: 55 }
+      },
+      lightbinder: {
+        name: 'Lightbinder', icon: '✨', faction: 'saints',
+        desc: 'Arcane saint who weaves light into devastating magical constructs.',
+        base: { hp: 75, mp: 130, str: 5, int: 17, agi: 9, vit: 7, def: 4, crit: 12 },
+        growth: { hp: 10, mp: 22, str: 1, int: 3, agi: 1, vit: 1, def: 1, crit: .5 },
+        skills: ['radiantBlast', 'holyNova', 'solarFlare'],
+        bars: { hp: 45, mp: 98, str: 22, int: 98, agi: 50, def: 20 }
+      },
+      // ── DEMONS ──
+      necromancer: {
+        name: 'Necromancer', icon: '💀', faction: 'demons',
+        desc: 'Master of death magic. Raises the dead and drains life from the living.',
+        base: { hp: 70, mp: 130, str: 5, int: 18, agi: 8, vit: 7, def: 3, crit: 11 },
+        growth: { hp: 9, mp: 22, str: 1, int: 4, agi: 1, vit: 1, def: 1, crit: .5 },
+        skills: ['deathBolt', 'soulDrain', 'raiseDead'],
+        bars: { hp: 42, mp: 99, str: 18, int: 99, agi: 45, def: 16 }
+      },
+      warlock: {
+        name: 'Warlock', icon: '🔮', faction: 'demons',
+        desc: 'Wielder of demonic pacts. Trades health for power in forbidden rituals.',
+        base: { hp: 85, mp: 110, str: 7, int: 15, agi: 9, vit: 8, def: 5, crit: 13 },
+        growth: { hp: 11, mp: 18, str: 1, int: 3, agi: 1, vit: 1, def: 1, crit: .6 },
+        skills: ['demonicPact', 'shadowBolt', 'hellfire'],
+        bars: { hp: 55, mp: 90, str: 35, int: 90, agi: 50, def: 25 }
+      },
+      barbarian: {
+        name: 'Barbarian', icon: '🪓', faction: 'demons',
+        desc: 'Berserker of the Bloodspire clans. Embraces rage to ignore pain and deal massive damage.',
+        base: { hp: 140, mp: 30, str: 17, int: 4, agi: 10, vit: 14, def: 7, crit: 15 },
+        growth: { hp: 22, mp: 3, str: 4, int: 0, agi: 2, vit: 3, def: 1, crit: .8 },
+        skills: ['berserkRage', 'brutalSlam', 'bloodFury'],
+        bars: { hp: 99, mp: 20, str: 99, int: 18, agi: 58, def: 42 }
+      },
+      assassin: {
+        name: 'Assassin', icon: '🗡️', faction: 'demons',
+        desc: 'Shadow-walker of the Dominion. Strikes from darkness with lethal precision.',
+        base: { hp: 90, mp: 65, str: 11, int: 9, agi: 18, vit: 8, def: 5, crit: 24 },
+        growth: { hp: 12, mp: 9, str: 2, int: 1, agi: 3, vit: 1, def: 1, crit: 1.2 },
+        skills: ['shadowStrike', 'venomBlade', 'smokeBomb'],
+        bars: { hp: 60, mp: 50, str: 65, int: 45, agi: 99, def: 30 }
+      }
+    };
+
+    /* ============================================================
+       SKILLS
+       ============================================================ */
+    const SKILLS = {
+      // Paladin
+      divineStrike: { name: 'Divine Strike', icon: '⚡', cost: 10, type: 'damage', mult: 2.3, desc: 'Holy-charged blow (2.3× STR + light damage).' },
+      holyShield: { name: 'Holy Shield', icon: '🛡️', cost: 8, type: 'defend', defense: 5, desc: 'Divine barrier — greatly raises DEF this turn.' },
+      consecrate: { name: 'Consecrate', icon: '✝️', cost: 14, type: 'heal', healMult: 2.0, desc: 'Consecrates the ground, restoring moderate HP.' },
+      // Inquisitor
+      purgeFlame: { name: 'Purge Flame', icon: '🔥', cost: 14, type: 'magic', mult: 2.4, desc: 'Purifying fire (2.4× INT). Burns heretics.' },
+      judgement: { name: 'Judgement', icon: '⚖️', cost: 10, type: 'damage', mult: 2.0, alwaysCrit: true, desc: 'Guaranteed crit — divine judgement (2.0× STR).' },
+      lightBind: { name: 'Light Bind', icon: '✨', cost: 8, type: 'defend', defense: 3, desc: 'Wraps enemy in light — reduces incoming damage.' },
+      // Cleric
+      holyHeal: { name: 'Holy Heal', icon: '💚', cost: 16, type: 'heal', healMult: 2.5, desc: 'Restores significant HP with holy light.' },
+      smite: { name: 'Smite', icon: '☀️', cost: 12, type: 'magic', mult: 2.0, desc: 'Holy energy strike (2.0× INT).' },
+      divineFavor: { name: 'Divine Favor', icon: '🌟', cost: 20, type: 'heal', healMult: 1.5, desc: 'Heals and cleanses corruption.' },
+      // Lightbinder
+      radiantBlast: { name: 'Radiant Blast', icon: '💫', cost: 15, type: 'magic', mult: 2.6, desc: 'Focused beam of pure light (2.6× INT).' },
+      holyNova: { name: 'Holy Nova', icon: '✨', cost: 12, type: 'magic', mult: 1.8, desc: 'Burst of sacred energy (1.8× INT).' },
+      solarFlare: { name: 'Solar Flare', icon: '🌞', cost: 22, type: 'magic', mult: 3.2, desc: 'Devastating solar explosion (3.2× INT).' },
+      // Necromancer
+      deathBolt: { name: 'Death Bolt', icon: '💀', cost: 14, type: 'magic', mult: 2.5, desc: 'Bolt of necrotic energy (2.5× INT).' },
+      soulDrain: { name: 'Soul Drain', icon: '🌑', cost: 12, type: 'drain', mult: 1.8, desc: 'Drains enemy HP and restores your own.' },
+      raiseDead: { name: 'Raise Dead', icon: '💀', cost: 20, type: 'summon', strBonus: 6, desc: 'Raises a skeletal warrior that fights alongside you each turn!' },
+      // Warlock
+      demonicPact: { name: 'Demonic Pact', icon: '😈', cost: 0, type: 'pact', desc: 'Sacrifice 15 HP for 20 MP. Dangerous power.' },
+      shadowBolt: { name: 'Shadow Bolt', icon: '🌑', cost: 12, type: 'magic', mult: 2.2, desc: 'Demonic shadow energy (2.2× INT).' },
+      hellfire: { name: 'Hellfire', icon: '🔥', cost: 20, type: 'magic', mult: 3.0, desc: 'Hellfire eruption (3.0× INT). Costs your soul.' },
+      // Barbarian
+      berserkRage: { name: 'Berserk Rage', icon: '😡', cost: 10, type: 'buff', strBonus: 8, desc: 'Unleashes rage — +8 STR for 3 turns.' },
+      brutalSlam: { name: 'Brutal Slam', icon: '💥', cost: 8, type: 'damage', mult: 2.4, desc: 'Ground-splitting strike (2.4× STR).' },
+      bloodFury: { name: 'Blood Fury', icon: '🩸', cost: 6, type: 'damage', mult: 1.6, doubleHit: true, desc: 'Frenzied double strike (1.6× STR each).' },
+      // Assassin
+      shadowStrike: { name: 'Shadow Strike', icon: '🗡️', cost: 10, type: 'damage', mult: 2.8, alwaysCrit: true, desc: 'Guaranteed crit from the shadows (2.8× STR).' },
+      venomBlade: { name: 'Venom Blade', icon: '🐍', cost: 8, type: 'damage', mult: 1.8, desc: 'Poisoned strike — deals 1.8× STR damage.' },
+      smokeBomb: { name: 'Smoke Bomb', icon: '💨', cost: 8, type: 'escape', desc: 'Vanish in shadow smoke — guaranteed escape.' }
+    };
+
+    /* ============================================================
+       COMPANIONS — hire in Tavern or summon via Raise Dead
+       ============================================================ */
+    const COMPANION_TYPES = {
+      skeleton: { name: 'Skeleton Warrior', icon: '💀', str: 8, desc: 'A risen warrior — attacks each turn.' },
+      mercenary: { name: 'Mercenary', icon: '⚔️', str: 10, desc: 'A hired blade from the Tavern.' },
+      guardsman: { name: 'Guardsman', icon: '🛡️', str: 7, desc: 'A stalwart shield-brother from Solmara.' },
+      shadowBlade: { name: 'Shadow Blade', icon: '🗡️', str: 12, desc: 'An elite Dominion hunter — costly but deadly.' }
+    };
+
+    /* ============================================================
+       ITEMS (Eryndor-flavoured)
+       ============================================================ */
+    const ITEMS = {
+      healthPotion: { id: 'healthPotion', name: 'Veil Salve', icon: '🧪', type: 'consumable', subtype: 'heal', healAmount: 40, buyPrice: 30, sellPrice: 12, desc: 'Veil-infused salve restoring 40 HP. Smells of violet lightning.' },
+      manaPotion: { id: 'manaPotion', name: 'Arcane Draught', icon: '💜', type: 'consumable', subtype: 'mana', manaAmount: 30, buyPrice: 30, sellPrice: 12, desc: 'Restores 30 MP. Contains trace amounts of the Veil.' },
+      elixir: { id: 'elixir', name: 'Outworlders Elixir', icon: '✨', type: 'consumable', subtype: 'both', healAmount: 30, manaAmount: 20, buyPrice: 55, sellPrice: 22, desc: 'A rare elixir restoring both HP and MP.' },
+      holyRelic: { id: 'holyRelic', name: 'Holy Relic Shard', icon: '✝️', type: 'consumable', subtype: 'heal', healAmount: 70, buyPrice: 80, sellPrice: 35, desc: 'A fragment of the divine relics that power Solmara. Restores 70 HP.' },
+      bloodVial: { id: 'bloodVial', name: 'Blood Vial', icon: '🩸', type: 'consumable', subtype: 'mana', manaAmount: 50, buyPrice: 50, sellPrice: 20, desc: 'Dark blood magic potion restoring 50 MP. Forbidden by the Saints.' },
+      // Weapons
+      veilblade: { id: 'veilblade', name: 'Veilblade', icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 5, buyPrice: 90, sellPrice: 40, desc: 'A sword forged from Veil fragments. +5 STR.' },
+      runesword: { id: 'runesword', name: 'Runic Longsword', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 10, buyPrice: 200, sellPrice: 90, desc: 'Ancient runes etched into the blade. +10 STR.' },
+      veilstaff: { id: 'veilstaff', name: 'Veil Staff', icon: '🪄', type: 'equipment', slot: 'weapon', intBonus: 7, buyPrice: 100, sellPrice: 45, desc: 'Channels raw Veil energy. +7 INT.' },
+      devourerorb: { id: 'devourerorb', name: "Devourer's Orb", icon: '🔮', type: 'equipment', slot: 'weapon', intBonus: 12, buyPrice: 220, sellPrice: 100, desc: "Pulsing with the Devouring King's energy. +12 INT." },
+      // Armour
+      covenantmail: { id: 'covenantmail', name: 'Covenant Mail', icon: '🛡️', type: 'equipment', slot: 'armor', defBonus: 5, vitBonus: 2, buyPrice: 80, sellPrice: 35, desc: 'Holy-blessed chain armour from Solmara. +5 DEF, +2 VIT.' },
+      ashplate: { id: 'ashplate', name: 'Ash Warlord Plate', icon: '⛓️', type: 'equipment', slot: 'armor', defBonus: 10, vitBonus: 5, buyPrice: 180, sellPrice: 80, desc: 'Brutal Ashen Dominion armour. +10 DEF, +5 VIT.' },
+      veilrobe: { id: 'veilrobe', name: 'Veil-Woven Robe', icon: '🧥', type: 'equipment', slot: 'armor', defBonus: 2, intBonus: 5, buyPrice: 110, sellPrice: 50, desc: 'Robe threaded with Veil energy. +2 DEF, +5 INT.' },
+      shadowmantle: { id: 'shadowmantle', name: 'Shadow Mantle', icon: '🪬', type: 'equipment', slot: 'armor', defBonus: 3, agiBonus: 5, buyPrice: 130, sellPrice: 60, desc: 'Woven from shadowstuff. +3 DEF, +5 AGI.' }
+    };
+
+    const SHOP_ITEMS = ['healthPotion', 'manaPotion', 'elixir', 'holyRelic', 'bloodVial', 'veilblade', 'runesword', 'veilstaff', 'devourerorb', 'covenantmail', 'ashplate', 'veilrobe', 'shadowmantle'];
+
+    /* ============================================================
+       ENEMIES — All from Eryndor world lore
+       ============================================================ */
+    const ENEMIES = {
+      // Ashfall Coast (lv 1-2)
+      veilWraith: {
+        name: 'Veil Wraith', icon: '👻', level: 1, hp: 28, maxHp: 28, str: 5, def: 2, agi: 9, crit: 6, xp: 20, gold: [3, 12], isBoss: false,
+        loot: [{ item: 'manaPotion', chance: .18 }],
+        desc: 'A soul consumed by the Veil — it screams without sound.',
+        attacks: ['phases through', 'slashes at', 'wails at']
+      },
+      corruptWolf: {
+        name: 'Corrupted Wolf', icon: '🐺', level: 2, hp: 38, maxHp: 38, str: 7, def: 3, agi: 13, crit: 8, xp: 30, gold: [0, 6], isBoss: false,
+        loot: [],
+        desc: 'A wolf warped by Veil energy — its eyes glow violet.',
+        attacks: ['bites', 'claws at', 'pounces on']
+      },
+      lostOutworlder: {
+        name: 'Lost Outworlder', icon: '🧟', level: 2, hp: 42, maxHp: 42, str: 8, def: 3, agi: 6, crit: 5, xp: 35, gold: [5, 18], isBoss: false,
+        loot: [{ item: 'healthPotion', chance: .2 }],
+        desc: 'An Outworlder who lost their mind to the Veil. They attack on instinct.',
+        attacks: ['claws at', 'bites', 'slams into']
+      },
+      // Frostvein Highlands (lv 3-4)
+      frostGiant: {
+        name: 'Frost Giant', icon: '🧊', level: 3, hp: 80, maxHp: 80, str: 14, def: 8, agi: 4, crit: 6, xp: 60, gold: [10, 25], isBoss: false,
+        loot: [{ item: 'covenantmail', chance: .08 }],
+        desc: 'A colossal giant wandering the frozen highlands of its ancestors.',
+        attacks: ['smashes', 'hurls ice at', 'crushes']
+      },
+      iceRevenant: {
+        name: 'Ice Revenant', icon: '❄️', level: 4, hp: 65, maxHp: 65, str: 10, def: 6, agi: 7, crit: 9, xp: 55, gold: [8, 20], isBoss: false,
+        loot: [{ item: 'manaPotion', chance: .25 }],
+        desc: 'An undead spirit of the ancient giants, frozen in eternal hatred.',
+        attacks: ['blasts frost at', 'chills the bones of', 'slams into']
+      },
+      // Black Marsh (lv 4-5)
+      rottingKnight: {
+        name: 'Rotting Knight', icon: '💀', level: 4, hp: 70, maxHp: 70, str: 11, def: 7, agi: 5, crit: 6, xp: 60, gold: [12, 28], isBoss: false,
+        loot: [{ item: 'healthPotion', chance: .2 }],
+        desc: 'An undead soldier risen from old wars — rusted armour, endless rage.',
+        attacks: ['strikes with a rusted blade', 'shields bashes', 'slashes at']
+      },
+      boneSerpent: {
+        name: 'Bone Serpent', icon: '🐍', level: 5, hp: 75, maxHp: 75, str: 12, def: 5, agi: 14, crit: 12, xp: 75, gold: [15, 35], isBoss: false,
+        loot: [{ item: 'bloodVial', chance: .2 }],
+        desc: 'A massive serpent skeleton driven by necromantic hunger.',
+        attacks: ['bites venomously', 'coils around', 'strikes at']
+      },
+      // Emberfall / Ruins (lv 5-6)
+      veilAberration: {
+        name: 'Veil Aberration', icon: '🌀', level: 5, hp: 70, maxHp: 70, str: 9, def: 4, agi: 10, crit: 12, xp: 80, gold: [18, 40], isBoss: false,
+        loot: [{ item: 'manaPotion', chance: .3 }, { item: 'veilstaff', chance: .04 }],
+        desc: 'Reality bends around this creature. It should not exist.',
+        attacks: ['tears at reality near', 'blasts veil energy at', 'distorts space around']
+      },
+      bloodCultist: {
+        name: 'Blood Cultist', icon: '🩸', level: 6, hp: 80, maxHp: 80, str: 13, def: 6, agi: 9, crit: 14, xp: 95, gold: [20, 50], isBoss: false,
+        loot: [{ item: 'bloodVial', chance: .35 }, { item: 'shadowmantle', chance: .05 }],
+        desc: 'A devotee of the Ashen Dominion, drunk on blood magic.',
+        attacks: ['hexes', 'slashes at', 'hurls a blood curse at']
+      },
+      // Hollow Wilds / Bloodspire (lv 6-7)
+      corruptTreant: {
+        name: 'Corrupted Treant', icon: '🌳', level: 6, hp: 110, maxHp: 110, str: 16, def: 10, agi: 3, crit: 5, xp: 110, gold: [25, 55], isBoss: false,
+        loot: [{ item: 'healthPotion', chance: .25 }],
+        desc: 'An ancient tree-spirit consumed by Veil corruption. It roars in agony.',
+        attacks: ['smashes with branches', 'entangles', 'slams the earth near']
+      },
+      darkMage: {
+        name: 'Veil-Touched Mage', icon: '🧙', level: 7, hp: 85, maxHp: 85, str: 8, def: 5, agi: 8, crit: 12, xp: 120, gold: [25, 60], isBoss: false,
+        loot: [{ item: 'veilstaff', chance: .06 }, { item: 'manaPotion', chance: .3 }],
+        desc: 'A mage who opened their mind to the Veil — and lost it.',
+        attacks: ['blasts with veil energy', 'curses', 'fires a shadow bolt at']
+      },
+      heretic: {
+        name: 'Covenant Heretic', icon: '⚔️', level: 7, hp: 90, maxHp: 90, str: 14, def: 8, agi: 10, crit: 11, xp: 115, gold: [20, 55], isBoss: false,
+        loot: [{ item: 'healthPotion', chance: .2 }, { item: 'covenantmail', chance: .06 }],
+        desc: 'A Saint who abandoned the Covenant — now hunted by both factions.',
+        attacks: ['slashes at', 'charges', 'hurls a light lance at']
+      },
+      // World Bosses
+      frostKing: {
+        name: 'The Frost King', icon: '👑', level: 8, hp: 220, maxHp: 220, str: 20, def: 14, agi: 4, crit: 9, xp: 280, gold: [90, 160], isBoss: true,
+        loot: [{ item: 'ashplate', chance: .5 }, { item: 'holyRelic', chance: .4 }],
+        desc: 'A giant ruler who refused to leave Frostvein. Now corrupted into an undead titan!',
+        attacks: ['unleashes a blizzard on', 'smashes with a frozen fist at', 'shatters the ground beneath']
+      },
+      plagueMother: {
+        name: 'The Plague Mother', icon: '🦠', level: 9, hp: 260, maxHp: 260, str: 18, def: 12, agi: 5, crit: 10, xp: 380, gold: [120, 200], isBoss: true,
+        loot: [{ item: 'devourerorb', chance: .25 }, { item: 'bloodVial', chance: .6 }],
+        desc: 'An ancient horror buried in the Black Marsh — mother of undead armies!',
+        attacks: ['spews plague at', 'corrupts the soul of', 'slams a rotten limb into']
+      },
+      devouringKing: {
+        name: 'Devouring King Fragment', icon: '😈', level: 10, hp: 300, maxHp: 300, str: 25, def: 12, agi: 12, crit: 18, xp: 500, gold: [160, 250], isBoss: true,
+        loot: [{ item: 'devourerorb', chance: .6 }, { item: 'shadowmantle', chance: .5 }],
+        desc: 'A fragment of the Devouring King\'s true power breaks through the Veil! The world shakes!',
+        attacks: ['consumes the soul of', 'tears reality beside', 'unleashes the Veil\'s fury on']
+      }
+    };
+
+    /* ============================================================
+       LOCATIONS — All 8 Eryndor zones with level gates
+       ============================================================ */
+    const LOCATIONS = {
+      solmara: {
+        name: 'Solmara Outpost', icon: '🏛️', isTown: true,
+        minLevel: 1, maxLevel: 100,
+        desc: 'A fortified outpost beyond Solmara\'s great walls — the last safe place in the eastern lands.',
+        enemies: [], encounterChance: 0,
+        events: ['A Paladin polishes a holy relic by firelight.',
+          'The Covenant\'s violet-and-gold banner snaps in the hot wind.',
+          'A wounded Outworlder stumbles in from the Ashfall Coast.',
+          'A cleric tends to the sick while murmuring prayers against the Veil.']
+      },
+      ashfall: {
+        name: 'Ashfall Coast', icon: '🌋', isTown: false,
+        minLevel: 1, maxLevel: 10,
+        desc: 'Where Outworlders first fell from the shattered Veil. Craters scar the ash-covered shore.',
+        enemies: ['veilWraith', 'corruptWolf', 'lostOutworlder'], encounterChance: .60,
+        events: ['A crater still glows violet from a recent soul-fall.',
+          'Twisted creatures circle in the distance — watching.',
+          'You find scorched earth where a battle recently took place.',
+          'The sky cracks with violet lightning. Something stirs.']
+      },
+      frostvein: {
+        name: 'Frostvein Highlands', icon: '🏔️', isTown: false,
+        minLevel: 5, maxLevel: 25,
+        desc: 'Ancient giant kingdom, abandoned and frozen. Something woke beneath the royal chambers.',
+        enemies: ['frostGiant', 'iceRevenant', 'corruptWolf'], encounterChance: .65,
+        events: ['Massive stone ruins loom through the blizzard.',
+          'Giant footprints — fresh — lead into the fog.',
+          'An ancient sentinel stands motionless. Then turns its head.',
+          'Ice forms letters on a wall. You cannot read them.']
+      },
+      blackMarsh: {
+        name: 'The Black Marsh', icon: '🌿', isTown: false,
+        minLevel: 10, maxLevel: 35,
+        desc: 'A cursed swamp fully consumed by necromantic magic. The dead rise endlessly from the mud.',
+        enemies: ['rottingKnight', 'boneSerpent', 'lostOutworlder'], encounterChance: .70,
+        events: ['A skeletal hand breaks through the marsh mud near your boot.',
+          'Necromantic runes glow on sunken stones.',
+          'The smell of rot hangs so thick it has weight.',
+          'You hear chanting in a dead language deep in the mist.']
+      },
+      emberfallWastes: {
+        name: 'Emberfall Wastes', icon: '🏜️', isTown: false,
+        minLevel: 20, maxLevel: 50,
+        desc: 'A desert born when the sky burned during the Shattered Summoning. Veil fragments float in the air.',
+        enemies: ['veilAberration', 'corruptWolf', 'darkMage'], encounterChance: .70,
+        events: ['Floating shards of the Veil hang suspended in the dry air.',
+          'Reality ripples at the edge of your vision.',
+          'A mutated creature drags itself across the burning sand.',
+          'You see yourself standing ten feet away — then it vanishes.']
+      },
+      hollowWilds: {
+        name: 'The Hollow Wilds', icon: '🌲', isTown: false,
+        minLevel: 30, maxLevel: 60,
+        desc: 'A vast corrupted forest. The trees whisper. Travellers vanish. Something sleeps beneath the roots.',
+        enemies: ['corruptTreant', 'darkMage', 'bloodCultist'], encounterChance: .72,
+        events: ['The trees lean toward you as you pass.',
+          'You hear a name whispered — your name.',
+          'A path that was not there appears, then disappears.',
+          'Ancient roots pulse with dark light beneath the soil.']
+      },
+      bloodspire: {
+        name: 'Bloodspire Mountains', icon: '⛰️', isTown: false,
+        minLevel: 45, maxLevel: 80,
+        desc: 'Home of demon war clans and blood cults. Fortress cities carved into the rock.',
+        enemies: ['bloodCultist', 'heretic', 'darkMage'], encounterChance: .75,
+        events: ['War drums echo between the peaks.',
+          'A demon-clan banner is staked through a Covenant soldier.',
+          'Rivers of blood run down channels carved into the stone.',
+          'The stench of dark rituals drifts from a fortress above.']
+      },
+      velkaris: {
+        name: 'Ruins of Velkaris', icon: '🏚️', isTown: false,
+        minLevel: 70, maxLevel: 100,
+        desc: 'Where the Shattered Summoning happened. Reality is unstable here. Only the most powerful survive.',
+        enemies: ['veilAberration', 'darkMage', 'bloodCultist', 'frostKing', 'plagueMother', 'devouringKing'], encounterChance: .80,
+        events: ['You see a version of yourself walking the opposite direction.',
+          'A clock tower counts backwards. Then stops.',
+          'Arcane phantoms replay the moment the Veil broke on loop.',
+          'The ground whispers the names of gods long forgotten.']
+      }
+    };
+
+    /* ============================================================
+       GAME STATE
+       ============================================================ */
+    const MAX_LEVEL = 100;
+
+    let G = {
+      player: null, location: 'solmara',
+      inCombat: false, currentEnemy: null,
+      playerDefending: false, combatBuffs: {},
+      turnCount: 0, canAct: true,
+      companion: null  // { type: 'skeleton'|'mercenary'|..., str, turnsLeft (null=permanent) }
+    };
+
+    /* ============================================================
+       PLAYER FACTORY
+       ============================================================ */
+    function createPlayer(name, classKey, permadeath = false) {
+      const cls = CLASSES[classKey], b = cls.base;
+      return {
+        name, classKey, faction: cls.faction,
+        level: 1, xp: 0, xpToNext: 100,
+        hp: b.hp, maxHp: b.hp, mp: b.mp, maxMp: b.mp,
+        str: b.str, int: b.int, agi: b.agi, vit: b.vit, def: b.def, crit: b.crit,
+        gold: 60,
+        inventory: [{ id: 'healthPotion', qty: 2 }, { id: 'manaPotion', qty: 1 }],
+        equipment: { weapon: null, armor: null },
+        skills: cls.skills,
+        permadeath,   // saved on player — survives load
+        kills: 0
+      };
+    }
+
+
+    /* ============================================================
+       STAT HELPERS
+       ============================================================ */
+    function effectiveStat(stat) {
+      const p = G.player; let val = p[stat] || 0;
+      for (const s of ['weapon', 'armor']) {
+        const eq = p.equipment[s];
+        if (eq && ITEMS[eq][stat + 'Bonus']) val += ITEMS[eq][stat + 'Bonus'];
+      }
+      if (stat === 'str' && G.combatBuffs.strBonus && G.combatBuffs.turns > 0) val += G.combatBuffs.strBonus;
+      return val;
+    }
+    function effectiveDef() {
+      const p = G.player; let val = p.def;
+      if (p.equipment.armor && ITEMS[p.equipment.armor].defBonus) val += ITEMS[p.equipment.armor].defBonus;
+      if (G.playerDefending) val += 6;
+      if (G.combatBuffs.defenseBonus) val += G.combatBuffs.defenseBonus;
+      return val;
+    }
+    function effectiveMaxHp() {
+      const p = G.player; let ex = 0;
+      if (p.equipment.armor && ITEMS[p.equipment.armor].vitBonus) ex += ITEMS[p.equipment.armor].vitBonus * 5;
+      return p.maxHp + ex;
+    }
+    function factionLabel(f) {
+      return f === 'saints' ? '☀ Luminous Covenant' : '💀 Ashen Dominion';
+    }
+    function factionClass(f) { return f === 'saints' ? 'saints' : 'demons'; }
+
+    /* ============================================================
+       MOBILE NAV
+       ============================================================ */
+    const MobileNav = {
+      show(panel) {
+        ['log', 'stats', 'bag', 'map'].forEach(id => document.getElementById('nav-' + id).classList.toggle('active', id === panel));
+        document.querySelectorAll('.mobile-drawer').forEach(d => d.classList.remove('open'));
+        if (panel === 'stats') { UI.refreshDrawerStats(); document.getElementById('drawer-stats').classList.add('open'); }
+        else if (panel === 'bag' || panel === 'map') {
+          if (panel === 'map') UI.switchMobileTab('location'); else UI.switchMobileTab('inventory');
+          document.getElementById('drawer-bag').classList.add('open');
+        }
+      },
+      closeDrawer(id) {
+        document.getElementById(id).classList.remove('open');
+        ['log', 'stats', 'bag', 'map'].forEach(b => document.getElementById('nav-' + b).classList.remove('active'));
+        document.getElementById('nav-log').classList.add('active');
+      }
+    };
+
+    /* ============================================================
+       UI MODULE
+       ============================================================ */
+    const UI = {
+      refresh() {
+        const p = G.player; if (!p) return;
+        const maxHp = effectiveMaxHp(), cls = CLASSES[p.classKey];
+        // Topbar
+        document.getElementById('top-level').textContent = p.level;
+        document.getElementById('top-hp').textContent = `${p.hp}/${maxHp}`;
+        document.getElementById('top-gold').textContent = p.gold;
+        const tf = document.getElementById('top-faction');
+        tf.textContent = p.faction === 'saints' ? '☀ Covenant' : '💀 Dominion';
+        tf.className = 'topbar-faction ' + factionClass(p.faction);
+        // Desktop stats
+        document.getElementById('stat-portrait').textContent = cls.icon;
+        document.getElementById('stat-name').textContent = p.name;
+        document.getElementById('stat-class').textContent = `${cls.name} · Lv.${p.level}`;
+        const fd = document.getElementById('stat-faction-dsp');
+        fd.textContent = factionLabel(p.faction);
+        fd.className = 'char-faction-dsp ' + (p.faction === 'saints' ? 'tag-saints' : 'tag-demons');
+        this._setBars('', p, maxHp);
+        this._setStats('', p);
+        document.getElementById('stat-gold').textContent = p.gold;
+        // Location
+        document.getElementById('location-name').textContent = LOCATIONS[G.location].name;
+        this.refreshInventory(); this.refreshEquipment(); this.refreshMapTab();
+      },
+
+      _setBars(pfx, p, maxHp) {
+        const sh = (id, t) => { const e = document.getElementById(pfx + id); if (e) e.textContent = t; };
+        const sw = (id, w) => { const e = document.getElementById(pfx + id); if (e) e.style.width = w + '%'; };
+        sh('stat-hp', `${p.hp}/${maxHp}`); sh('stat-mp', `${p.mp}/${p.maxMp}`); sh('stat-xp', `${p.xp}/${p.xpToNext}`);
+        sw('hp-bar', Math.max(0, p.hp / maxHp * 100)); sw('mp-bar', Math.max(0, p.mp / p.maxMp * 100)); sw('xp-bar', Math.min(100, p.xp / p.xpToNext * 100));
+      },
+      _setStats(pfx, p) {
+        const sh = (id, t) => { const e = document.getElementById(pfx + id); if (e) e.textContent = t; };
+        sh('s-str', effectiveStat('str')); sh('s-int', effectiveStat('int')); sh('s-agi', effectiveStat('agi'));
+        sh('s-vit', p.vit); sh('s-def', effectiveDef()); sh('s-crit', p.crit + '%');
+      },
+
+      refreshDrawerStats() {
+        const p = G.player; if (!p) return;
+        this._setBars('d-', p, effectiveMaxHp()); this._setStats('d-', p);
+        const e = document.getElementById('d-stat-gold'); if (e) e.textContent = p.gold;
+        const dt = document.getElementById('drawer-stats-title');
+        if (dt) dt.textContent = `${CLASSES[p.classKey].icon} ${p.name}`;
+      },
+
+      refreshInventory() {
+        const p = G.player, total = p.inventory.reduce((a, i) => a + i.qty, 0);
+        const html = p.inventory.length
+          ? p.inventory.map(e => { const item = ITEMS[e.id]; return `<div class="inv-item" onclick="UI.showItemModal('${e.id}')"><span class="item-name">${item.icon} ${item.name}</span><span class="item-qty">×${e.qty}</span></div>`; }).join('')
+          : '<div class="inv-empty">Your pack is empty.</div>';
+        ['inv-list', 'd-inv-list'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = html; });
+        ['inv-count', 'd-inv-count'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = total; });
+      },
+
+      refreshEquipment() {
+        const p = G.player;
+        const html = [{ key: 'weapon', label: 'Weapon' }, { key: 'armor', label: 'Armour' }].map(s => {
+          const eqId = p.equipment[s.key], item = eqId ? ITEMS[eqId] : null;
+          const bonus = item ? Object.entries(item).filter(([k]) => k.endsWith('Bonus')).map(([k, v]) => `+${v} ${k.replace('Bonus', '').toUpperCase()}`).join(', ') : '';
+          return `<div class="eq-slot"><div class="eq-slot-name">${s.label}</div><div class="eq-slot-item ${item ? '' : 'empty'}">${item ? item.icon + ' ' + item.name : '— Empty —'}</div>${bonus ? `<div class="eq-bonus">${bonus}</div>` : ''}${item ? `<button class="btn btn-sm btn-red" style="margin-top:6px;width:100%;" onclick="Combat.unequip('${s.key}')">Unequip</button>` : ''}</div>`;
+        }).join('');
+        ['eq-list', 'd-eq-list'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = html; });
+      },
+
+      refreshMapTab() {
+        const html = Object.entries(LOCATIONS).map(([key, loc]) => {
+          const here = key === G.location;
+          return `<div class="eq-slot" style="${here ? 'border-color:var(--violet);' : ''}"><div class="eq-slot-name">${loc.icon} ${loc.name}${here ? ' ← YOU ARE HERE' : ''}</div><div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">${loc.desc}</div>${!here ? `<button class="btn btn-sm btn-violet" style="width:100%;" onclick="Explore.travel('${key}');MobileNav.closeDrawer('drawer-bag')">Travel Here</button>` : '<span style="font-size:11px;color:var(--text-dim);">Current location</span>'}</div>`;
+        }).join('');
+        ['map-list', 'd-map-list'].forEach(id => { const e = document.getElementById(id); if (e) e.innerHTML = html; });
+      },
+
+      switchTab(tab) {
+        ['inventory', 'equipment', 'location'].forEach(t => {
+          const b = document.getElementById('tab-' + t), tc = document.getElementById('tc-' + t);
+          if (b) b.classList.toggle('active', t === tab); if (tc) tc.classList.toggle('active', t === tab);
+        });
+      },
+      switchMobileTab(tab) {
+        ['inventory', 'equipment', 'location'].forEach(t => {
+          const b = document.getElementById('dtab-' + t), tc = document.getElementById('dtc-' + t);
+          if (b) b.classList.toggle('active', t === tab); if (tc) tc.classList.toggle('active', t === tab);
+        });
+        const titles = { inventory: '🎒 Inventory', equipment: '⚔️ Equipment', location: '🗺️ Eryndor Map' };
+        const el = document.getElementById('drawer-bag-title'); if (el) el.textContent = titles[tab] || '🎒 Inventory';
+      },
+
+      showItemModal(itemId) {
+        const item = ITEMS[itemId];
+        document.getElementById('modal-item-name').textContent = item.icon + ' ' + item.name;
+        document.getElementById('modal-item-desc').textContent = item.desc;
+        const useBtn = document.getElementById('modal-item-use'), eqBtn = document.getElementById('modal-item-equip');
+        useBtn.style.display = item.type === 'consumable' ? '' : 'none';
+        eqBtn.style.display = item.type === 'equipment' ? '' : 'none';
+        useBtn.onclick = () => { Combat.useItem(itemId); this.closeModal('modal-item'); };
+        eqBtn.onclick = () => { Combat.equipItem(itemId); this.closeModal('modal-item'); MobileNav.closeDrawer('drawer-bag'); };
+        document.getElementById('modal-item-sell').onclick = () => { Combat.sellItem(itemId); this.closeModal('modal-item'); };
+        this.openModal('modal-item');
+      },
+
+      openModal(id) { document.getElementById(id).classList.add('open'); },
+      closeModal(id) { document.getElementById(id).classList.remove('open'); },
+
+      showLevelUpBanner(level) {
+        const el = document.createElement('div');
+        el.className = 'levelup-banner';
+        el.textContent = `🌀 POWER SURGES — Level ${level}! 🌀`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2600);
+      },
+
+      veilFlash() {
+        const el = document.createElement('div');
+        el.className = 'veil-flash';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 450);
+      },
+
+      setActions(actions) {
+        document.getElementById('action-btns').innerHTML = actions.map(a =>
+          `<button class="btn ${a.cls || ''}" onclick="${a.fn}" ${a.disabled ? 'disabled' : ''} style="touch-action:manipulation;">${a.label}</button>`
+        ).join('');
+      },
+
+      showEnemyPanel(enemy) {
+        const panel = document.getElementById('combat-enemy-area');
+        if (!enemy) { panel.style.display = 'none'; return; }
+        panel.style.display = '';
+        document.getElementById('enemy-name-disp').textContent = enemy.icon + ' ' + enemy.name;
+        document.getElementById('enemy-level-disp').textContent = `Lv.${enemy.level}`;
+        this.updateEnemyBar(enemy);
+      },
+      updateEnemyBar(enemy) {
+        document.getElementById('enemy-hp-disp').textContent = `${enemy.hp}/${enemy.maxHp}`;
+        document.getElementById('enemy-hp-bar').style.width = Math.max(0, enemy.hp / enemy.maxHp * 100) + '%';
+      }
+    };
+
+    /* ============================================================
+       LOGGING
+       ============================================================ */
+    const Log = {
+      add(text, type = 'normal') {
+        const log = document.getElementById('text-log');
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`; div.innerHTML = text;
+        log.appendChild(div);
+        requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
+      },
+      divider() { this.add('────────────────────────────────', 'divider'); },
+      clear() { document.getElementById('text-log').innerHTML = ''; }
+    };
+
+    /* ============================================================
+       EXPLORE MODULE
+       ============================================================ */
+    const Explore = {
+      travel(key) {
+        if (G.inCombat) { Log.add('You cannot flee while in combat!', 'system'); return; }
+        const loc = LOCATIONS[key];
+        // Level gate check
+        if (!loc.isTown && G.player && G.player.level < loc.minLevel) {
+          Log.add(`⚠️ <strong>Danger!</strong> ${loc.name} requires Level ${loc.minLevel}+. You are Level ${G.player.level} — this place will crush you!`, 'death');
+        }
+        G.location = key;
+        Log.divider();
+        Log.add(`You travel to <strong>${loc.name}</strong>.`, 'story');
+        Log.add(`<em>${loc.desc}</em>`, 'story');
+        if (!loc.isTown) Log.add(`📊 Recommended: Lv.${loc.minLevel}–${loc.maxLevel}`, 'system');
+        UI.refresh();
+        loc.isTown ? this.showTownActions() : this.showExploreActions();
+        Game.autosave();
+      },
+
+      showTownActions() {
+        const compLabel = G.companion ? `👥 ${G.companion.name} (active)` : '🍺 Tavern';
+        const gLabel = (G.player && G.player.guildName) ? `🏰 ${G.player.guildName}` : '🏰 Guild';
+        UI.setActions([
+          { label: '🏪 Market', fn: "Explore.openShop()", cls: 'btn-gold' },
+          { label: compLabel, fn: "Explore.openTavern()", cls: 'btn-green' },
+          { label: gLabel, fn: "GuildSystem.open()", cls: 'btn-violet btn-sm' },
+          { label: '🏆 World', fn: "WorldServer.openLeaderboard()", cls: 'btn-violet btn-sm' },
+          { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' },
+          { label: '💾 Save', fn: "Game.saveGame()", cls: 'btn-sm' }
+        ]);
+      },
+
+      openMap() {
+        const content = document.getElementById('map-modal-list');
+        if (!content) { UI.openModal('modal-map'); return; }
+        const zones = Object.entries(LOCATIONS)
+          .filter(([k, loc]) => !loc.isTown)
+          .sort((a, b) => a[1].minLevel - b[1].minLevel);
+        const town = Object.entries(LOCATIONS).filter(([k, loc]) => loc.isTown);
+        const renderZone = ([key, loc]) => {
+          const canGo = !loc.isTown && G.player && G.player.level >= loc.minLevel;
+          const isCurrent = key === G.location;
+          const danger = !loc.isTown && G.player && G.player.level < loc.minLevel;
+          return `<div style="background:${isCurrent ? 'rgba(139,92,246,.12)' : 'var(--bg-mid)'};border:1px solid ${isCurrent ? 'var(--violet)' : 'var(--border)'};border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+            <div style="font-size:22px;flex-shrink:0;">${loc.icon}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--text-lt);">${loc.name}${isCurrent ? ' <span style="color:var(--violet-lt);font-size:10px;">(HERE)</span>' : ''}</div>
+              ${loc.isTown ? '' : `<div style="font-size:11px;color:${danger ? '#e08088' : 'var(--text-dim)'};">Lv.${loc.minLevel}–${loc.maxLevel} ${danger ? '⚠️ Dangerous' : ''}</div>`}
+              <div style="font-size:11px;color:var(--text-dim);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${loc.desc}</div>
+            </div>
+            ${isCurrent ? '<span style="color:var(--violet-lt);font-size:11px;">📍</span>' :
+              `<button onclick="Explore.travel('${key}');UI.closeModal('modal-map')" style="background:${danger ? 'var(--bg)' : 'var(--violet)'};border:1px solid ${danger ? '#e08088' : 'transparent'};color:${danger ? '#e08088' : '#fff'};font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;flex-shrink:0;">${danger ? '⚠ Travel' : 'Travel'}</button>`
+            }
+          </div>`;
+        };
+        content.innerHTML =
+          `<div style="font-family:'Cinzel',serif;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:6px;">TOWNS</div>` +
+          town.map(renderZone).join('') +
+          `<div style="font-family:'Cinzel',serif;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin:12px 0 6px;">ZONES (by level)</div>` +
+          zones.map(renderZone).join('');
+        UI.openModal('modal-map');
+      },
+
+      showExploreActions() {
+        const loc = LOCATIONS[G.location];
+        UI.setActions([
+          { label: `🔍 Explore ${loc.icon}`, fn: "Explore.explore()", cls: 'btn-violet' },
+          { label: '📝 Zone Notes', fn: "WorldServer.openZoneNotes()", cls: 'btn-gold btn-sm' },
+          { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' },
+          { label: '🏛️ Solmara', fn: "Explore.travel('solmara')", cls: '' },
+          { label: '💾 Save', fn: "Game.saveGame()", cls: 'btn-sm' }
+        ]);
+      },
+
+
+
+      explore() {
+        const loc = LOCATIONS[G.location];
+        Log.add(loc.events[Math.floor(Math.random() * loc.events.length)], 'story');
+        if (Math.random() < .15) Log.add('The sky tears with violet lightning — the Veil shudders.', 'veil');
+        if (loc.enemies.length && Math.random() < loc.encounterChance) {
+          // Scale enemy to zone + player level
+          const key = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+          setTimeout(() => Combat.start(key), 400);
+        } else {
+          Log.add('The area is quiet. For now.', 'system');
+        }
+      },
+
+      // ── TAVERN ──
+      openTavern() {
+        const p = G.player;
+        document.getElementById('tavern-gold-display').textContent = p.gold;
+        // Companion status
+        const compDiv = document.getElementById('tavern-companion-status');
+        if (G.companion) {
+          compDiv.innerHTML = `<div style="color:var(--violet-lt);margin-bottom:10px;">👥 Current companion: <strong>${G.companion.icon} ${G.companion.name}</strong> (STR ${G.companion.str})</div>
+          <button class="btn btn-red btn-sm" onclick="Explore.dismissCompanion()">Dismiss Companion</button>`;
+        } else {
+          compDiv.innerHTML = `<div style="color:var(--text-dim);font-style:italic;margin-bottom:8px;">No companion hired.</div>`;
+        }
+        UI.openModal('modal-tavern');
+      },
+
+      eat() {
+        const p = G.player, cost = 10, maxHp = effectiveMaxHp();
+        if (p.gold < cost) { Log.add('Not enough gold for a meal!', 'system'); return; }
+        p.gold -= cost;
+        const healAmt = Math.floor(maxHp * 0.35);
+        const manaAmt = Math.floor(p.maxMp * 0.35);
+        p.hp = Math.min(maxHp, p.hp + healAmt);
+        p.mp = Math.min(p.maxMp, p.mp + manaAmt);
+        Log.divider();
+        Log.add(`🍖 You eat a warm meal at the Tavern. −${cost} gold. +${healAmt} HP, +${manaAmt} MP.`, 'heal');
+        UI.closeModal('modal-tavern');
+        UI.refresh(); Game.autosave();
+      },
+
+      rest() {
+        const p = G.player, cost = 20;
+        if (p.gold < cost) { Log.add('Not enough gold to rent a room!', 'system'); UI.closeModal('modal-tavern'); return; }
+        p.gold -= cost; p.hp = effectiveMaxHp(); p.mp = p.maxMp;
+        Log.divider();
+        Log.add(`🛏 You rest at the Tavern. −${cost} gold. HP and MP fully restored.`, 'heal');
+        UI.closeModal('modal-tavern');
+        UI.refresh(); Game.autosave();
+      },
+
+      hireCompanion(type) {
+        const p = G.player;
+        const costs = { mercenary: 80, guardsman: 50, shadowBlade: 150 };
+        const cost = costs[type];
+        if (G.companion) { Log.add('Dismiss your current companion first!', 'system'); return; }
+        if (p.gold < cost) { Log.add(`You need ${cost} gold to hire this companion.`, 'system'); return; }
+        p.gold -= cost;
+        const ct = COMPANION_TYPES[type];
+        G.companion = { type, name: ct.name, icon: ct.icon, str: ct.str + Math.floor(p.level / 5) };
+        Log.add(`⚔️ <strong>${ct.icon} ${ct.name}</strong> joins you as a companion!`, 'success');
+        UI.closeModal('modal-tavern');
+        UI.refresh(); Game.autosave();
+      },
+
+      dismissCompanion() {
+        if (!G.companion) return;
+        Log.add(`${G.companion.icon} ${G.companion.name} parts ways with you.`, 'system');
+        G.companion = null;
+        UI.closeModal('modal-tavern');
+        this.showTownActions();
+        UI.refresh();
+      },
+
+      openShop() {
+        document.getElementById('shop-gold').textContent = G.player.gold;
+        document.getElementById('shop-items').innerHTML = SHOP_ITEMS.map(id => {
+          const item = ITEMS[id];
+          return `<div class="shop-item"><div class="shop-item-info"><div class="item-nm">${item.icon} ${item.name}</div><div class="item-dsc">${item.desc}</div></div><span class="shop-item-price">🪙${item.buyPrice}</span><button class="btn btn-sm btn-gold" onclick="Explore.buyItem('${id}')" style="touch-action:manipulation;">Buy</button></div>`;
+        }).join('');
+        UI.openModal('modal-shop');
+      },
+
+      buyItem(id) {
+        const p = G.player, item = ITEMS[id];
+        if (p.gold < item.buyPrice) { Log.add('Not enough gold!', 'system'); return; }
+        p.gold -= item.buyPrice; Combat.addToInventory(id, 1);
+        Log.add(`Purchased ${item.icon} <strong>${item.name}</strong> for 🪙${item.buyPrice}.`, 'loot');
+        document.getElementById('shop-gold').textContent = p.gold;
+        UI.refresh();
+      }
+    };
+
+    /* ============================================================
+       COMBAT MODULE
+       ============================================================ */
+    const Combat = {
+      start(enemyKey) {
+        const base = ENEMIES[enemyKey];
+        G.currentEnemy = this.scaleEnemy(base);
+        G.inCombat = true; G.playerDefending = false; G.combatBuffs = {}; G.turnCount = 0;
+        Log.divider();
+        if (G.currentEnemy.isBoss) {
+          Log.add(`⚠️ <strong>WORLD BOSS!</strong> ${G.currentEnemy.icon} <strong>${G.currentEnemy.name}</strong> (Lv.${G.currentEnemy.level}) emerges!`, 'death');
+          UI.veilFlash();
+        } else {
+          Log.add(`⚔ A ${G.currentEnemy.icon} <strong>${G.currentEnemy.name}</strong> (Lv.${G.currentEnemy.level}) bars your path!`, 'combat');
+        }
+        Log.add(`<em>${base.desc}</em>`, 'story');
+        if (G.companion) Log.add(`👥 ${G.companion.icon} <strong>${G.companion.name}</strong> stands ready at your side!`, 'success');
+        UI.showEnemyPanel(G.currentEnemy); this.showCombatActions(); UI.refresh();
+      },
+
+      showCombatActions() {
+        const p = G.player;
+        const skillBtns = p.skills.map(sk => {
+          const s = SKILLS[sk], hasMp = s.type === 'pact' || (p.mp >= s.cost);
+          return { label: `${s.icon} ${s.name}${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`, fn: `Combat.useSkill('${sk}')`, cls: hasMp ? 'btn-violet' : '', disabled: !hasMp };
+        });
+        UI.setActions([
+          { label: '⚔ Attack', fn: "Combat.attack()", cls: 'btn-red' },
+          ...skillBtns,
+          { label: '🧪 Item', fn: "Combat.showItemMenu()", cls: 'btn-green' },
+          { label: '🛡 Defend', fn: "Combat.defend()", cls: 'btn-blue' },
+          { label: '💨 Flee', fn: "Combat.flee()", cls: '' }
+        ]);
+      },
+
+      attack() {
+        if (!G.canAct) return;
+        G.playerDefending = false;
+        const enemy = G.currentEnemy;
+        let dmg = Math.max(1, effectiveStat('str') + Math.floor(Math.random() * 5) - enemy.def);
+        const crit = Math.random() * 100 < G.player.crit;
+        if (crit) dmg = Math.floor(dmg * 1.8);
+        enemy.hp -= dmg;
+        Log.add(crit ? `💥 Critical hit! You strike for <strong>${dmg}</strong>!` : `You attack for <strong>${dmg}</strong> damage.`, 'player');
+        this.afterPlayerTurn();
+      },
+
+      useSkill(skillKey) {
+        if (!G.canAct) return;
+        G.playerDefending = false;
+        const p = G.player, enemy = G.currentEnemy, skill = SKILLS[skillKey];
+        // Special pact mechanic: pay HP for MP
+        if (skill.type === 'pact') {
+          if (p.hp <= 20) { Log.add('You are too weak for a Demonic Pact!', 'system'); return; }
+          p.hp -= 15; p.mp = Math.min(p.maxMp, p.mp + 20);
+          Log.add(`😈 <strong>Demonic Pact!</strong> You sacrifice 15 HP for 20 MP.`, 'demons');
+          this.afterPlayerTurn(); return;
+        }
+        if (p.mp < skill.cost) { Log.add('Not enough mana!', 'system'); return; }
+        p.mp -= skill.cost;
+
+        if (skill.type === 'damage') {
+          let dmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult) - enemy.def);
+          const crit = skill.alwaysCrit || Math.random() * 100 < p.crit;
+          if (crit && !skill.alwaysCrit) dmg = Math.floor(dmg * 1.8);
+          if (skill.doubleHit) {
+            const dmg2 = Math.max(1, Math.floor(effectiveStat('str') * skill.mult) - enemy.def);
+            enemy.hp -= dmg + dmg2;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong>! You strike twice for <strong>${dmg}</strong> and <strong>${dmg2}</strong>!`, 'player');
+          } else {
+            enemy.hp -= dmg;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong>! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
+          }
+        } else if (skill.type === 'magic') {
+          let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult) - Math.floor(enemy.def / 2));
+          const crit = Math.random() * 100 < p.crit;
+          if (crit) dmg = Math.floor(dmg * 1.6);
+          enemy.hp -= dmg;
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! <strong>${dmg}</strong> arcane damage${crit ? ' (CRIT!)' : ''}!`, 'player');
+          if (enemy.isBoss) UI.veilFlash();
+        } else if (skill.type === 'drain') {
+          let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult) - Math.floor(enemy.def / 2));
+          const heal = Math.floor(dmg * 0.5);
+          enemy.hp -= dmg; p.hp = Math.min(effectiveMaxHp(), p.hp + heal);
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! Drained <strong>${dmg}</strong> HP, restored <strong>${heal}</strong>.`, 'heal');
+        } else if (skill.type === 'heal') {
+          const amt = Math.floor((effectiveStat('int') + p.vit) * skill.healMult);
+          p.hp = Math.min(effectiveMaxHp(), p.hp + amt);
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! Restored <strong>${amt}</strong> HP.`, 'heal');
+        } else if (skill.type === 'defend') {
+          G.combatBuffs.defenseBonus = skill.defense; G.playerDefending = true;
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! Defensive stance taken.`, 'player');
+        } else if (skill.type === 'summon') {
+          const ct = COMPANION_TYPES['skeleton'];
+          G.companion = { type: 'skeleton', name: ct.name, icon: ct.icon, str: ct.str + Math.floor(G.player.level / 3) };
+          G.combatBuffs = { strBonus: skill.strBonus, turns: 3 };
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! A skeletal warrior rises from the dead to fight for you!`, 'veil');
+        } else if (skill.type === 'buff') {
+          G.combatBuffs = { strBonus: skill.strBonus, turns: 3 };
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! Power surges through you!`, 'player');
+        } else if (skill.type === 'escape') {
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! You vanish into shadow.`, 'player');
+          this.endCombat(false, true); return;
+        }
+        this.afterPlayerTurn();
+      },
+
+      showItemMenu() {
+        const consumables = G.player.inventory.filter(e => ITEMS[e.id].type === 'consumable');
+        if (!consumables.length) { Log.add('No usable items.', 'system'); return; }
+        document.getElementById('action-btns').innerHTML =
+          consumables.map(e => { const item = ITEMS[e.id]; return `<button class="btn btn-green" onclick="Combat.useItemInCombat('${e.id}')" style="touch-action:manipulation;">${item.icon} ${item.name} ×${e.qty}</button>`; }).join('') +
+          `<button class="btn btn-sm" onclick="Combat.showCombatActions()" style="touch-action:manipulation;">← Back</button>`;
+      },
+
+      useItemInCombat(id) { this.useItem(id); this.afterPlayerTurn(); },
+
+      useItem(id) {
+        const p = G.player, item = ITEMS[id]; if (!item || item.type !== 'consumable') return;
+        const maxHp = effectiveMaxHp();
+        if (item.subtype === 'heal' || item.subtype === 'both') { const prev = p.hp; p.hp = Math.min(maxHp, p.hp + item.healAmount); Log.add(`Used ${item.icon} <strong>${item.name}</strong>. +${p.hp - prev} HP.`, 'heal'); }
+        if (item.subtype === 'mana' || item.subtype === 'both') { const prev = p.mp; p.mp = Math.min(p.maxMp, p.mp + item.manaAmount); Log.add(`Used ${item.icon} <strong>${item.name}</strong>. +${p.mp - prev} MP.`, 'heal'); }
+        this.removeFromInventory(id, 1); UI.refresh();
+      },
+
+      defend() {
+        if (!G.canAct) return;
+        G.playerDefending = true;
+        Log.add('🛡 You raise your guard against the darkness.', 'player');
+        this.afterPlayerTurn();
+      },
+
+      flee() {
+        if (!G.canAct) return;
+        const chance = Math.max(.2, Math.min(.82, .4 + (G.player.agi - G.currentEnemy.agi) * .02));
+        if (Math.random() < chance) { Log.add('💨 You escape into the shadows.', 'system'); this.endCombat(false, true); }
+        else { Log.add('The enemy blocks your escape!', 'combat'); this.afterPlayerTurn(true); }
+      },
+
+      enemyTurn() {
+        const p = G.player, enemy = G.currentEnemy;
+        const atk = enemy.attacks[Math.floor(Math.random() * enemy.attacks.length)];
+        // Dodge nerfed: max 25%, base 4%, and AGI advantage matters less
+        const dodge = Math.min(.25, (effectiveStat('agi') - enemy.agi) * .015 + .04);
+        if (Math.random() < dodge) { Log.add(`The ${enemy.name} ${atk} you — you barely dodge!`, 'player'); return; }
+        // Enemy attacks with random variance: base str ± 20%
+        let dmg = Math.max(1, enemy.str + Math.floor(Math.random() * Math.ceil(enemy.str * 0.2)) - effectiveDef());
+        const crit = Math.random() * 100 < enemy.crit;
+        if (crit) dmg = Math.floor(dmg * 2.0); // crit deals double (was 1.6)
+        p.hp -= dmg;
+        if (enemy.isBoss) UI.veilFlash();
+        Log.add(`The ${enemy.icon} ${enemy.name} ${atk} you for <strong>${dmg}</strong>${crit ? ' 💥 (CRITICAL!)' : ''}!`, 'combat');
+        if (p.hp <= 0) { p.hp = 0; UI.refresh(); this.endCombat(false, false, true); }
+      },
+
+      companionAttack() {
+        if (!G.companion || !G.currentEnemy || G.currentEnemy.hp <= 0) return;
+        const c = G.companion, enemy = G.currentEnemy;
+        const dmg = Math.max(1, c.str + Math.floor(Math.random() * 4) - Math.floor(enemy.def / 2));
+        enemy.hp -= dmg;
+        Log.add(`${c.icon} <strong>${c.name}</strong> strikes the ${enemy.name} for <strong>${dmg}</strong>!`, 'player');
+      },
+
+      // Scale enemy stats based on player level vs enemy base level
+      scaleEnemy(base) {
+        const plevel = G.player ? G.player.level : 1;
+        const loc = LOCATIONS[G.location];
+        // Target level: bias ABOVE player so fights are a real challenge
+        const targetLevel = Math.min(MAX_LEVEL, Math.max(loc.minLevel,
+          Math.floor(plevel * 1.0 + Math.random() * plevel * 0.5 + 1)));
+        const clampedTarget = Math.max(base.level, Math.min(loc.maxLevel, targetLevel));
+        const ratio = clampedTarget / Math.max(1, base.level);
+        const scaled = Object.assign({}, base);
+        scaled.level = clampedTarget;
+        scaled.hp = Math.floor(base.hp * ratio * 1.5);  // +50% more HP
+        scaled.maxHp = scaled.hp;
+        scaled.str = Math.floor(base.str * ratio * 1.3);  // +30% more damage
+        scaled.def = Math.floor(base.def * ratio * 1.0);  // full DEF scaling (was 0.8)
+        scaled.crit = Math.min(40, base.crit + Math.floor(ratio * 3)); // crits scale up
+        scaled.xp = Math.floor(base.xp * ratio);
+        scaled.gold = [Math.floor(base.gold[0] * ratio), Math.floor(base.gold[1] * ratio)];
+        return scaled;
+      },
+
+      afterPlayerTurn(skipEnemy = false) {
+        G.turnCount++;
+        if (G.combatBuffs.turns > 0) G.combatBuffs.turns--;
+        // Companion attacks after player each turn
+        this.companionAttack();
+        UI.refresh(); UI.updateEnemyBar(G.currentEnemy);
+        if (G.currentEnemy.hp <= 0) { G.currentEnemy.hp = 0; UI.updateEnemyBar(G.currentEnemy); this.endCombat(true); return; }
+        if (!skipEnemy) {
+          G.canAct = false;
+          setTimeout(() => { this.enemyTurn(); G.playerDefending = false; G.canAct = true; UI.refresh(); this.showCombatActions(); }, 700);
+        } else { this.showCombatActions(); }
+      },
+
+      endCombat(victory, fled = false, died = false) {
+        G.inCombat = false; G.playerDefending = false; G.combatBuffs = {};
+        UI.showEnemyPanel(null);
+        if (died) {
+          const p = G.player;
+          Log.add(`💀 <strong>The ${G.currentEnemy.name} has slain you!</strong>`, 'death');
+          if (p.permadeath) {
+            // ── PERMADEATH: show special modal then delete save ──
+            const killerEl = document.getElementById('permadeath-killer');
+            const epitaphEl = document.getElementById('permadeath-epitaph');
+            if (killerEl) killerEl.textContent = G.currentEnemy.icon + ' ' + G.currentEnemy.name;
+            if (epitaphEl) epitaphEl.textContent =
+              `${p.name} · Lv.${p.level} ${CLASSES[p.classKey].name} · ${p.kills || 0} kills · Fell at ${LOCATIONS[G.location]?.name || G.location}`;
+            UI.openModal('modal-permadeath');
+          } else {
+            // ── NORMAL DEATH: auto-respawn at Solmara, no modal ──
+            const penalty = Math.min(p.gold, Math.floor(p.gold * 0.15));
+            p.gold -= penalty;
+            p.hp = Math.floor(effectiveMaxHp() * 0.25);
+            p.mp = Math.floor(p.maxMp * 0.25);
+            G.location = 'solmara';
+            Log.add(`The Veil spits you back out. ${penalty > 0 ? `You lost ${penalty} gold.` : ''} You collapse at Solmara.`, 'veil');
+            UI.refresh(); Game.autosave(); Explore.showTownActions();
+          }
+          return;
+        }
+        if (victory) {
+          const e = G.currentEnemy;
+          const xp = e.xp + Math.floor(Math.random() * 12), gold = e.gold[0] + Math.floor(Math.random() * (e.gold[1] - e.gold[0] + 1));
+          G.player.gold += gold;
+          // Track kills
+          G.player.kills = (G.player.kills || 0) + 1;
+          Log.add(`⚔ <strong>Victory!</strong> ${e.icon} ${e.name} falls.`, 'success');
+          Log.add(`🪙 +${gold} gold. ⭐ +${xp} XP.`, 'loot');
+          e.loot.forEach(d => { if (Math.random() < d.chance) { this.addToInventory(d.item, 1); Log.add(`🎁 Found: ${ITEMS[d.item].icon} <strong>${ITEMS[d.item].name}</strong>!`, 'loot'); } });
+          this.grantXP(xp);
+          // Record faction kill (async, fire-and-forget)
+          WorldServer.recordKill(G.player.faction);
+        } else if (fled) {
+          Log.add('You slip away into the darkness of Eryndor.', 'system');
+        }
+        UI.refresh(); Game.autosave();
+        LOCATIONS[G.location].isTown ? Explore.showTownActions() : Explore.showExploreActions();
+      },
+
+      grantXP(amount) {
+        G.player.xp += amount;
+        while (G.player.xp >= G.player.xpToNext) { G.player.xp -= G.player.xpToNext; this.levelUp(); }
+      },
+
+      levelUp() {
+        const p = G.player;
+        if (p.level >= MAX_LEVEL) { Log.add('You have reached the maximum level of 100!', 'levelup'); return; }
+        const cls = CLASSES[p.classKey], g = cls.growth;
+        p.level++; p.maxHp += g.hp; p.maxMp += g.mp; p.hp = effectiveMaxHp(); p.mp = p.maxMp;
+        p.str += g.str; p.int += g.int; p.agi += g.agi; p.vit += g.vit; p.def += g.def; p.crit += g.crit;
+        p.xpToNext = Math.floor(p.xpToNext * 1.6); // Steeper XP curve
+        Log.divider();
+        Log.add(`🌀 <strong>LEVEL ${p.level}${p.level === MAX_LEVEL ? ' — MAX!' : ''}!</strong> The Veil responds to your growing power.`, 'levelup');
+        Log.add(`All stats increased. HP and MP fully restored.`, 'levelup');
+        UI.showLevelUpBanner(p.level);
+        // Submit updated score to world leaderboard (async)
+        WorldServer.submitScore();
+      },
+
+      equipItem(id) {
+        const p = G.player, item = ITEMS[id]; if (item.type !== 'equipment') return;
+        p.equipment[item.slot] = id; this.removeFromInventory(id, 1);
+        Log.add(`Equipped ${item.icon} <strong>${item.name}</strong>.`, 'success');
+        UI.refresh();
+      },
+      unequip(slot) {
+        const p = G.player, id = p.equipment[slot]; if (!id) return;
+        this.addToInventory(id, 1); p.equipment[slot] = null;
+        Log.add(`Unequipped ${ITEMS[id].name}.`, 'system'); UI.refresh();
+      },
+      sellItem(id) {
+        const p = G.player, item = ITEMS[id];
+        this.removeFromInventory(id, 1); p.gold += item.sellPrice;
+        Log.add(`Sold ${item.icon} ${item.name} for 🪙${item.sellPrice}.`, 'loot');
+        UI.refresh();
+      },
+      addToInventory(id, qty) {
+        const ex = G.player.inventory.find(e => e.id === id);
+        ex ? ex.qty += qty : G.player.inventory.push({ id, qty });
+        UI.refreshInventory();
+      },
+      removeFromInventory(id, qty) {
+        const p = G.player, idx = p.inventory.findIndex(e => e.id === id); if (idx === -1) return;
+        p.inventory[idx].qty -= qty;
+        if (p.inventory[idx].qty <= 0) p.inventory.splice(idx, 1);
+        UI.refreshInventory();
+      }
+    };
+
+    /* ============================================================
+       GAME MODULE
+       ============================================================ */
+    const Game = {
+      _show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+
+      showTitle() { this._show('screen-title'); },
+
+      showCreate() {
+        this._show('screen-create');
+        this._selectedFaction = 'saints';
+        this.buildClassGrid();
+        // Reset permadeath toggle every time the create screen opens
+        const tog = document.getElementById('permadeath-toggle');
+        const warn = document.getElementById('permadeath-warning');
+        const row = document.getElementById('permadeath-row');
+        if (tog) tog.checked = false;
+        if (warn) warn.style.display = 'none';
+        if (row) { row.style.borderColor = 'var(--border)'; row.style.background = 'var(--bg-mid)'; }
+      },
+
+      selectFaction(f) {
+        this._selectedFaction = f;
+        document.getElementById('faction-saints-btn').classList.toggle('active', f === 'saints');
+        document.getElementById('faction-demons-btn').classList.toggle('active', f === 'demons');
+        // Reset class selection to first class of chosen faction
+        const firstClass = Object.keys(CLASSES).find(k => CLASSES[k].faction === f);
+        this._selectedClass = firstClass;
+        this.buildClassGrid();
+      },
+
+      buildClassGrid() {
+        const faction = this._selectedFaction || 'saints';
+        const factionClasses = Object.entries(CLASSES).filter(([, cls]) => cls.faction === faction);
+        if (!this._selectedClass || CLASSES[this._selectedClass].faction !== faction)
+          this._selectedClass = factionClasses[0][0];
+
+        const grid = document.getElementById('class-grid');
+        grid.innerHTML = factionClasses.map(([key, cls]) => `
+      <div class="class-card ${cls.faction}-class ${key === this._selectedClass ? 'selected' : ''}" id="card-${key}" onclick="Game.selectClass('${key}')">
+        <div class="class-icon">${cls.icon}</div>
+        <div class="class-name">${cls.name}</div>
+        <div class="class-faction-tag ${cls.faction === 'saints' ? 'tag-saints' : 'tag-demons'}">${cls.faction === 'saints' ? '☀ Luminous Covenant' : '💀 Ashen Dominion'}</div>
+        <div class="class-desc">${cls.desc}</div>
+        ${['hp', 'mp', 'str', 'int', 'agi', 'def'].map(stat => `
+          <div class="stat-bar-row">
+            <div class="stat-bar-label">${stat.toUpperCase()}</div>
+            <div class="stat-bar-track">
+              <div class="stat-bar-fill ${stat === 'hp' ? 'bar-red' : stat === 'mp' ? 'bar-violet' : ['str'].includes(stat) ? 'bar-gold' : ['int'].includes(stat) ? 'bar-violet' : stat === 'def' ? 'bar-green' : 'bar-green'}"
+                   style="width:${cls.bars[stat]}%"></div>
+            </div>
+          </div>`).join('')}
+      </div>`).join('');
+      },
+
+      selectClass(key) {
+        this._selectedClass = key;
+        document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('card-' + key).classList.add('selected');
+      },
+
+      startGame() {
+        const name = document.getElementById('char-name-input').value.trim() || 'Outworlder';
+        const classKey = this._selectedClass || 'paladin';
+        const isHardcore = document.getElementById('permadeath-toggle')?.checked || false;
+        G.player = createPlayer(name, classKey, isHardcore);
+        G.location = 'solmara'; G.inCombat = false; G.companion = null;
+        if (!G.activeSaveSlot) G.activeSaveSlot = 'runehaven_slot_0';
+        this._show('screen-game');
+        GlobalChat.init();
+        Log.clear();
+        const faction = G.player.faction;
+        Log.add('════════════════════════════════════', 'divider');
+        Log.add(`<strong>${name}</strong> — you fall through the Veil and crash into Eryndor.`, 'veil');
+        Log.add(`The sky above cracks with violet lightning. You are an <em>Outworlder</em>.`, 'story');
+        Log.add(`You have pledged to the <strong>${factionLabel(faction)}</strong>.`, (faction === 'saints' ? 'saints' : 'demons'));
+        if (isHardcore) {
+          Log.add(`⚠ <strong style="color:#e08088;">PERMADEATH ENABLED.</strong> If you fall, your chronicle is gone forever.`, 'death');
+        }
+        Log.add(`The dying world of Eryndor stretches before you.`, 'story');
+        Log.add(`The Shattered Summoning broke the Veil. Two factions war for what remains.`, 'story');
+        Log.add(`And something far worse than either of them stirs in the depths.`, 'veil');
+        Log.add('════════════════════════════════════', 'divider');
+        Log.add(`You stand at <strong>Solmara Outpost</strong>. Rest, trade, then explore Eryndor.`, 'system');
+        Log.add(`Use the buttons below to act. On mobile, use the bottom nav.`, 'system');
+        UI.refresh(); Explore.showTownActions();
+      },
+
+      saveGame() {
+        if (!G.player) return;
+        const key = G.activeSaveSlot || 'runehaven_slot_0';
+        const data = {
+          player: G.player, location: G.location,
+          turnCount: G.turnCount, companion: G.companion
+        };
+        // Always backup to local
+        localStorage.setItem(key, JSON.stringify(data));
+        // Sync to cloud if logged in
+        if (CloudSave.user) {
+          CloudSave.save(key, data).then(ok => {
+            if (ok) Log.add('☁ Chronicle synced to cloud.', 'system');
+          });
+        }
+        Log.add('💾 Chronicle saved.', 'system');
+      },
+
+      loadGame(slot) {
+        const key = slot || G.activeSaveSlot || 'runehaven_slot_0';
+        // Check cloud first if logged in
+        let raw = CloudSave.user ? JSON.stringify(CloudSave.slots[key]) : null;
+        if (raw === 'undefined' || !raw) raw = localStorage.getItem(key);
+
+        if (!raw) { Log.add('No saved chronicle found.', 'system'); return; }
+        try {
+          const data = JSON.parse(raw);
+          G.activeSaveSlot = key;
+          G.player = data.player; G.location = data.location || 'solmara';
+          G.inCombat = false; G.currentEnemy = null;
+          G.turnCount = data.turnCount || 0;
+          G.companion = data.companion || null;
+          this._show('screen-game');
+          GlobalChat.init(); // start persistent chat polling
+          Log.clear();
+          Log.add(`📂 Chronicle restored. Welcome back, <strong>${G.player.name}</strong>.`, 'system');
+          Log.add(`${factionLabel(G.player.faction)} · Level ${G.player.level} · ${LOCATIONS[G.location].name}.`, 'story');
+          UI.refresh(); UI.showEnemyPanel(null);
+          LOCATIONS[G.location].isTown ? Explore.showTownActions() : Explore.showExploreActions();
+        } catch (e) { Log.add('Failed to restore chronicle.', 'system'); }
+      },
+
+      autosave() { this.saveGame(); },
+
+      // Called from the old gameover modal "Crawl back" button (non-permadeath fallback)
+      respawn() {
+        const p = G.player;
+        p.hp = Math.floor(effectiveMaxHp() * 0.25);
+        p.mp = Math.floor(p.maxMp * 0.25);
+        G.inCombat = false; G.location = 'solmara';
+        UI.closeModal('modal-gameover'); UI.showEnemyPanel(null);
+        Log.divider();
+        Log.add(`You awaken at the gates of Solmara Outpost.`, 'veil');
+        UI.refresh(); Game.autosave(); Explore.showTownActions();
+      },
+
+      togglePermadeath(on) {
+        const warn = document.getElementById('permadeath-warning');
+        const row = document.getElementById('permadeath-row');
+        if (warn) warn.style.display = on ? 'block' : 'none';
+        if (row) {
+          row.style.borderColor = on ? '#e08088' : 'var(--border)';
+          row.style.background = on ? 'rgba(224,128,136,.05)' : 'var(--bg-mid)';
+        }
+      },
+
+      permadeathEnd() {
+        // Delete the save slot permanently from local and cloud
+        const slot = G.activeSaveSlot || 'runehaven_slot_0';
+        localStorage.removeItem(slot);
+        CloudSave.deleteSlot(slot);
+        G.player = null; G.location = 'solmara'; G.inCombat = false;
+        UI.closeModal('modal-permadeath');
+        this._show('screen-title');
+      },
+
+      showTitle() { this._show('screen-title'); }
+    };
+
+    /* ============================================================
+       CHARACTER SELECT MODULE
+       ============================================================ */
+    const SAVE_SLOTS = 4;
+    const CharSelect = {
+      slotKey(i) { return `runehaven_slot_${i}`; },
+
+      show() {
+        Game._show('screen-charselect');
+        this.render();
+      },
+
+      render() {
+        const list = document.getElementById('slot-list');
+        list.innerHTML = '';
+        for (let i = 0; i < SAVE_SLOTS; i++) {
+          const key = this.slotKey(i);
+          let raw = null, isCloud = false;
+          if (CloudSave.user && CloudSave.slots[key]) {
+            raw = JSON.stringify(CloudSave.slots[key]); isCloud = true;
+          } else {
+            raw = localStorage.getItem(key);
+          }
+          let card;
+          if (raw) {
+            try {
+              const data = JSON.parse(raw);
+              const p = data.player;
+              const cls = CLASSES[p.classKey];
+              const faction = p.faction === 'saints' ? '☀ Covenant' : '💀 Dominion';
+              const loc = LOCATIONS[data.location] ? LOCATIONS[data.location].name : 'Unknown';
+              card = `
+                <div style="background:var(--bg-panel);border:1px solid ${isCloud ? 'var(--violet-lt)' : 'var(--border)'};border-radius:8px;padding:14px 16px; position:relative;">
+                  ${isCloud ? '<div style="position:absolute; top:8px; right:12px; font-size:9px; color:var(--violet-lt); font-family:\'Cinzel\',serif; letter-spacing:1px;">☁ CLOUD</div>' : ''}
+                  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                    <div style="font-size:32px;">${cls.icon}</div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-family:\'Cinzel\',serif;color:var(--violet-lt);font-size:15px;font-weight:600;">${p.name}</div>
+                      <div style="color:var(--text-dim);font-size:12px;">${cls.name} &middot; Lv.${p.level} &middot; ${faction}</div>
+                      <div style="color:var(--text-dim);font-size:11px;font-style:italic;">📍 ${loc} &middot; 🪙 ${p.gold}g &middot; ❤️ ${p.hp}/${p.maxHp}</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:8px;">
+                    <button class="btn btn-violet" style="flex:1;" onclick="CharSelect.load(${i})">&#128220; Continue</button>
+                    <button class="btn btn-red btn-sm" onclick="CharSelect.confirmDelete(${i})" title="Delete">&#128465;</button>
+                  </div>
+                </div>`;
+            } catch (e) { card = this._emptySlot(i); }
+          } else { card = this._emptySlot(i); }
+          list.innerHTML += card;
+        }
+      },
+
+      _emptySlot(i) {
+        return `
+          <div style="background:var(--bg-panel);border:1px dashed var(--border);border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+            <div style="font-size:32px;opacity:.3;">👤</div>
+            <div style="flex:1;">
+              <div style="font-family:'Cinzel',serif;color:var(--text-dim);font-size:13px;">Chronicle ${i + 1} &mdash; Empty</div>
+              <div style="color:var(--text-dim);font-size:11px;font-style:italic;">No Outworlder bound to this slot.</div>
+            </div>
+            <button class="btn btn-violet btn-sm" onclick="CharSelect.newGame(${i})">+ New</button>
+          </div>`;
+      },
+
+      newGame(slotIndex) {
+        G.activeSaveSlot = this.slotKey(slotIndex);
+        Game.showCreate();
+      },
+
+      load(slotIndex) {
+        Game.loadGame(this.slotKey(slotIndex));
+      },
+
+      confirmDelete(slotIndex) {
+        const key = this.slotKey(slotIndex);
+        let raw = CloudSave.user ? JSON.stringify(CloudSave.slots[key]) : null;
+        if (raw === 'undefined' || !raw) raw = localStorage.getItem(key);
+        if (!raw) return;
+        const p = JSON.parse(raw).player;
+        if (confirm(`Delete "${p.name}" (Lv.${p.level} ${CLASSES[p.classKey].name})? This cannot be undone.`)) {
+          localStorage.removeItem(key);
+          CloudSave.deleteSlot(key);
+          this.render();
+        }
+      }
+    };
+
+    /* ============================================================
+       CLOUD SAVE MODULE — Netlify Identity + Blobs
+       ============================================================ */
+    const CloudSave = {
+      user: null,
+      slots: {},
+      loading: false,
+
+      init() {
+        if (typeof netlifyIdentity === 'undefined') return;
+        netlifyIdentity.on('init', user => this.handleAuth(user));
+        netlifyIdentity.on('login', user => this.handleAuth(user));
+        netlifyIdentity.on('logout', () => this.handleAuth(null));
+        netlifyIdentity.on('open', () => this.updateUI());
+      },
+
+      async handleAuth(user) {
+        this.user = user;
+        this.updateUI();
+        if (user) {
+          Log.add(`☁ Cloud Sync active: ${user.email}`, 'system');
+          await this.loadAll();
+          if (document.getElementById('screen-charselect').classList.contains('active')) {
+            CharSelect.render();
+          }
+        } else {
+          this.slots = {};
+          if (G.player) Log.add('☁ Cloud Sync disabled (logged out).', 'system');
+        }
+      },
+
+      updateUI() {
+        const info = document.getElementById('user-info');
+        const email = document.getElementById('user-email');
+        if (this.user) {
+          if (info) info.style.display = 'block';
+          if (email) email.textContent = this.user.email;
+        } else {
+          if (info) info.style.display = 'none';
+        }
+      },
+
+      async loadAll() {
+        if (!this.user) return;
+        this.loading = true;
+        try {
+          const resp = await fetch('/api/saves', {
+            headers: { 'Authorization': `Bearer ${this.user.token.access_token}` }
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            this.slots = data.slots || {};
+          }
+        } catch (e) { console.error('Cloud load failed', e); }
+        finally { this.loading = false; }
+      },
+
+      async save(slotKey, data) {
+        if (!this.user) return false;
+        this.slots[slotKey] = data;
+        try {
+          const resp = await fetch('/api/saves', {
+            method: 'POST',
+            body: JSON.stringify({ slots: this.slots }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.user.token.access_token}`
+            }
+          });
+          return resp.ok;
+        } catch (e) {
+          console.error('Cloud save failed', e);
+          return false;
+        }
+      },
+
+      deleteSlot(slotKey) {
+        if (!this.user) return;
+        delete this.slots[slotKey];
+        this.saveRemaining();
+      },
+
+      async saveRemaining() {
+        if (!this.user) return;
+        try {
+          await fetch('/api/saves', {
+            method: 'POST',
+            body: JSON.stringify({ slots: this.slots }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.user.token.access_token}`
+            }
+          });
+        } catch (e) { }
+      }
+    };
+
+    /* ============================================================
+       WORLD SERVER — Async Multiplayer via JSONBin.io
+       ============================================================ */
+    const WorldServer = {
+      _base: 'https://api.jsonbin.io/v3/b',
+      _lbTab: 'level',
+
+      _ok() {
+        return WORLD_CONFIG.enabled &&
+          WORLD_CONFIG.apiKey !== 'YOUR_JSONBIN_MASTER_KEY';
+      },
+
+      _headers(write = false) {
+        const h = { 'Content-Type': 'application/json', 'X-Master-Key': WORLD_CONFIG.apiKey };
+        if (!write) h['X-Bin-Meta'] = 'false';
+        return h;
+      },
+
+      async _get(binId) {
+        const r = await fetch(`${this._base}/${binId}`, { headers: this._headers() });
+        if (!r.ok) throw new Error('Fetch failed');
+        return r.json();
+      },
+
+      async _put(binId, data) {
+        const r = await fetch(`${this._base}/${binId}`, {
+          method: 'PUT', headers: this._headers(true),
+          body: JSON.stringify(data)
+        });
+        if (!r.ok) throw new Error('Write failed');
+        return r.json();
+      },
+
+      // ── LEADERBOARD ──────────────────────────────────────────────
+      async submitScore() {
+        if (!this._ok() || !G.player) return;
+        try {
+          const data = await this._get(WORLD_CONFIG.leaderboardId);
+          const entries = data.entries || [];
+          const p = G.player;
+          const cls = CLASSES[p.classKey];
+          const entry = {
+            name: p.name, class: cls.name, icon: cls.icon,
+            level: p.level, kills: p.kills || 0,
+            faction: p.faction, ts: Date.now()
+          };
+          // Replace existing entry for same name+class or add new
+          const idx = entries.findIndex(e => e.name === p.name && e.class === cls.name);
+          if (idx >= 0) entries[idx] = entry; else entries.push(entry);
+          // Keep top 50
+          entries.sort((a, b) => b.level - a.level);
+          if (entries.length > 50) entries.length = 50;
+          await this._put(WORLD_CONFIG.leaderboardId, { entries });
+        } catch (e) { console.warn('Leaderboard submit failed', e); }
+      },
+
+      async openLeaderboard() {
+        UI.openModal('modal-leaderboard');
+        document.getElementById('lb-status').textContent = 'Loading…';
+        document.getElementById('lb-list').innerHTML = '';
+        if (!this._ok()) {
+          document.getElementById('lb-status').textContent =
+            'World features not configured yet. Fill in WORLD_CONFIG in index.html.';
+          return;
+        }
+        await this.refresh();
+      },
+
+      async refresh() {
+        if (!this._ok()) return;
+        document.getElementById('lb-status').textContent = 'Refreshing…';
+        try {
+          // Leaderboard
+          const lbData = await this._get(WORLD_CONFIG.leaderboardId);
+          const entries = (lbData.entries || []).slice();
+          this._renderLeaderboard(entries);
+          // Faction war
+          const fw = await this._get(WORLD_CONFIG.factionWarId);
+          this._renderFactionWar(fw);
+          document.getElementById('lb-status').textContent =
+            `Updated · ${entries.length} Outworlders recorded`;
+        } catch (e) {
+          document.getElementById('lb-status').textContent = 'Connection to Eryndor World failed.';
+        }
+      },
+
+      _renderLeaderboard(entries) {
+        const sorted = this._lbTab === 'level'
+          ? [...entries].sort((a, b) => b.level - a.level)
+          : [...entries].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+        const medals = ['🥇', '🥈', '🥉'];
+        document.getElementById('lb-list').innerHTML = sorted.length
+          ? sorted.map((e, i) => {
+            const fColor = e.faction === 'saints' ? 'var(--gold)' : '#e08088';
+            const fIcon = e.faction === 'saints' ? '☀' : '💀';
+            return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:10px;">
+                <div style="font-size:18px;min-width:24px;text-align:center;">${medals[i] || `#${i + 1}`}</div>
+                <div style="font-size:20px;">${e.icon}</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-family:'Cinzel',serif;color:var(--text-lt);font-size:13px;">${e.name}</div>
+                  <div style="font-size:11px;color:var(--text-dim);">${e.class} · <span style="color:${fColor};">${fIcon} ${e.faction === 'saints' ? 'Covenant' : 'Dominion'}</span></div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="color:var(--violet-lt);font-family:'Cinzel',serif;font-size:13px;">Lv.${e.level}</div>
+                  <div style="font-size:11px;color:var(--text-dim);">${e.kills || 0} kills</div>
+                </div>
+              </div>`;
+          }).join('')
+          : '<div style="color:var(--text-dim);font-style:italic;padding:16px;text-align:center;">No Outworlders recorded yet. Be the first!</div>';
+      },
+
+      _renderFactionWar(fw) {
+        const s = fw.saints || 0, d = fw.demons || 0, total = s + d || 1;
+        const sPct = Math.round(s / total * 100);
+        document.getElementById('lb-saints-bar').style.width = sPct + '%';
+        document.getElementById('lb-saints-count').textContent = `${s.toLocaleString()} kills`;
+        document.getElementById('lb-demons-count').textContent = `${d.toLocaleString()} kills`;
+      },
+
+      switchLbTab(tab) {
+        this._lbTab = tab;
+        document.getElementById('lb-tab-level').classList.toggle('btn-gold', tab === 'level');
+        document.getElementById('lb-tab-kills').classList.toggle('btn-gold', tab === 'kills');
+        // Re-render with cached data if available
+        this._get(WORLD_CONFIG.leaderboardId).then(d => this._renderLeaderboard(d.entries || [])).catch(() => { });
+      },
+
+      // ── FACTION WAR ──────────────────────────────────────────────
+      async recordKill(faction) {
+        if (!this._ok()) return;
+        try {
+          const fw = await this._get(WORLD_CONFIG.factionWarId);
+          fw[faction] = (fw[faction] || 0) + 1;
+          await this._put(WORLD_CONFIG.factionWarId, fw);
+        } catch (e) { /* silent */ }
+      },
+
+      // ── ZONE NOTES ───────────────────────────────────────────────
+      async openZoneNotes() {
+        const loc = LOCATIONS[G.location];
+        document.getElementById('zonenotes-title').textContent = `📝 Notes — ${loc.name}`;
+        document.getElementById('zonenotes-input').value = '';
+        document.getElementById('zonenotes-list').innerHTML =
+          '<div style="color:var(--text-dim);font-style:italic;">Loading notes…</div>';
+        UI.openModal('modal-zonenotes');
+        if (!this._ok()) {
+          document.getElementById('zonenotes-list').innerHTML =
+            '<div style="color:var(--text-dim);font-style:italic;">World features not configured yet.</div>';
+          return;
+        }
+        try {
+          const data = await this._get(WORLD_CONFIG.notesId);
+          const notes = (data.notes || []).filter(n => n.zone === G.location);
+          document.getElementById('zonenotes-list').innerHTML = notes.length
+            ? notes.slice(-15).reverse().map(n => {
+              const fColor = n.faction === 'saints' ? 'var(--gold)' : '#e08088';
+              const fIcon = n.faction === 'saints' ? '☀' : '💀';
+              const time = new Date(n.ts).toLocaleDateString();
+              return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px 12px;">
+                  <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">
+                    <span style="color:var(--violet-lt);">${n.author}</span>
+                    <span style="color:${fColor};margin-left:6px;">${fIcon}</span>
+                    <span style="float:right;">${time}</span>
+                  </div>
+                  <div style="font-style:italic;color:var(--text);font-size:13px;">"${n.text}"</div>
+                </div>`;
+            }).join('')
+            : '<div style="color:var(--text-dim);font-style:italic;padding:8px;">No notes left here yet. Be the first!</div>';
+        } catch (e) {
+          document.getElementById('zonenotes-list').innerHTML =
+            '<div style="color:var(--text-dim);font-style:italic;">Could not load notes.</div>';
+        }
+      },
+
+      async postNote() {
+        if (!this._ok()) { Log.add('World features not configured yet.', 'system'); UI.closeModal('modal-zonenotes'); return; }
+        const p = G.player;
+        const text = document.getElementById('zonenotes-input').value.trim();
+        if (!text) { return; }
+        try {
+          const data = await this._get(WORLD_CONFIG.notesId);
+          const notes = data.notes || [];
+          notes.push({
+            author: p.name, faction: p.faction,
+            zone: G.location, text, ts: Date.now()
+          });
+          // Keep last 200 notes total
+          if (notes.length > 200) notes.splice(0, notes.length - 200);
+          await this._put(WORLD_CONFIG.notesId, { notes });
+          Log.add(`📝 Your note was left at <strong>${LOCATIONS[G.location].name}</strong>.`, 'system');
+          UI.closeModal('modal-zonenotes');
+        } catch (e) {
+          Log.add('Could not post note to Eryndor World.', 'system');
+        }
+      }
+    };
+
+    /* ============================================================
+       GLOBAL CHAT — tabbed panel: Global / Guild / Party
+       Fast-poll 3s when open, 30s when collapsed
+       All messages stored in one JSONBin with {ch, guild, party} fields
+       ============================================================ */
+    const GlobalChat = {
+      _fast: 3, _slow: 30,
+      _countdown: 0, _timer: null,
+      _expanded: false,
+      _channel: 'global',   // 'global' | 'guild' | 'party'
+      _lastTs: { global: 0, guild: 0, party: 0 },
+      _unread: { global: 0, guild: 0, party: 0 },
+      _cache: [],
+
+      // guild / party stored on G (session-only, not in player save)
+      _guild() { return G.guildName || ''; },
+      _party() { return G.partyCode || ''; },
+
+      _ok() {
+        return WORLD_CONFIG.enabled &&
+          WORLD_CONFIG.chatId && WORLD_CONFIG.chatId !== 'YOUR_CHAT_BIN_ID';
+      },
+
+      // Auto-called when entering game
+      init() {
+        this._setExpanded(false);
+        this._setDot('gray');
+        if (!this._ok()) return;
+        this._startPoll(this._slow);
+        this.refresh();
+      },
+
+      toggle() { this._setExpanded(!this._expanded); },
+
+      _setExpanded(open) {
+        this._expanded = open;
+        const panel = document.getElementById('chat-panel');
+        const tabs = document.getElementById('chat-tabs');
+        const msgs = document.getElementById('chat-messages');
+        const inputRow = document.getElementById('chat-input-row');
+        const icon = document.getElementById('chat-toggle-icon');
+        if (!panel) return;
+        if (open) {
+          panel.style.maxHeight = '300px';
+          tabs.style.display = 'block';
+          msgs.style.display = 'flex';
+          inputRow.style.display = 'flex';
+          icon.innerHTML = '&#9650;';
+          // Clear unread for current channel
+          this._unread[this._channel] = 0;
+          this._updateBadges();
+          this._updateChannelTabs();
+          this._renderMessages();
+          setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 60);
+          // Faster polling when open
+          this._startPoll(this._fast);
+          // Add bottom padding so content isn't hidden
+          const gb = document.querySelector('.game-body');
+          if (gb) gb.style.paddingBottom = '305px';
+        } else {
+          panel.style.maxHeight = '28px';
+          tabs.style.display = 'none';
+          msgs.style.display = 'none';
+          inputRow.style.display = 'none';
+          icon.innerHTML = '&#9660;';
+          // Slower polling when collapsed
+          this._startPoll(this._slow);
+          const gb = document.querySelector('.game-body');
+          if (gb) gb.style.paddingBottom = '32px';
+        }
+      },
+
+      setChannel(ch) {
+        this._channel = ch;
+        this._unread[ch] = 0;
+        this._updateBadges();
+        this._updateChannelTabs();
+        this._renderMessages();
+      },
+
+      _updateChannelTabs() {
+        const active = 'var(--bg-mid)', inactive = 'var(--bg)';
+        const acCol = 'var(--violet-lt)', inCol = 'var(--text-dim)';
+        ['global', 'guild', 'party'].forEach(ch => {
+          const id = { global: 'cht-g', guild: 'cht-gu', party: 'cht-p' }[ch];
+          const btn = document.getElementById(id);
+          if (!btn) return;
+          const isActive = ch === this._channel;
+          btn.style.background = isActive ? active : inactive;
+          btn.style.color = isActive ? acCol : inCol;
+        });
+        // Show join prompt or channel info
+        const gj = document.getElementById('chat-guild-join');
+        const pj = document.getElementById('chat-party-join');
+        const ci = document.getElementById('chat-channel-info');
+        const cn = document.getElementById('chat-channel-name');
+        if (gj) gj.style.display = 'none';
+        if (pj) pj.style.display = 'none';
+        if (ci) ci.style.display = 'none';
+        if (this._channel === 'guild') {
+          if (!this._guild()) {
+            if (gj) { gj.style.display = 'flex'; }
+          } else {
+            if (ci) { ci.style.display = 'flex'; }
+            if (cn) cn.textContent = '\uD83C\uDFF0 Guild: ' + this._guild();
+          }
+        } else if (this._channel === 'party') {
+          if (!this._party()) {
+            if (pj) { pj.style.display = 'flex'; }
+          } else {
+            if (ci) { ci.style.display = 'flex'; }
+            if (cn) cn.textContent = '\u2694\uFE0F Party code: ' + this._party();
+          }
+        }
+      },
+
+      _updateBadges() {
+        const map = { global: 'chat-unread-g', guild: 'chat-unread-gu', party: 'chat-unread-p' };
+        Object.entries(this._unread).forEach(([ch, n]) => {
+          const el = document.getElementById(map[ch]);
+          if (!el) return;
+          if (n > 0 && ch !== this._channel) {
+            el.textContent = n; el.style.display = 'inline';
+          } else { el.style.display = 'none'; }
+        });
+      },
+
+      joinGuild() {
+        const val = (document.getElementById('guild-name-input').value || '').trim();
+        if (!val) return;
+        G.guildName = val;
+        Log.add(`\uD83C\uDFF0 Joined guild: <strong>${val}</strong>`, 'success');
+        this._updateChannelTabs();
+        this.refresh();
+      },
+
+      joinParty() {
+        const val = (document.getElementById('party-code-input').value || '').trim().toUpperCase();
+        if (!val) return;
+        G.partyCode = val;
+        Log.add(`\u2694\uFE0F Joined party: <strong>${val}</strong>`, 'success');
+        this._updateChannelTabs();
+        this.refresh();
+      },
+
+      createParty() {
+        // Generate a random 6-char party code
+        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+        G.partyCode = code;
+        document.getElementById('party-code-input').value = code;
+        Log.add(`\u2694\uFE0F Party created! Code: <strong>${code}</strong> — share it with friends!`, 'success');
+        this._updateChannelTabs();
+        this.refresh();
+      },
+
+      leaveChannel() {
+        if (this._channel === 'guild') G.guildName = '';
+        if (this._channel === 'party') G.partyCode = '';
+        this._updateChannelTabs();
+        this._renderMessages();
+      },
+
+      _startPoll(secs) {
+        if (this._timer) clearInterval(this._timer);
+        this._countdown = secs;
+        this._timer = setInterval(() => {
+          this._countdown--;
+          const el = document.getElementById('chat-countdown');
+          if (el) el.textContent = this._countdown + 's';
+          if (this._countdown <= 0) { this._countdown = secs; this.refresh(); }
+        }, 1000);
+      },
+
+      _setDot(color) {
+        const map = { green: '#4ade80', gray: '#555', red: '#e08088', yellow: '#fbbf24' };
+        const dot = document.getElementById('chat-status-dot');
+        if (dot) dot.style.background = map[color] || color;
+      },
+
+      async refresh() {
+        if (!this._ok()) return;
+        this._setDot('yellow');
+        try {
+          const data = await WorldServer._get(WORLD_CONFIG.chatId);
+          this._cache = data.messages || [];
+          // Count unread per channel
+          const now = Date.now();
+          ['global', 'guild', 'party'].forEach(ch => {
+            const filtered = this._filterFor(ch);
+            const newCount = filtered.filter(m => m.ts > this._lastTs[ch]).length;
+            if (!this._expanded || this._channel !== ch) {
+              if (newCount > 0) this._unread[ch] += newCount;
+            }
+            if (filtered.length) this._lastTs[ch] = Math.max(...filtered.map(m => m.ts));
+          });
+          this._updateBadges();
+          if (this._expanded) this._renderMessages();
+          this._setDot('green');
+        } catch (e) { this._setDot('red'); }
+      },
+
+      _filterFor(ch) {
+        return this._cache.filter(m => {
+          // Skip obviously corrupted messages (text is raw HTML from a broken build)
+          if (!m.text || typeof m.text !== 'string' || m.text.trimStart().startsWith('<')) return false;
+          // Treat legacy messages (no ch field) as global
+          const mch = m.ch || 'global';
+          if (mch !== ch) return false;
+          if (ch === 'guild') return m.guild && m.guild === this._guild();
+          if (ch === 'party') return m.party && m.party === this._party();
+          return true;
+        });
+      },
+
+      _factionColor(faction) {
+        return faction === 'saints' ? 'var(--gold)' : '#e08088';
+      },
+
+      _renderMessages() {
+        const box = document.getElementById('chat-messages');
+        if (!box) return;
+        const atBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 40;
+        // Show appropriate help message if no guild/party joined
+        if (this._channel === 'guild' && !this._guild()) {
+          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">Join a guild to see guild chat.</div>';
+          return;
+        }
+        if (this._channel === 'party' && !this._party()) {
+          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">Join or create a party to use party chat.</div>';
+          return;
+        }
+        const msgs = this._filterFor(this._channel).slice(-80);
+        if (!msgs.length) {
+          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">No messages yet — say something!</div>';
+          return;
+        }
+        box.innerHTML = msgs.map(m => {
+          const fc = this._factionColor(m.faction);
+          const fi = m.faction === 'saints' ? '\u2600' : '\uD83D\uDC80';
+          const time = new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);">`
+            + `<span style="color:${fc};font-weight:600;font-size:11px;">${fi} ${this._e(m.author)}</span>`
+            + `<span style="color:var(--text-dim);font-size:10px;"> Lv${m.level || '?'} ${this._e(m.cls || m.class || '')} &middot; ${time}</span>`
+            + `<br><span style="color:var(--text-lt);font-size:12px;">${this._e(m.text)}</span>`
+            + `</div>`;
+        }).join('');
+        if (atBottom) setTimeout(() => { box.scrollTop = box.scrollHeight; }, 20);
+      },
+
+      _e(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); },
+
+      async send() {
+        if (!G.player) return;
+        const input = document.getElementById('chat-input');
+        const text = (input.value || '').trim();
+        if (!text) return;
+        if (!this._ok()) return;
+        // Block guild/party send if not joined
+        if (this._channel === 'guild' && !this._guild()) {
+          Log.add('Join a guild first!', 'system'); return;
+        }
+        if (this._channel === 'party' && !this._party()) {
+          Log.add('Join or create a party first!', 'system'); return;
+        }
+        input.value = ''; input.disabled = true;
+        const p = G.player;
+        const msg = {
+          ch: this._channel,
+          guild: this._guild() || undefined,
+          party: this._party() || undefined,
+          author: p.name,
+          faction: p.faction,
+          cls: CLASSES[p.classKey]?.name || '',
+          level: p.level,
+          text, ts: Date.now()
+        };
+        try {
+          const data = await WorldServer._get(WORLD_CONFIG.chatId);
+          const messages = data.messages || [];
+          messages.push(msg);
+          if (messages.length > 500) messages.splice(0, messages.length - 500);
+          await WorldServer._put(WORLD_CONFIG.chatId, { messages });
+          this._cache = messages;
+          this._renderMessages();
+          this._countdown = this._expanded ? this._fast : this._slow;
+        } catch (e) {
+          const box = document.getElementById('chat-messages');
+          if (box) box.insertAdjacentHTML('beforeend', '<div style="color:#e08088;font-size:11px;">Send failed.</div>');
+        } finally { input.disabled = false; input.focus(); }
+      }
+    };
+
+
+    // ============================================================
+
+    const GUILD_FOCUSES = [
+      { id: 'pvp', icon: '⚔️', label: 'PvP' },
+      { id: 'pve', icon: '🐉', label: 'PvE' },
+      { id: 'dungeon', icon: '🏰', label: 'Dungeons' },
+      { id: 'rp', icon: '🎭', label: 'Roleplay' },
+      { id: 'chill', icon: '😎', label: 'Chill/Hangout' },
+      { id: 'hardcore', icon: '💀', label: 'Hardcore' }
+    ];
+
+    const GuildSystem = {
+      _guilds: [],   // all guilds from bin
+      _mine: null, // my guild object
+      _myMem: null, // my member record
+      _tab: 'mine',
+
+      _ok() {
+        return WORLD_CONFIG.enabled &&
+          WORLD_CONFIG.guildId && WORLD_CONFIG.guildId !== 'YOUR_GUILD_BIN_ID';
+      },
+      _status(msg) {
+        const el = document.getElementById('guild-status');
+        if (el) el.textContent = msg;
+      },
+      _content(html) {
+        const el = document.getElementById('guild-content');
+        if (el) el.innerHTML = html;
+      },
+
+      async open() {
+        UI.openModal('modal-guild');
+        this._status('Loading guild data…');
+        this._content('<div style="color:var(--text-dim);padding:16px;text-align:center;">Loading…</div>');
+        if (!this._ok()) {
+          this._status('Add guildId to WORLD_CONFIG to enable guilds.');
+          this._content('<div style="color:var(--text-dim);padding:16px;text-align:center;">Guild system not configured.<br>Create a JSONBin with <code>{"guilds":[]}</code> and add its ID as <strong>guildId</strong> in WORLD_CONFIG.</div>');
+          return;
+        }
+        await this.refresh();
+        this.showTab(this._mine ? 'mine' : 'browse');
+      },
+
+      async refresh() {
+        try {
+          const data = await WorldServer._get(WORLD_CONFIG.guildId);
+          this._guilds = data.guilds || [];
+        } catch (e) {
+          this._guilds = [];
+          this._status('Failed to load guild data.');
+        }
+        const pname = G.player?.name;
+        this._mine = this._guilds.find(g => g.members && g.members.some(m => m.name === pname)) || null;
+        this._myMem = this._mine ? (this._mine.members.find(m => m.name === pname) || null) : null;
+        // Sync guild name on player for display
+        if (G.player) G.player.guildName = this._mine?.name || '';
+        this._status(this._mine ? `Guild: ${this._mine.name} · ${this._myMem?.role || 'Member'}` : 'Not in a guild.');
+      },
+
+      showTab(tab) {
+        this._tab = tab;
+        ['mine', 'browse', 'create'].forEach(t => {
+          const btn = document.getElementById('gtab-' + t);
+          if (!btn) return;
+          btn.style.background = t === tab ? 'var(--bg-mid)' : 'var(--bg)';
+          btn.style.color = t === tab ? 'var(--violet-lt)' : 'var(--text-dim)';
+        });
+        switch (tab) {
+          case 'mine': this._renderMine(); break;
+          case 'browse': this._renderBrowse(); break;
+          case 'create': this._renderCreate(); break;
+        }
+      },
+
+      // ─── MY GUILD TAB ─────────────────────────────────────────────
+      _renderMine() {
+        if (!this._mine) {
+          this._content(`
+        <div style="text-align:center;padding:24px;color:var(--text-dim);">
+          <div style="font-size:48px;margin-bottom:12px;">🏰</div>
+          <div style="font-family:'Cinzel',serif;font-size:14px;margin-bottom:8px;">You are not in a guild.</div>
+          <div style="font-size:12px;font-style:italic;">Browse guilds or create your own.</div>
+          <div style="display:flex;gap:8px;margin-top:16px;justify-content:center;">
+            <button class="btn btn-violet btn-sm" onclick="GuildSystem.showTab('browse')">Browse Guilds</button>
+            <button class="btn btn-sm" onclick="GuildSystem.showTab('create')">Create Guild</button>
+          </div>
+        </div>`);
+          return;
+        }
+        const g = this._mine;
+        const isLeader = this._myMem?.role === 'leader';
+        const isOfficer = this._myMem?.role === 'officer' || isLeader;
+        const fColor = g.faction === 'saints' ? 'var(--gold)' : '#e08088';
+        const fIcon = g.faction === 'saints' ? '☀' : '💀';
+        const focuses = (g.focus || []).map(f => { const fd = GUILD_FOCUSES.find(x => x.id === f); return fd ? `<span style="background:var(--bg-mid);border:1px solid var(--border);border-radius:12px;padding:2px 8px;font-size:11px;">${fd.icon} ${fd.label}</span>` : ''; }).join(' ');
+        const roleColor = { leader: 'var(--gold)', officer: 'var(--violet-lt)', member: 'var(--text-dim)' };
+
+        let memberRows = g.members.map(m => {
+          const rc = roleColor[m.role] || 'var(--text-dim)';
+          const actions = isLeader && m.name !== G.player.name ? `
+        <select onchange="GuildSystem.setRole('${g.id}','${m.name}',this.value)" style="background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-size:10px;padding:2px;border-radius:3px;">
+          <option value="member" ${m.role === 'member' ? 'selected' : ''}>Member</option>
+          <option value="officer" ${m.role === 'officer' ? 'selected' : ''}>Officer</option>
+        </select>
+        <button onclick="GuildSystem.kickMember('${g.id}','${m.name}')" style="background:#7f1d1d;border:none;color:#fca5a5;font-size:10px;padding:2px 6px;border-radius:3px;cursor:pointer;">Kick</button>
+      ` : (isOfficer && m.role === 'member' && m.name !== G.player.name ? `
+        <button onclick="GuildSystem.kickMember('${g.id}','${m.name}')" style="background:#7f1d1d;border:none;color:#fca5a5;font-size:10px;padding:2px 6px;border-radius:3px;cursor:pointer;">Kick</button>
+      ` : '');
+          return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+        <div style="flex:1;">
+          <span style="color:var(--text-lt);font-size:13px;">${this._e(m.name)}</span>
+          <span style="color:${rc};font-size:10px;margin-left:6px;">${m.role}</span>
+          <span style="color:var(--text-dim);font-size:10px;"> · Lv${m.level || '?'} ${this._e(m.cls || '')}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">${actions}</div>
+      </div>`;
+        }).join('');
+
+        let pendingSection = '';
+        if (isOfficer) {
+          const requests = g.requests || [];
+          const reqs = requests.length
+            ? requests.map(r => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+          <div style="flex:1;">
+            <div style="font-size:12px;color:var(--text);">${this._e(r.name)}</div>
+            <div style="font-size:11px;color:var(--text-dim);">Lv${r.level || '?'} ${this._e(r.cls || '')} · ${r.faction === 'saints' ? '☀ Covenant' : '💀 Dominion'}</div>
+          </div>
+          <button onclick="GuildSystem.approveRequest('${g.id}','${r.name}')" style="background:#14532d;border:none;color:#86efac;font-size:10px;padding:4px 10px;border-radius:3px;cursor:pointer;">&#10003; Accept</button>
+          <button onclick="GuildSystem.denyRequest('${g.id}','${r.name}')"   style="background:#7f1d1d;border:none;color:#fca5a5;font-size:10px;padding:4px 10px;border-radius:3px;cursor:pointer;">&#10007; Deny</button>
+        </div>`).join('')
+            : `<div style="color:var(--text-dim);font-size:11px;font-style:italic;padding:6px 0;">No pending requests.</div>`;
+          pendingSection = `
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);margin:14px 0 6px;letter-spacing:1px;">&#128338; JOIN REQUESTS (${requests.length})</div>
+        ${reqs}`;
+        }
+
+
+        let inviteSection = isOfficer ? `
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--violet-lt);margin:14px 0 6px;letter-spacing:1px;">INVITE PLAYER</div>
+      <div style="display:flex;gap:6px;">
+        <input id="guild-invite-input" type="text" maxlength="30" placeholder="Enter player name..."
+          style="flex:1;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:7px 10px;font-size:12px;border-radius:4px;outline:none;">
+        <button class="btn btn-gold btn-sm" onclick="GuildSystem.invitePlayer('${g.id}')">Invite</button>
+      </div>` : '';
+
+        let leaderSection = isLeader ? `
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--violet-lt);margin:14px 0 6px;letter-spacing:1px;">EDIT GUILD INFO</div>
+      <input id="guild-edit-desc" type="text" maxlength="120" value="${this._e(g.description || '')}" placeholder="Guild description..."
+        style="width:100%;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:7px 10px;font-size:12px;border-radius:4px;outline:none;margin-bottom:6px;">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+        ${GUILD_FOCUSES.map(fd => `<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;"><input type="checkbox" id="gedit-${fd.id}" ${(g.focus || []).includes(fd.id) ? 'checked' : ''} style="accent-color:var(--violet);"> ${fd.icon} ${fd.label}</label>`).join('')}
+      </div>
+      <button class="btn btn-violet btn-sm" style="width:100%;margin-bottom:6px;" onclick="GuildSystem.saveGuildInfo('${g.id}')">Save Changes</button>
+      <button class="btn btn-sm" style="width:100%;color:#e08088;" onclick="GuildSystem.disband('${g.id}')">&#128465; Disband Guild</button>
+    ` : `<button class="btn btn-sm" style="width:100%;margin-top:14px;color:#e08088;" onclick="GuildSystem.leave('${g.id}')">Leave Guild</button>`;
+
+        this._content(`
+      <div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-family:'Cinzel',serif;font-size:16px;color:var(--text-lt);margin-bottom:4px;">${this._e(g.name)}</div>
+        <div style="font-size:12px;color:${fColor};margin-bottom:6px;">${fIcon} ${g.faction === 'saints' ? 'Luminous Covenant' : 'Ashen Dominion'} · ${g.members.length} members</div>
+        <div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:8px;">${this._e(g.description || 'No description set.')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">${focuses}</div>
+      </div>
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--violet-lt);margin-bottom:6px;letter-spacing:1px;">MEMBERS (${g.members.length})</div>
+      ${memberRows}
+      ${pendingSection}
+      ${inviteSection}
+      ${leaderSection}
+    `);
+      },
+
+      // ─── BROWSE TAB ───────────────────────────────────────────────
+      _renderBrowse() {
+        const p = G.player;
+        if (!p) { this._content('<div style="color:var(--text-dim);padding:16px;">No character loaded.</div>'); return; }
+        const myFaction = p.faction;
+        const fGuilds = this._guilds.filter(g => g.faction === myFaction);
+
+        // Check if this player has any pending invites
+        const invites = this._guilds.filter(g => g.invites && g.invites.some(inv => inv.name === p.name));
+
+        let inviteSection = '';
+        if (invites.length) {
+          inviteSection = `<div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);margin-bottom:8px;letter-spacing:1px;">PENDING INVITES</div>` +
+            invites.map(g => `
+          <div style="background:var(--bg-mid);border:1px solid var(--gold);border-radius:6px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+            <div style="flex:1;">
+              <div style="font-family:'Cinzel',serif;color:var(--gold);font-size:13px;">${this._e(g.name)}</div>
+              <div style="font-size:11px;color:var(--text-dim);">${g.members.length} members</div>
+            </div>
+            <button onclick="GuildSystem.acceptInvite('${g.id}')" style="background:#14532d;border:none;color:#86efac;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;">Accept</button>
+            <button onclick="GuildSystem.declineInvite('${g.id}')" style="background:#7f1d1d;border:none;color:#fca5a5;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;">Decline</button>
+          </div>`).join('');
+        }
+
+        if (!fGuilds.length) {
+          this._content(inviteSection + '<div style="color:var(--text-dim);padding:16px;text-align:center;font-style:italic;">No guilds found for your faction yet.<br>Be the first to create one!</div>');
+          return;
+        }
+
+        const cards = fGuilds.map(g => {
+          const fColor = g.faction === 'saints' ? 'var(--gold)' : '#e08088';
+          const focuses = (g.focus || []).map(f => { const fd = GUILD_FOCUSES.find(x => x.id === f); return fd ? `${fd.icon} ${fd.label}` : ''; }).filter(Boolean).join(' · ');
+          const isMember = g.members.some(m => m.name === p.name);
+          const hasReq = g.requests && g.requests.some(r => r.name === p.name);
+          const actionBtn = isMember
+            ? `<span style="color:#4ade80;font-size:11px;">✓ Member</span>`
+            : hasReq
+              ? `<span style="color:var(--text-dim);font-size:11px;">Request Pending</span>`
+              : `<button onclick="GuildSystem.requestJoin('${g.id}')" style="background:var(--violet);border:none;color:#fff;font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;">Request to Join</button>`;
+          return `
+        <div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
+            <div>
+              <div style="font-family:'Cinzel',serif;color:var(--text-lt);font-size:14px;">${this._e(g.name)}</div>
+              <div style="font-size:11px;color:${fColor};">Led by ${this._e(g.leader)} · ${g.members.length} members</div>
+            </div>
+            ${actionBtn}
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:4px;">${this._e(g.description || 'No description.')}</div>
+          ${focuses ? `<div style="font-size:11px;color:var(--text-dim);">🎯 ${focuses}</div>` : ''}
+        </div>`;
+        }).join('');
+
+        this._content(inviteSection + cards);
+      },
+
+      // ─── CREATE TAB ───────────────────────────────────────────────
+      _renderCreate() {
+        if (this._mine) {
+          this._content('<div style="color:var(--text-dim);padding:16px;text-align:center;">You are already in a guild. Leave it before creating a new one.</div>');
+          return;
+        }
+        const p = G.player;
+        const hasGold = p && p.gold >= 500;
+        const focusInputs = GUILD_FOCUSES.map(fd =>
+          `<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:6px 10px;">
+        <input type="checkbox" id="gfoc-${fd.id}" style="accent-color:var(--violet);"> ${fd.icon} <span>${fd.label}</span>
+       </label>`
+        ).join('');
+
+        this._content(`
+      <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--violet-lt);margin-bottom:12px;letter-spacing:1px;">FOUND A NEW GUILD</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Cost: <strong style="color:var(--gold);">500 Gold</strong> (you have ${p?.gold || 0}g). You become the Guild Leader.</div>
+
+      <div style="margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">Guild Name</div>
+        <input id="gcreate-name" type="text" maxlength="30" placeholder="Name your guild..."
+          style="width:100%;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:8px 10px;font-size:13px;border-radius:4px;outline:none;">
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">Description</div>
+        <input id="gcreate-desc" type="text" maxlength="120" placeholder="What's your guild about?"
+          style="width:100%;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:8px 10px;font-size:12px;border-radius:4px;outline:none;">
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Focus (pick any)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">${focusInputs}</div>
+      </div>
+
+      <button class="btn btn-gold" style="width:100%;margin-bottom:8px;${hasGold ? '' : 'opacity:.4;cursor:not-allowed;'}"
+        ${hasGold ? 'onclick="GuildSystem.create()"' : 'disabled'}>
+        ${hasGold ? '&#127968; Found Guild (500g)' : 'Not enough gold (need 500g)'}
+      </button>
+      <button class="btn btn-sm" style="width:100%;opacity:.7;" onclick="GuildSystem.quickTest()">
+        &#129514; Quick Test Setup (free, skips cost)
+      </button>
+    `);
+      },
+
+      // ─── ACTIONS ──────────────────────────────────────────────────
+      async create(free = false) {
+        const p = G.player;
+        const name = (document.getElementById('gcreate-name')?.value || '').trim();
+        if (!name) { this._status('Enter a guild name.'); return; }
+        if (!free && p.gold < 500) { this._status('Not enough gold.'); return; }
+        if (this._guilds.some(g => g.name.toLowerCase() === name.toLowerCase())) {
+          this._status('A guild with that name already exists.'); return;
+        }
+        const focuses = GUILD_FOCUSES.filter(fd => document.getElementById('gfoc-' + fd.id)?.checked).map(fd => fd.id);
+        const desc = (document.getElementById('gcreate-desc')?.value || '').trim();
+        const guild = {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          name, faction: p.faction, leader: p.name,
+          description: desc, focus: focuses,
+          members: [{ name: p.name, role: 'leader', level: p.level, cls: CLASSES[p.classKey]?.name || '', joinedAt: Date.now() }],
+          requests: [], invites: [], createdAt: Date.now()
+        };
+        this._guilds.push(guild);
+        if (!free) p.gold -= 500;
+        await this._save();
+        await this.refresh();
+        Log.add(`\uD83C\uDFF0 Guild <strong>${name}</strong> founded! You are the Guild Leader.`, 'success');
+        UI.refresh();
+        this.showTab('mine');
+      },
+
+      quickTest() {
+        // Pre-fill form and create for free
+        const nameEl = document.getElementById('gcreate-name');
+        const descEl = document.getElementById('gcreate-desc');
+        if (nameEl) nameEl.value = (G.player?.name || 'Test') + "'s Guild";
+        if (descEl) descEl.value = 'A test guild for development.';
+        // Check PvP and Chill
+        ['pvp', 'chill'].forEach(id => { const el = document.getElementById('gfoc-' + id); if (el) el.checked = true; });
+        this.create(true);
+      },
+
+      async requestJoin(guildId) {
+        const p = G.player;
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        g.requests = g.requests || [];
+        if (g.requests.some(r => r.name === p.name)) { this._status('Already requested.'); return; }
+        g.requests.push({ name: p.name, level: p.level, cls: CLASSES[p.classKey]?.name || '', faction: p.faction, ts: Date.now() });
+        await this._save();
+        Log.add(`\uD83D\uDCE8 Join request sent to <strong>${g.name}</strong>.`, 'system');
+        this._status('Request sent!');
+        this._renderBrowse();
+      },
+
+      async approveRequest(guildId, playerName) {
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        const req = g.requests.find(r => r.name === playerName);
+        if (!req) return;
+        g.requests = g.requests.filter(r => r.name !== playerName);
+        g.members.push({ name: playerName, role: 'member', level: req.level || 1, cls: req.cls || '', joinedAt: Date.now() });
+        await this._save();
+        this._status(`${playerName} approved!`);
+        await this.refresh(); this.showTab('mine');
+      },
+
+      async denyRequest(guildId, playerName) {
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        g.requests = g.requests.filter(r => r.name !== playerName);
+        await this._save();
+        this._status(`${playerName} denied.`);
+        await this.refresh(); this.showTab('mine');
+      },
+
+      async invitePlayer(guildId) {
+        const name = (document.getElementById('guild-invite-input')?.value || '').trim();
+        if (!name) return;
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        if (g.members.some(m => m.name === name)) { this._status('Player already a member.'); return; }
+        g.invites = g.invites || [];
+        if (g.invites.some(i => i.name === name)) { this._status('Already invited.'); return; }
+        g.invites.push({ name, invitedBy: G.player.name, ts: Date.now() });
+        await this._save();
+        Log.add(`\uD83D\uDCE8 Invite sent to <strong>${name}</strong>.`, 'system');
+        this._status(`Invite sent to ${name}`);
+        this.showTab('mine');
+      },
+
+      async acceptInvite(guildId) {
+        const p = G.player;
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        g.invites = (g.invites || []).filter(i => i.name !== p.name);
+        g.members.push({ name: p.name, role: 'member', level: p.level, cls: CLASSES[p.classKey]?.name || '', joinedAt: Date.now() });
+        await this._save();
+        Log.add(`\uD83C\uDFF0 You joined guild <strong>${g.name}</strong>!`, 'success');
+        await this.refresh(); this.showTab('mine');
+      },
+
+      async declineInvite(guildId) {
+        const p = G.player;
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        g.invites = (g.invites || []).filter(i => i.name !== p.name);
+        await this._save();
+        this._status('Invite declined.');
+        await this.refresh(); this.showTab('browse');
+      },
+
+      async setRole(guildId, playerName, role) {
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        const m = g.members.find(x => x.name === playerName);
+        if (m) m.role = role;
+        await this._save();
+        this._status(`${playerName} is now ${role}.`);
+        await this.refresh(); this.showTab('mine');
+      },
+
+      async kickMember(guildId, playerName) {
+        if (!confirm(`Kick ${playerName} from the guild?`)) return;
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        g.members = g.members.filter(m => m.name !== playerName);
+        await this._save();
+        Log.add(`\uD83D\uDEAB ${playerName} was removed from the guild.`, 'system');
+        await this.refresh(); this.showTab('mine');
+      },
+
+      async leave(guildId) {
+        if (!confirm('Leave this guild?')) return;
+        const p = G.player;
+        const g = this._guilds.find(x => x.id === guildId);
+        if (!g) return;
+        if (g.leader === p.name && g.members.length > 1) {
+          // Transfer leadership to next officer or member
+          const next = g.members.find(m => m.name !== p.name && m.role === 'officer') ||
+            g.members.find(m => m.name !== p.name);
+          if (next) { next.role = 'leader'; g.leader = next.name; }
+        }
+        g.members = g.members.filter(m => m.name !== p.name);
+        await this._save();
+        p.guildName = '';
+        Log.add('\uD83C\uDFF0 You left the guild.', 'system');
+        await this.refresh(); this.showTab('browse');
+      },
+
+      async disband(guildId) {
+        if (!confirm('Disband this guild? This cannot be undone.')) return;
+        this._guilds = this._guilds.filter(g => g.id !== guildId);
+        await this._save();
+        if (G.player) G.player.guildName = '';
+        Log.add('\uD83C\uDFF0 Guild disbanded.', 'system');
+        await this.refresh(); this.showTab('browse');
+      },
+
+      async saveGuildInfo(guildId) {
+        const g = this._guilds.find(x => x.id === guildId); if (!g) return;
+        g.description = (document.getElementById('guild-edit-desc')?.value || '').trim();
+        g.focus = GUILD_FOCUSES.filter(fd => document.getElementById('gedit-' + fd.id)?.checked).map(fd => fd.id);
+        await this._save();
+        this._status('Guild info saved!');
+        await this.refresh(); this.showTab('mine');
+      },
+
+      async _save() {
+        await WorldServer._put(WORLD_CONFIG.guildId, { guilds: this._guilds });
+      },
+
+      _e(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    };
+
+
+    /* ============================================================
+       INIT
+       ============================================================ */
+    document.addEventListener('DOMContentLoaded', () => {
+      CloudSave.init();
+      Game.showTitle();
+
+      // Prevent elastic scroll on non-scrollable areas (iOS)
+      document.addEventListener('touchmove', e => {
+        let node = e.target;
+        while (node && node !== document.body) {
+          const s = window.getComputedStyle(node), o = s.overflow + s.overflowY;
+          if (o.includes('scroll') || o.includes('auto')) return;
+          node = node.parentNode;
+        }
+        e.preventDefault();
+      }, { passive: false });
+
+      // Tap backdrop to close drawers & modals
+      document.querySelectorAll('.mobile-drawer').forEach(d => {
+        d.addEventListener('click', e => { if (e.target === d) MobileNav.closeDrawer(d.id); });
+      });
+      document.querySelectorAll('.modal-overlay').forEach(o => {
+        o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+      });
+    });
+    /* ============================================================
+       PWA REGISTRATION
+       ============================================================ */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker: Registered'))
+          .catch(err => console.log('Service Worker: Error', err));
+      });
+    }
+  </script>
+</body>
+
+</html>
