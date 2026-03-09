@@ -2108,6 +2108,7 @@
       factionWarId: '69ae108fd0ea881f40fdfcdd',
       chatId: '69ae1161d0ea881f40fe0037',
       guildId: '69ae1674ae596e708f6e6eeb',
+      netlifySiteURL: 'https://runehaventextbased.netlify.app',
       enabled: true
     };
 
@@ -3153,7 +3154,7 @@
     const Game = {
       _show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
 
-      showTitle() { this._show('screen-title'); },
+      showTitle() { this._show('screen-title'); if (typeof GlobalChat !== 'undefined') GlobalChat.clear(); },
 
       showCreate() {
         this._show('screen-create');
@@ -3311,7 +3312,7 @@
         this._show('screen-title');
       },
 
-      showTitle() { this._show('screen-title'); }
+      showTitle() { this._show('screen-title'); if (typeof GlobalChat !== 'undefined') GlobalChat.clear(); }
     };
 
     /* ============================================================
@@ -3416,6 +3417,14 @@
 
       init() {
         if (typeof netlifyIdentity === 'undefined') return;
+
+        // Explicitly initialize if site URL is provided (needed for localhost)
+        if (WORLD_CONFIG.netlifySiteURL) {
+          netlifyIdentity.init({
+            APIUrl: `${WORLD_CONFIG.netlifySiteURL}/.netlify/identity`
+          });
+        }
+
         netlifyIdentity.on('init', user => this.handleAuth(user));
         netlifyIdentity.on('login', user => this.handleAuth(user));
         netlifyIdentity.on('logout', () => this.handleAuth(null));
@@ -3434,6 +3443,7 @@
         } else {
           this.slots = {};
           if (G.player) Log.add('☁ Cloud Sync disabled (logged out).', 'system');
+          if (typeof GlobalChat !== 'undefined') GlobalChat.clear();
         }
       },
 
@@ -3715,7 +3725,7 @@
       _cache: [],
 
       // guild / party stored on G (session-only, not in player save)
-      _guild() { return G.guildName || ''; },
+      _guild() { return (G.player && G.player.guildName) || ''; },
       _party() { return G.partyCode || ''; },
 
       _ok() {
@@ -3730,6 +3740,15 @@
         if (!this._ok()) return;
         this._startPoll(this._slow);
         this.refresh();
+      },
+
+      clear() {
+        this._cache = [];
+        this._unread = { global: 0, guild: 0, party: 0 };
+        this._lastTs = { global: 0, guild: 0, party: 0 };
+        const box = document.getElementById('chat-messages');
+        if (box) box.innerHTML = '';
+        this._updateBadges();
       },
 
       toggle() { this._setExpanded(!this._expanded); },
@@ -3800,16 +3819,12 @@
         if (pj) pj.style.display = 'none';
         if (ci) ci.style.display = 'none';
         if (this._channel === 'guild') {
-          if (!this._guild()) {
-            if (gj) { gj.style.display = 'flex'; }
-          } else {
+          if (this._guild()) {
             if (ci) { ci.style.display = 'flex'; }
             if (cn) cn.textContent = '\uD83C\uDFF0 Guild: ' + this._guild();
           }
         } else if (this._channel === 'party') {
-          if (!this._party()) {
-            if (pj) { pj.style.display = 'flex'; }
-          } else {
+          if (this._party()) {
             if (ci) { ci.style.display = 'flex'; }
             if (cn) cn.textContent = '\u2694\uFE0F Party code: ' + this._party();
           }
@@ -3924,11 +3939,11 @@
         const atBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 40;
         // Show appropriate help message if no guild/party joined
         if (this._channel === 'guild' && !this._guild()) {
-          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">Join a guild to see guild chat.</div>';
+          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">You are not in a guild.</div>';
           return;
         }
         if (this._channel === 'party' && !this._party()) {
-          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">Join or create a party to use party chat.</div>';
+          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">You are not in a party.</div>';
           return;
         }
         const msgs = this._filterFor(this._channel).slice(-80);
@@ -4048,7 +4063,11 @@
         this._mine = this._guilds.find(g => g.members && g.members.some(m => m.name === pname)) || null;
         this._myMem = this._mine ? (this._mine.members.find(m => m.name === pname) || null) : null;
         // Sync guild name on player for display
-        if (G.player) G.player.guildName = this._mine?.name || '';
+        if (G.player) {
+          G.player.guildName = this._mine?.name || '';
+          // Mirror to G.guildName for legacy compatibility if any
+          G.guildName = G.player.guildName;
+        }
         this._status(this._mine ? `Guild: ${this._mine.name} · ${this._myMem?.role || 'Member'}` : 'Not in a guild.');
       },
 
@@ -4285,6 +4304,10 @@
         this._guilds.push(guild);
         if (!free) p.gold -= 500;
         await this._save();
+
+        // Sync G.guildName immediately for GlobalChat
+        G.guildName = name;
+
         await this.refresh();
         Log.add(`\uD83C\uDFF0 Guild <strong>${name}</strong> founded! You are the Guild Leader.`, 'success');
         UI.refresh();
