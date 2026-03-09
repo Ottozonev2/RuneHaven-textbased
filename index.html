@@ -16,8 +16,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Courier+Prime:wght@400;700&display=swap"
     rel="stylesheet">
-  <!-- Netlify Identity Widget — handles login/signup/JWT -->
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <!-- Clerk Authentication — handles login/signup/JWT (Cloudflare Compatible) -->
+  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
 
   <style>
     /* ============================================================
@@ -1203,6 +1203,68 @@
     }
 
     /* ============================================================
+   TOOLTIPS & UI HELPERS
+   ============================================================ */
+    .btn[data-tooltip] {
+      position: relative;
+    }
+
+    .btn[data-tooltip]::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--bg-raised);
+      color: var(--text-lt);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--violet);
+      font-size: 11px;
+      font-family: 'IM Fell English', serif;
+      width: clamp(140px, 40vw, 220px);
+      white-space: normal;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease-out;
+      z-index: 10000;
+    }
+
+    .btn[data-tooltip]:hover::before {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Small triangle for tooltip */
+    .btn[data-tooltip]::after {
+      content: '';
+      position: absolute;
+      bottom: 115%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--violet);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease-out;
+      z-index: 10000;
+    }
+
+    .btn[data-tooltip]:hover::after {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+
+      /* On mobile, tooltips are harder to see, but we can center them better */
+      .btn[data-tooltip]::before {
+        width: 180px;
+      }
+    }
+
+    /* ============================================================
    BUTTONS
    ============================================================ */
     .btn {
@@ -1483,7 +1545,7 @@
      TITLE SCREEN
      ============================================================ -->
   <div id="screen-title" class="screen active">
-    <!-- Netlify Identity Auth Header -->
+    <!-- Clerk Auth Header -->
     <div id="auth-header"
       style="position:absolute; top:12px; right:12px; z-index:100; display:flex; align-items:center; gap:10px;">
       <div id="user-info"
@@ -1491,7 +1553,8 @@
         <div style="color:var(--violet-lt); font-weight:bold;" id="user-email"></div>
         <div style="font-size:9px;">Cloud Sync Active</div>
       </div>
-      <div data-netlify-identity-button class="btn btn-sm" style="min-width: 80px;">Login</div>
+      <div id="user-button-container"></div>
+      <button id="login-btn" class="btn btn-sm" onclick="CloudSave.login()" style="min-width: 80px;">Login</button>
     </div>
 
     <div class="title-world" style="margin-top: min(45vh, 400px); text-shadow: 0 0 10px #000;">World of Eryndor</div>
@@ -2224,7 +2287,7 @@
       factionWarId: '69ae108fd0ea881f40fdfcdd',
       chatId: '69ae1161d0ea881f40fe0037',
       guildId: '69ae1674ae596e708f6e6eeb',
-      netlifySiteURL: 'https://runehaventextbased.netlify.app',
+      clerkPublishableKey: 'pk_test_ZnVuLXRyZWVmcm9nLTk2LmNsZXJrLmFjY291bnRzLmRldiQ',
       enabled: true
     };
 
@@ -2329,9 +2392,9 @@
       // Warlock
       demonicPact: { name: 'Demonic Pact', icon: '😈', cost: 0, type: 'pact', dmgType: 'shadow', desc: 'Sacrifice 15 HP for 20 MP. Dangerous power.' },
       shadowBolt: { name: 'Shadow Bolt', icon: '🌑', cost: 12, type: 'magic', dmgType: 'shadow', mult: 2.2, desc: 'Demonic shadow energy (2.2× INT).' },
-      hellfire: { name: 'Hellfire', icon: '🔥', cost: 20, type: 'magic', dmgType: 'fire', mult: 3.0, desc: 'Hellfire eruption (3.0× INT). Costs your soul.' },
+      hellfire: { name: 'Hellfire', icon: '🔥', cost: 20, type: 'magic', dmgType: 'fire', mult: 3.0, desc: 'Hellfire eruption (3.0× INT). Highly destructive.' },
       // Barbarian
-      berserkRage: { name: 'Berserk Rage', icon: '😡', cost: 10, type: 'buff', dmgType: 'physical', strBonus: 8, desc: 'Unleashes rage — +8 STR for 3 turns.' },
+      berserkRage: { name: 'Berserk Rage', icon: '😡', cost: 10, type: 'buff', dmgType: 'physical', strBonus: 8, duration: 3, desc: 'Unleashes rage — +8 STR for 3 turns.' },
       brutalSlam: { name: 'Brutal Slam', icon: '💥', cost: 8, type: 'damage', dmgType: 'physical', mult: 2.4, desc: 'Ground-splitting strike (2.4× STR).' },
       bloodFury: { name: 'Blood Fury', icon: '🩸', cost: 6, type: 'damage', dmgType: 'physical', mult: 1.6, doubleHit: true, desc: 'Frenzied double strike (1.6× STR each).' },
       // Assassin
@@ -2931,9 +2994,10 @@
       },
 
       setActions(actions) {
-        document.getElementById('action-btns').innerHTML = actions.map(a =>
-          `<button class="btn ${a.cls || ''}" onclick="${a.fn}" ${a.disabled ? 'disabled' : ''} style="touch-action:manipulation;">${a.label}</button>`
-        ).join('');
+        document.getElementById('action-btns').innerHTML = actions.map(a => {
+          const tooltipAttr = a.tooltip ? `data-tooltip="${a.tooltip}"` : '';
+          return `<button class="btn ${a.cls || ''}" onclick="${a.fn}" ${a.disabled ? 'disabled' : ''} ${tooltipAttr} style="touch-action:manipulation;">${a.label}</button>`;
+        }).join('');
       },
 
       showEnemyPanel(enemies) {
@@ -3321,14 +3385,22 @@
         const p = G.player;
         const skillBtns = Object.keys(p.skills).map(sk => {
           const s = SKILLS[sk], hasMp = s.type === 'pact' || (p.mp >= s.cost);
-          return { label: `${s.icon} ${s.name}${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`, fn: `Combat.useSkill('${sk}')`, cls: hasMp ? 'btn-violet' : '', disabled: !hasMp };
+          let tooltip = `${s.desc} | Cost: ${s.type === 'pact' ? '15 HP' : s.cost + ' MP'}`;
+          if (s.duration) tooltip += ` | Duration: ${s.duration} turns`;
+          return {
+            label: `${s.icon} ${s.name}${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`,
+            fn: `Combat.useSkill('${sk}')`,
+            cls: hasMp ? 'btn-violet' : '',
+            disabled: !hasMp,
+            tooltip: tooltip
+          };
         });
         UI.setActions([
-          { label: '⚔ Attack', fn: "Combat.attack()", cls: 'btn-red' },
+          { label: '⚔ Attack', fn: "Combat.attack()", cls: 'btn-red', tooltip: 'Basic strike based on Strength.' },
           ...skillBtns,
-          { label: '🧪 Item', fn: "Combat.showItemMenu()", cls: 'btn-green' },
-          { label: '🛡 Defend', fn: "Combat.defend()", cls: 'btn-blue' },
-          { label: '💨 Flee', fn: "Combat.flee()", cls: '' }
+          { label: '🧪 Item', fn: "Combat.showItemMenu()", cls: 'btn-green', tooltip: 'Open your inventory to use consumables.' },
+          { label: '🛡 Defend', fn: "Combat.defend()", cls: 'btn-blue', tooltip: 'Reduce incoming damage by 50% this turn.' },
+          { label: '💨 Flee', fn: "Combat.flee()", cls: '', tooltip: 'Attempt to escape from battle.' }
         ]);
       },
 
@@ -3945,9 +4017,9 @@
       slotKey(i) { return `runehaven_slot_${i}`; },
 
       show() {
-        // If not logged in, prompt for login first
-        if (!CloudSave.user && typeof netlifyIdentity !== 'undefined') {
-          netlifyIdentity.open();
+        // If not logged in, prompt for Clerk login first
+        if (!CloudSave.user) {
+          CloudSave.login();
         }
         Game._show('screen-charselect');
         this.render();
@@ -4030,34 +4102,40 @@
     };
 
     /* ============================================================
-       CLOUD SAVE MODULE — Netlify Identity + Blobs
+       CLOUD SAVE MODULE — Clerk + Cloudflare KV
        ============================================================ */
     const CloudSave = {
       user: null,
       slots: {},
       loading: false,
 
-      init() {
-        if (typeof netlifyIdentity === 'undefined') return;
+      async init() {
+        if (typeof Clerk === 'undefined') return;
 
-        // Explicitly initialize if site URL is provided (needed for localhost)
-        if (WORLD_CONFIG.netlifySiteURL) {
-          netlifyIdentity.init({
-            APIUrl: `${WORLD_CONFIG.netlifySiteURL}/.netlify/identity`
+        try {
+          await Clerk.load({ publishableKey: WORLD_CONFIG.clerkPublishableKey });
+
+          if (Clerk.user) {
+            this.handleAuth(Clerk.user);
+          } else {
+            this.handleAuth(null);
+          }
+
+          Clerk.addListener(({ user }) => {
+            this.handleAuth(user);
           });
-        }
+        } catch (e) { console.error('Clerk init error', e); }
+      },
 
-        netlifyIdentity.on('init', user => this.handleAuth(user));
-        netlifyIdentity.on('login', user => this.handleAuth(user));
-        netlifyIdentity.on('logout', () => this.handleAuth(null));
-        netlifyIdentity.on('open', () => this.updateUI());
+      login() {
+        if (typeof Clerk !== 'undefined') Clerk.openSignIn();
       },
 
       async handleAuth(user) {
         this.user = user;
         this.updateUI();
         if (user) {
-          Log.add(`☁ Cloud Sync active: ${user.email}`, 'system');
+          Log.add(`☁ Cloud Sync active: ${user.primaryEmailAddress.emailAddress}`, 'system');
           await this.loadAll();
           if (document.getElementById('screen-charselect').classList.contains('active')) {
             CharSelect.render();
@@ -4072,11 +4150,21 @@
       updateUI() {
         const info = document.getElementById('user-info');
         const email = document.getElementById('user-email');
+        const loginBtn = document.getElementById('login-btn');
+        const userBtnContainer = document.getElementById('user-button-container');
+
         if (this.user) {
           if (info) info.style.display = 'block';
-          if (email) email.textContent = this.user.email;
+          if (email) email.textContent = this.user.primaryEmailAddress.emailAddress;
+          if (loginBtn) loginBtn.style.display = 'none';
+          if (userBtnContainer) {
+            userBtnContainer.style.display = 'block';
+            Clerk.mountUserButton(userBtnContainer);
+          }
         } else {
           if (info) info.style.display = 'none';
+          if (loginBtn) loginBtn.style.display = 'block';
+          if (userBtnContainer) userBtnContainer.style.display = 'none';
         }
       },
 
@@ -4084,8 +4172,9 @@
         if (!this.user) return;
         this.loading = true;
         try {
+          const token = await Clerk.session.getToken();
           const resp = await fetch('/api/saves', {
-            headers: { 'Authorization': `Bearer ${this.user.token.access_token}` }
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           if (resp.ok) {
             const data = await resp.json();
@@ -4099,12 +4188,13 @@
         if (!this.user) return false;
         this.slots[slotKey] = data;
         try {
+          const token = await Clerk.session.getToken();
           const resp = await fetch('/api/saves', {
             method: 'POST',
             body: JSON.stringify({ slots: this.slots }),
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.user.token.access_token}`
+              'Authorization': `Bearer ${token}`
             }
           });
           return resp.ok;
@@ -4123,12 +4213,13 @@
       async saveRemaining() {
         if (!this.user) return;
         try {
+          const token = await Clerk.session.getToken();
           await fetch('/api/saves', {
             method: 'POST',
             body: JSON.stringify({ slots: this.slots }),
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.user.token.access_token}`
+              'Authorization': `Bearer ${token}`
             }
           });
         } catch (e) { }
