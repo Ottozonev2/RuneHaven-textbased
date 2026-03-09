@@ -2598,6 +2598,18 @@
       refresh() {
         const p = G.player; if (!p) return;
         const maxHp = effectiveMaxHp(), cls = CLASSES[p.classKey];
+
+        // Dynamic Backgrounds for Main Game Screen
+        const screen = document.getElementById('screen-game');
+        if (screen) {
+          const loc = LOCATIONS[G.location];
+          const bgImg = loc.isTown ? 'townbackground.png' : 'combatbackround.png';
+          screen.style.backgroundImage = `linear-gradient(rgba(8, 6, 15, 0.6) 0%, rgba(8, 6, 15, 0.8) 100%), url('${bgImg}')`;
+          screen.style.backgroundSize = 'cover';
+          screen.style.backgroundPosition = 'center';
+          screen.style.backgroundRepeat = 'no-repeat';
+        }
+
         // Topbar
         document.getElementById('top-level').textContent = p.level;
         document.getElementById('top-hp').textContent = `${p.hp}/${maxHp}`;
@@ -3923,6 +3935,7 @@
       _unread: { global: 0, guild: 0, party: 0 },
       _cache: [],
       _selectedUser: null,
+      _sessionStart: 0,
 
       // guild / party stored on G (session-only, not in player save)
       _guild() { return (G.player && G.player.guildName) || ''; },
@@ -3935,6 +3948,7 @@
 
       // Auto-called when entering game
       init() {
+        this._sessionStart = Date.now();
         this._setExpanded(false);
         this._setDot('gray');
         if (!this._ok()) return;
@@ -4169,6 +4183,8 @@
 
       _filterFor(ch) {
         return this._cache.filter(m => {
+          // Filter out messages from previous sessions
+          if (m.ts < this._sessionStart) return false;
           // Skip obviously corrupted messages (text is raw HTML from a broken build)
           if (!m.text || typeof m.text !== 'string' || m.text.trimStart().startsWith('<')) return false;
           // Treat legacy messages (no ch field) as global
