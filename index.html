@@ -3553,7 +3553,7 @@
        EXPLORE MODULE
        ============================================================ */
     const Explore = {
-      travel(key) {
+      travel(key, isSync = false) {
         if (G.inCombat) { Log.add('You cannot flee while in combat!', 'system'); return; }
         const loc = LOCATIONS[key];
         // Level gate check
@@ -3569,6 +3569,11 @@
         UI.refresh();
         loc.isTown ? this.showTownActions() : this.showExploreActions();
         Game.autosave();
+
+        // Party Sync
+        if (!isSync && G.partyCode && G.isPartyLeader) {
+          GlobalChat._broadcastPartyCmd(`/party_travel ${key}`);
+        }
       },
 
       showTownActions() {
@@ -3728,6 +3733,10 @@
               Log.add(`👤 <strong>Encounter:</strong> You find a desperate traveler in the ${loc.name}.`, 'gold');
               Log.add(`<em>"${q.desc}"</em>`, 'story');
               QuestSystem.start(qId);
+              // Party Sync
+              if (G.partyCode && G.isPartyLeader) {
+                GlobalChat._broadcastPartyCmd(`/party_discovery npc ${qId}`);
+              }
             }
           } else if (discRoll < 0.6) {
             // Broken Carriage
@@ -3740,6 +3749,10 @@
             G.player.gold += gold;
             Combat.addToInventory(it, 1);
             UI.refresh();
+            // Party Sync
+            if (G.partyCode && G.isPartyLeader) {
+              GlobalChat._broadcastPartyCmd(`/party_discovery loot ${gold} ${it}`);
+            }
           } else {
             // Chest / Mimic
             Log.divider();
@@ -3747,6 +3760,7 @@
             if (Math.random() < 0.25) {
               Log.add('⚠️ <strong>SURPRISE!</strong> The chest sprouts teeth and a massive tongue! It\'s a <strong>MIMIC!</strong>', 'death');
               setTimeout(() => Combat.start('mimic'), 800);
+              // Combat search automatically handles broadcast inside Combat.start
             } else {
               const lootId = ['leatherVest', 'copperRing', 'ironPlate', 'sagePendant', 'arcaneLoop'][Math.floor(Math.random() * 5)];
               const gold = 50 + Math.floor(Math.random() * 100);
@@ -3754,6 +3768,10 @@
               G.player.gold += gold;
               Combat.addToInventory(lootId, 1, Math.max(1, G.player.level - 2));
               UI.refresh();
+              // Party Sync
+              if (G.partyCode && G.isPartyLeader) {
+                GlobalChat._broadcastPartyCmd(`/party_discovery loot ${gold} ${lootId}`);
+              }
             }
           }
           Game.autosave();
@@ -5379,7 +5397,7 @@
         const icon = document.getElementById('chat-toggle-icon');
         if (!panel) return;
         if (open) {
-          panel.style.maxHeight = '600px';
+          panel.style.maxHeight = '400px';
           tabs.style.display = 'block';
           msgs.style.display = 'flex';
           inputRow.style.display = 'flex';
@@ -5394,7 +5412,7 @@
           this._startPoll(this._fast);
           // Add bottom padding so content isn't hidden
           const gb = document.querySelector('.game-body');
-          if (gb) gb.style.paddingBottom = '605px';
+          if (gb) gb.style.paddingBottom = '405px';
         } else {
           panel.style.maxHeight = '28px';
           tabs.style.display = 'none';
@@ -5476,6 +5494,7 @@
         val = (val || document.getElementById('party-code-input').value || '').trim().toUpperCase();
         if (!val) return;
         G.partyCode = val;
+        G.isPartyLeader = false;
         localStorage.setItem('runehaven_party_code', val);
         Log.add(`⚔️ Joined party: <strong>${val}</strong>`, 'success');
         this._updateChannelTabs();
@@ -5528,6 +5547,7 @@
         for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
 
         G.partyCode = code;
+        G.isPartyLeader = true;
         localStorage.setItem('runehaven_party_code', code);
         const input1 = document.getElementById('party-code-input');
         if (input1) input1.value = code;
@@ -5717,6 +5737,32 @@
               G.targetIndex = G.enemies.findIndex(e => e.hp > 0);
               UI.showEnemyPanel(G.enemies);
             }
+            UI.refresh();
+          }
+        } else if (m.text.startsWith('/party_travel')) {
+          const key = m.text.replace('/party_travel ', '');
+          if (G.location !== key) {
+            Log.add(`🚀 <strong>Party Sync:</strong> Following leader to <strong>${LOCATIONS[key].name}</strong>...`, 'system');
+            Explore.travel(key, true);
+          }
+        } else if (m.text.startsWith('/party_discovery')) {
+          const parts = m.text.split(' ');
+          const type = parts[1];
+          if (type === 'npc') {
+            const qId = parts[2];
+            const q = QUESTS[qId];
+            Log.divider();
+            Log.add(`👥 <strong>Party Discovery:</strong> Your leader found a traveler!`, 'gold');
+            Log.add(`<em>"${q.desc}"</em>`, 'story');
+            QuestSystem.start(qId);
+          } else if (type === 'loot') {
+            const gold = parseInt(parts[2]);
+            const itValue = parts[3];
+            Log.divider();
+            Log.add(`🎁 <strong>Party Discovery:</strong> Your leader found loot!`, 'loot');
+            Log.add(`You each receive 🪙<strong>${gold}</strong> gold and <strong>${ITEMS[itValue]?.name || itValue}</strong>!`, 'success');
+            G.player.gold += gold;
+            Combat.addToInventory(itValue, 1, Math.max(1, G.player.level - 1));
             UI.refresh();
           }
         }
