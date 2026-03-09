@@ -1630,7 +1630,7 @@
       <button class="btn btn-sm btn-gold" onclick="UI.openModal('modal-updates')">📜 Latest Updates</button>
     </div>
     <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
-      v3.1 &middot; Rune Haven &middot; Mobile &amp; Desktop
+      v3.6 &middot; Rune Haven &middot; Mobile &amp; Desktop
     </div>
   </div>
 
@@ -5379,7 +5379,7 @@
         const icon = document.getElementById('chat-toggle-icon');
         if (!panel) return;
         if (open) {
-          panel.style.maxHeight = '300px';
+          panel.style.maxHeight = '600px';
           tabs.style.display = 'block';
           msgs.style.display = 'flex';
           inputRow.style.display = 'flex';
@@ -5394,7 +5394,7 @@
           this._startPoll(this._fast);
           // Add bottom padding so content isn't hidden
           const gb = document.querySelector('.game-body');
-          if (gb) gb.style.paddingBottom = '305px';
+          if (gb) gb.style.paddingBottom = '605px';
         } else {
           panel.style.maxHeight = '28px';
           tabs.style.display = 'none';
@@ -5751,6 +5751,8 @@
           if (m.ts < this._sessionStart) return false;
           // Skip obviously corrupted messages (text is raw HTML from a broken build)
           if (!m.text || typeof m.text !== 'string' || m.text.trimStart().startsWith('<')) return false;
+          // Hide internal system commands (like party pulses) from the UI
+          if (m.text.startsWith('/')) return false;
           // Treat legacy messages (no ch field) as global
           const mch = m.ch || 'global';
           if (mch !== ch) return false;
