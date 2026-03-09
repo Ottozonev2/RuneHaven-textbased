@@ -537,7 +537,9 @@
     }
 
     .topbar {
-      background: var(--bg-panel);
+      background: rgba(17, 13, 26, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border-bottom: 2px solid var(--border);
       padding: 6px 12px;
       padding-top: calc(6px + var(--safe-top));
@@ -608,7 +610,9 @@
     #panel-stats {
       width: 210px;
       flex-shrink: 0;
-      background: var(--bg-panel);
+      background: rgba(17, 13, 26, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
@@ -629,13 +633,17 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: var(--bg);
+      background: rgba(8, 6, 15, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       border-bottom: 1px solid var(--border);
     }
 
     #panel-actions {
       flex-shrink: 0;
-      background: var(--bg-panel);
+      background: rgba(17, 13, 26, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border-top: 1px solid var(--border);
       display: flex;
       flex-direction: column;
@@ -644,7 +652,9 @@
     #panel-right {
       width: 190px;
       flex-shrink: 0;
-      background: var(--bg-panel);
+      background: rgba(17, 13, 26, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border-left: 1px solid var(--border);
       display: flex;
       flex-direction: column;
@@ -771,7 +781,7 @@
 
     /* Panel internals */
     .panel-header {
-      background: var(--bg-mid);
+      background: rgba(26, 21, 38, 0.5);
       border-bottom: 1px solid var(--border);
       padding: 7px 12px;
       font-family: 'Cinzel', serif;
@@ -1595,7 +1605,8 @@
          ====================================================== -->
     <div id="chat-panel" style="
         position:absolute; bottom:0; left:0; right:0; z-index:80;
-        background:var(--bg-panel); border-top:1px solid var(--border);
+        background:rgba(17, 13, 26, 0.75); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+        border-top:1px solid var(--border);
         display:flex; flex-direction:column; max-height:280px;
         transition:max-height .25s ease;
       ">
@@ -2604,7 +2615,8 @@
         if (screen) {
           const loc = LOCATIONS[G.location];
           const bgImg = loc.isTown ? 'townbackground.png' : 'combatbackround.png';
-          screen.style.backgroundImage = `linear-gradient(rgba(8, 6, 15, 0.6) 0%, rgba(8, 6, 15, 0.8) 100%), url('${bgImg}')`;
+          // Lighten the overlay to show more background
+          screen.style.backgroundImage = `linear-gradient(rgba(8, 6, 15, 0.3) 0%, rgba(8, 6, 15, 0.5) 100%), url('${bgImg}')`;
           screen.style.backgroundSize = 'cover';
           screen.style.backgroundPosition = 'center';
           screen.style.backgroundRepeat = 'no-repeat';
