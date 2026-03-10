@@ -2022,7 +2022,11 @@
         <!-- Col 3: INTEGRATED CHAT -->
         <div class="dash-col" id="dash-col-chat">
           <div id="chat-panel" style="height:100%; display:flex; flex-direction:column; background:none; border:none;">
-            <div class="panel-header">World Chat</div>
+            <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>World Chat</div>
+              <button class="btn btn-sm btn-violet" style="min-height:20px; padding:2px 6px; font-size:9px;"
+                onclick="GlobalChat.openPartyMenu()">Manage Party</button>
+            </div>
             <div id="chat-tabs" style="display:flex; flex-shrink:0; border-bottom:1px solid var(--border);">
               <button id="cht-g" onclick="GlobalChat.setChannel('global')"
                 style="flex:1; padding:6px; font-size:10px; background:var(--bg-mid); border:none; color:var(--violet-lt); font-family:'Cinzel',serif;">Global</button>
@@ -2179,10 +2183,12 @@
       <div id="party-info-box"
         style="margin-bottom:15px; padding:12px; background:rgba(184, 144, 255, 0.05); border:1px solid var(--violet-dk); border-radius:4px;">
         <div style="font-size:11px; color:var(--violet-lt); margin-bottom:4px; font-family:'Cinzel',serif;">CURRENT
-          PARTY CODE</div>
+          PARTY CODE (OR TYPE TO JOIN)</div>
         <div style="display:flex; gap:8px;">
-          <input id="party-menu-code" type="text" readonly
+          <input id="party-menu-code" type="text" placeholder="Enter Code..."
             style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--text-lt); padding:6px 10px; font-family:monospace; font-size:16px; border-radius:4px; text-align:center;">
+          <button class="btn btn-sm btn-gold"
+            onclick="GlobalChat.joinParty(document.getElementById('party-menu-code').value)">Join</button>
           <button class="btn btn-sm" onclick="GlobalChat.createParty()">New Code</button>
         </div>
       </div>
@@ -2597,6 +2603,17 @@
         ✕ Accept Your Fate
       </button>
     </div>
+  </div>
+
+  <div id="chat-context-menu"
+    style="display:none; position:absolute; background:var(--bg-raised); border:1px solid var(--violet); z-index:1000; padding:4px; border-radius:4px; box-shadow:0 4px 10px rgba(0,0,0,0.8);">
+    <div id="chat-menu-user"
+      style="font-size:10px; color:var(--text-dim); padding:4px 8px; border-bottom:1px solid var(--border); margin-bottom:4px; text-align:center; font-family:'Cinzel',serif;">
+      USER</div>
+    <button class="btn btn-sm" style="width:100%; text-align:left; border:none; background:transparent;"
+      onclick="GlobalChat.inviteToParty()">Invite to Party</button>
+    <button class="btn btn-sm" style="width:100%; text-align:left; border:none; background:transparent; color:#e08088;"
+      onclick="document.getElementById('chat-context-menu').style.display='none'">Close</button>
   </div>
 
   <script>
@@ -5996,7 +6013,7 @@
           const fi = m.faction === 'saints' ? '☀️' : '💀';
           const time = new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           return `<div style="padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.03);">`
-            + `<span class="chat-author" style="color:${fc};cursor:pointer;font-weight:bold;" onclick="GlobalChat.showMenu(event, '${m.author}')">${fi} ${m.author}</span>`
+            + `<span class="chat-author" style="color:${fc};cursor:pointer;font-weight:bold;" onclick="GlobalChat.showMenu(event, '${m.author}')">${fi} ${m.guild ? `[${m.guild}] ` : ''}${m.author}</span>`
             + `<span style="color:var(--text-dim);font-size:10px;"> Lv${m.level} ${m.cls} · ${time}</span><br>`
             + `<span style="color:var(--text-lt);">${m.text}</span></div>`;
         }).join('');
@@ -6110,8 +6127,15 @@
         if (menu) menu.style.display = 'none';
       },
 
+      openPartyMenu() {
+        const codeInput = document.getElementById('party-menu-code');
+        if (codeInput) codeInput.value = G.partyCode || '';
+        this.refreshPartyMenu();
+        UI.openModal('modal-party');
+      },
+
       joinParty(val) {
-        val = (val || document.getElementById('party-code-input').value || '').trim().toUpperCase();
+        val = (val || '').trim().toUpperCase();
         if (!val) return;
         G.partyCode = val;
         G.isPartyLeader = false;
