@@ -5166,6 +5166,7 @@
         G.partyInvites = [];
         G.partyMembers = {}; // Initialize party members
         G.lastPartyCmdTs = 0; // Initialize last party command timestamp
+        G.world = { x: 1000, y: 1000, steps: 0, entities: {} }; // Init world coords
         if (!G.activeSaveSlot) G.activeSaveSlot = 'runehaven_slot_0';
         this._show('screen-game');
         GlobalChat.init();
@@ -5194,7 +5195,8 @@
         const key = G.activeSaveSlot || 'runehaven_slot_0';
         const data = {
           player: G.player, location: G.location,
-          turnCount: G.turnCount, companions: G.companions || []
+          turnCount: G.turnCount, companions: G.companions || [],
+          world: G.world
         };
         // Always backup to local
         localStorage.setItem(key, JSON.stringify(data));
@@ -5223,6 +5225,7 @@
           G.companions = data.companions || (data.companion ? [data.companion] : []);
           G.partyMembers = {}; // Initialize party members on load
           G.lastPartyCmdTs = 0; // Initialize last party command timestamp on load
+          G.world = data.world || { x: 1000, y: 1000, steps: 0, entities: {} }; // Restore or init coords
           this._show('screen-game');
           GlobalChat.init(); // start persistent chat polling
           Log.clear();
