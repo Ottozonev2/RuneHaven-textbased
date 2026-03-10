@@ -138,6 +138,52 @@
       display: flex;
     }
 
+    /* Maintenance Screen */
+    #screen-maintenance {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      z-index: 10000;
+      /* Above everything */
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    #screen-maintenance.active {
+      display: flex;
+    }
+
+    #screen-maintenance img {
+      max-width: 80%;
+      max-height: 50vh;
+      border: 2px solid var(--violet-dk);
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 30px rgba(184, 144, 255, 0.2);
+    }
+
+    .maintenance-title {
+      font-family: 'Cinzel', serif;
+      font-size: 32px;
+      color: var(--violet-lt);
+      text-shadow: 0 0 15px var(--violet);
+      margin-bottom: 20px;
+    }
+
+    .maintenance-msg {
+      max-width: 500px;
+      line-height: 1.6;
+      color: var(--text-dim);
+      font-size: 16px;
+    }
+
     /* ============================================================
    TITLE SCREEN
    ============================================================ */
@@ -1899,6 +1945,20 @@
 <body>
 
   <!-- ============================================================
+       MAINTENANCE SCREEN
+       ============================================================ -->
+  <div id="screen-maintenance">
+    <img src="maint.png" alt="Eryndor is Shifting"
+      onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800'">
+    <div class="maintenance-title">THE VEIL IS SHIFTING</div>
+    <div class="maintenance-msg">
+      The ley lines of Eryndor are currently unstable. Our sages are working to re-anchor the world to the stars.
+      <br><br>
+      <span style="color:var(--gold);">Chronicle restoration is in progress. Please return shortly.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
      TITLE SCREEN
      ============================================================ -->
   <div id="screen-title" class="screen active">
@@ -2379,8 +2439,10 @@
           <div style="border-top:1px dashed var(--border); padding-top:16px;">
             <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeGuilds()">⚠️
               WIPE ALL GUILDS</button>
-            <button class="btn btn-violet" style="width:100%;" onclick="AdminSystem.checkDbHealth()">🧪 Database Health
-              Check</button>
+            <button class="btn btn-violet" style="width:100%; margin-bottom:8px;"
+              onclick="AdminSystem.checkDbHealth()">🧪 Database Health Check</button>
+            <button id="admin-maintenance-btn" class="btn btn-gold" style="width:100%;"
+              onclick="AdminSystem.toggleMaintenance()">🔒 Maintenance Mode</button>
           </div>
           <div style="border-top:1px dashed var(--border); padding-top:16px;">
             <button class="btn btn-red" style="width:100%;" onclick="AuthSystem.logout()">Forced System Purge
@@ -6268,6 +6330,35 @@
             firebase.database().ref(`world/commands/${user.uid}`).remove();
           }
         });
+
+        // Listen for Maintenance Mode
+        firebase.database().ref('world/maintenance').on('value', snap => {
+          const maintenance = snap.val() || { enabled: false };
+          this.updateMaintenanceScreen(maintenance.enabled);
+        });
+      },
+
+      updateMaintenanceScreen(enabled) {
+        const screen = document.getElementById('screen-maintenance');
+        const btn = document.getElementById('admin-maintenance-btn');
+        if (btn) btn.textContent = enabled ? '🔓 Disable Maintenance' : '🔒 Enable Maintenance';
+
+        // Admins can bypass maintenance to test things
+        if (enabled && !this.isAdmin) {
+          screen.classList.add('active');
+        } else {
+          screen.classList.remove('active');
+        }
+      },
+
+      async toggleMaintenance() {
+        const snap = await firebase.database().ref('world/maintenance/enabled').once('value');
+        const currentState = snap.val() || false;
+        const newState = !currentState;
+        if (confirm(`Switch Maintenance Mode to ${newState ? 'ON' : 'OFF'}?`)) {
+          await firebase.database().ref('world/maintenance/enabled').set(newState);
+          Log.add(`🛠️ Maintenance Mode toggled: ${newState ? 'ACTIVE' : 'INACTIVE'}`, 'system');
+        }
       },
 
       open() {
