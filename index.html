@@ -138,6 +138,40 @@
       display: flex;
     }
 
+    #maintenance-countdown {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--red);
+      color: white;
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 1px;
+      z-index: 9999;
+      box-shadow: 0 0 15px rgba(201, 64, 80, 0.5);
+      border: 1px solid white;
+      display: none;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
     /* Maintenance Screen */
     #screen-maintenance {
       position: fixed;
@@ -1943,6 +1977,8 @@
 </head>
 
 <body>
+
+  <div id="maintenance-countdown">⚠️ SHUTDOWN IN: 60s</div>
 
   <!-- ============================================================
        MAINTENANCE SCREEN
@@ -6332,9 +6368,47 @@
         });
 
         // Listen for Maintenance Mode
+        this._maintenanceInterval = null;
+        this._lastShout = 0;
         firebase.database().ref('world/maintenance').on('value', snap => {
           const maintenance = snap.val() || { enabled: false };
-          this.updateMaintenanceScreen(maintenance.enabled);
+          if (this._maintenanceInterval) clearInterval(this._maintenanceInterval);
+
+          if (maintenance.enabled) {
+            this.updateMaintenanceScreen(true);
+          } else if (maintenance.scheduledAt) {
+            this._maintenanceInterval = setInterval(() => {
+              const remaining = maintenance.scheduledAt - Date.now();
+              if (remaining <= 0) {
+                clearInterval(this._maintenanceInterval);
+                this.updateMaintenanceScreen(true);
+                return;
+              }
+
+              const secsTotal = Math.ceil(remaining / 1000);
+              const h = Math.floor(secsTotal / 3600);
+              const m = Math.floor((secsTotal % 3600) / 60);
+              const s = secsTotal % 60;
+              const formatted = (h > 0 ? `${h}h ` : "") + (m > 0 || h > 0 ? `${m}m ` : "") + `${s}s`;
+
+              const countdownEl = document.getElementById('maintenance-countdown');
+              if (countdownEl) {
+                countdownEl.style.display = 'block';
+                countdownEl.textContent = `⚠️ SHUTDOWN IN: ${formatted}`;
+              }
+
+              // If admin, announce in chat every 60 seconds
+              if (this.isAdmin && secsTotal % 60 === 0 && this._lastShout !== secsTotal) {
+                this._lastShout = secsTotal;
+                const timeStr = (h > 0 ? `${h} hour${h > 1 ? 's' : ''} ` : "") + (m > 0 ? `${m} minute${m > 1 ? 's' : ''}` : (h === 0 ? `${s} seconds` : ""));
+                GlobalChat.broadcastAsSystem(`🚨 NOTICE: Server going down for maintenance in ${timeStr.trim()}! Please logout or risk losing data.`);
+              }
+            }, 1000);
+          } else {
+            this.updateMaintenanceScreen(false);
+            const countdownEl = document.getElementById('maintenance-countdown');
+            if (countdownEl) countdownEl.style.display = 'none';
+          }
         });
       },
 
@@ -6352,12 +6426,33 @@
       },
 
       async toggleMaintenance() {
-        const snap = await firebase.database().ref('world/maintenance/enabled').once('value');
-        const currentState = snap.val() || false;
-        const newState = !currentState;
-        if (confirm(`Switch Maintenance Mode to ${newState ? 'ON' : 'OFF'}?`)) {
-          await firebase.database().ref('world/maintenance/enabled').set(newState);
-          Log.add(`🛠️ Maintenance Mode toggled: ${newState ? 'ACTIVE' : 'INACTIVE'}`, 'system');
+        const snap = await firebase.database().ref('world/maintenance').once('value');
+        const maintenance = snap.val() || { enabled: false };
+
+        if (maintenance.enabled || maintenance.scheduledAt) {
+          if (confirm("Maintenance is active or scheduled. Disable it?")) {
+            await firebase.database().ref('world/maintenance').set({ enabled: false });
+            Log.add('🔓 Maintenance cancelled/disabled.', 'success');
+          }
+          return;
+        }
+
+        const seconds = prompt("Enter seconds until maintenance (0 for instant):", "60");
+        if (seconds === null) return;
+
+        const delay = parseInt(seconds);
+        if (isNaN(delay)) { alert("Enter a valid number of seconds."); return; }
+
+        if (delay <= 0) {
+          await firebase.database().ref('world/maintenance').set({ enabled: true });
+          Log.add('🔒 Maintenance enabled instantly.', 'system');
+        } else {
+          const scheduledAt = Date.now() + (delay * 1000);
+          await firebase.database().ref('world/maintenance').set({
+            enabled: false,
+            scheduledAt: scheduledAt
+          });
+          Log.add(`🕒 Maintenance scheduled in ${delay} seconds.`, 'system');
         }
       },
 
@@ -6801,6 +6896,27 @@
         this._cache = [];
         this._unread = { global: 0, guild: 0, party: 0 };
         this._renderMessages();
+      },
+
+      async broadcastAsSystem(text) {
+        if (!G.player || !WorldServer._db) return;
+        const msg = {
+          ch: 'global',
+          author: 'SYSTEM',
+          faction: 'admin',
+          cls: 'Overseer',
+          level: '??',
+          text, ts: Date.now()
+        };
+        try {
+          const ref = WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/messages');
+          await ref.transaction(current => {
+            const msgs = Array.isArray(current) ? current : [];
+            msgs.push(msg);
+            if (msgs.length > 200) msgs.shift();
+            return msgs;
+          });
+        } catch (e) { console.error("Broadcast fail", e); }
       },
 
       _setupPartyListener(code) {
