@@ -1653,42 +1653,59 @@
       pointer-events: none;
     }
 
-    /* Terrain Types (Replacing gridlines with ambient colors) */
+    /* Terrain Types (Replacing gridlines with static user-provided 2D art) */
     #world-grid.terrain-solmara {
-      background-color: #0c0b11;
+      background-image: url('assets/solmaraoutpoust.png');
+      background-size: cover;
+      background-position: center;
     }
 
     #world-grid.terrain-ash {
-      background-color: #0d0908;
+      background-image: url('assets/ash.png');
+      background-size: cover;
+      background-position: center;
     }
 
     #world-grid.terrain-snow {
-      background-color: #0f1318;
+      background-image: url('assets/Frost.png');
+      background-size: cover;
+      background-position: center;
     }
 
     #world-grid.terrain-swamp {
-      background-color: #080d08;
+      background-image: url('assets/blackmarsh.png');
+      background-size: cover;
+      background-position: center;
     }
 
     #world-grid.terrain-desert {
-      background-color: #120e09;
+      background-image: url('assets/emberfall.png');
+      background-size: cover;
+      background-position: center;
     }
 
     #world-grid.terrain-forest {
-      background-color: #050a06;
-      /* Dark forest green, like the reference screenshot */
+      background-image: url('assets/hollowwilds.png');
+      background-size: cover;
+      background-position: center;
     }
 
     #world-grid.terrain-crimson {
-      background-color: #120505;
+      background-image: url('assets/Blood.png');
+      background-size: cover;
+      background-position: center;
     }
 
     #world-grid.terrain-dungeon {
-      background-color: #0a0a0f;
-      background-image:
-        linear-gradient(rgba(100, 100, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(100, 100, 255, 0.05) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background-image: url('assets/catacombs.png');
+      background-size: cover;
+      background-position: center;
+    }
+
+    #world-grid.terrain-velkaris {
+      background-image: url('assets/ruins of velkaris.png');
+      background-size: cover;
+      background-position: center;
     }
 
     /* World View Entities */
@@ -1932,11 +1949,23 @@
     </div>
 
     <div class="game-body">
-      <!-- Row 1: Graphical World View -->
       <div id="world-viewport" tabindex="0">
         <!-- The visual map and players will be rendered here -->
         <div id="world-grid"></div>
         <div id="world-entities-layer"></div>
+
+        <!-- Inline Enemy UI Overlay -->
+        <div id="viewport-enemy-ui"
+          style="display:none; position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.85); border:1px solid #e08088; border-radius:6px; padding:8px 12px; z-index:100; min-width:160px; pointer-events:none;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:4px;">
+            <span id="vp-enemy-name"
+              style="font-family:'Cinzel',serif; font-size:14px; color:#fff; font-weight:bold;">Enemy</span>
+          </div>
+          <div class="main-bar" style="height:8px; margin-bottom:4px;">
+            <div class="main-bar-fill hp-fill" id="vp-enemy-hp-bar" style="width:100%;"></div>
+          </div>
+          <div id="vp-enemy-hp-text" style="font-size:10px; color:var(--text-dim); text-align:right;">0/0 HP</div>
+        </div>
       </div>
 
       <!-- Row 2: 4-Column Dashboard -->
@@ -2031,22 +2060,15 @@
         <!-- Col 4: LOG & ACTIONS -->
         <div class="dash-col" id="dash-col-log">
           <div id="panel-centre">
-            <div id="panel-log">
-              <div class="panel-header">Chronicle</div>
-              <div id="text-log"></div>
-            </div>
             <div id="panel-actions">
               <div class="location-bar" style="font-size:10px;">📍 <span id="location-name">Eryndor</span></div>
               <div class="action-area" style="max-height:120px; padding:6px;">
-                <div id="combat-enemy-area" style="display:none; margin-bottom:4px; padding:4px;">
-                  <div class="enemy-name-row"><span class="enemy-name-dsp" id="enemy-name-disp"
-                      style="font-size:11px;">Enemy</span></div>
-                  <div class="main-bar" style="height:6px;">
-                    <div class="main-bar-fill hp-fill" id="enemy-hp-bar"></div>
-                  </div>
-                </div>
                 <div class="btn-grid" id="action-btns"></div>
               </div>
+            </div>
+            <div id="panel-log">
+              <div class="panel-header">Chronicle</div>
+              <div id="text-log"></div>
             </div>
           </div>
         </div>
@@ -3617,11 +3639,13 @@
       },
 
       showEnemyPanel(enemies) {
-        const area = document.getElementById('combat-enemy-area');
+        const area = document.getElementById('viewport-enemy-ui');
+        if (!area) return;
         if (!enemies || enemies.length === 0) { area.style.display = 'none'; area.innerHTML = ''; return; }
         area.style.display = 'flex';
         area.style.flexDirection = 'column';
         area.style.gap = '8px';
+        area.style.pointerEvents = 'auto'; // allow clicking
 
         area.innerHTML = enemies.map((e, idx) => {
           const isTargeted = G.targetIndex === idx;
@@ -3629,17 +3653,18 @@
           const opacity = isDead ? 0.4 : 1.0;
           return `
             <div onclick="Combat.setTarget(${idx})" style="
-              cursor:pointer; padding:8px; border:1px solid ${isTargeted ? 'var(--gold)' : 'var(--border)'};
+              cursor:pointer; padding:6px; border:1px solid ${isTargeted ? 'var(--gold)' : 'var(--border)'};
               background:${isTargeted ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.03)'};
-              border-radius:4px; opacity:${opacity}; transition:all 0.2s;
+              border-radius:4px; opacity:${opacity}; transition:all 0.2s; min-width:140px;
             ">
-              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px;">
-                <span style="font-family:'Cinzel',serif; color:${isTargeted ? 'var(--gold-lt)' : 'var(--text-lt)'}">${isTargeted ? '🎯 ' : ''}${e.icon} ${e.name}</span>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+                <span style="font-family:'Cinzel',serif; color:${isTargeted ? 'var(--gold-lt)' : 'var(--text-lt)'}">${isTargeted ? '🎯 ' : ''}${e.icon || ''} ${e.name}</span>
                 <span style="color:var(--text-dim)">Lv.${e.level}</span>
               </div>
-              <div class="main-bar" style="height:6px;">
+              <div class="main-bar" style="height:6px; margin-bottom:2px;">
                 <div class="main-bar-fill hp-fill" style="width:${Math.max(0, e.hp / e.maxHp * 100)}%"></div>
               </div>
+              <div style="font-size:9px; color:var(--text-dim); text-align:right;">${Math.max(0, e.hp)}/${e.maxHp}</div>
             </div>
           `;
         }).join('');
@@ -3756,11 +3781,22 @@
       showExploreActions() {
         const loc = LOCATIONS[G.location];
         UI.setActions([
+          { label: '🧭 Explore', fn: "Explore.triggerExplore()", cls: 'btn-green btn-lg', tooltip: 'Search the area for enemies or loot.' },
           { label: '📝 Zone Notes', fn: "WorldServer.openZoneNotes()", cls: 'btn-gold btn-sm' },
           { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' },
           { label: '🏛️ Solmara', fn: "Explore.travel('solmara')", cls: '' },
           { label: '💾 Save', fn: "Game.saveGame()", cls: 'btn-sm' }
         ]);
+      },
+
+      triggerExplore() {
+        // Simulates walking around to trigger encounters or discoveries
+        const dx = (Math.random() - 0.5) * 360; // -180 to 180
+        const dy = (Math.random() - 0.5) * 360;
+        // Make sure distance is at least 180 to guarantee an encounter check
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const scale = dist < 180 ? 180 / dist : 1;
+        World.move(dx * scale, dy * scale);
       },
 
       // ── STASH ──
@@ -4250,35 +4286,19 @@
           emberfallWastes: 'desert',
           hollowWilds: 'forest',
           bloodspire: 'crimson',
-          catacombs: 'dungeon'
+          catacombs: 'dungeon',
+          velkaris: 'velkaris'
         };
         // Remove all terrain classes
         Object.values(terrainMap).forEach(t => grid.classList.remove('terrain-' + t));
         // Add current one
         const terrain = terrainMap[loc] || 'dungeon';
         grid.classList.add('terrain-' + terrain);
-        this.generateDecor(); // Regen decor for new zone
+        // User provided custom graphic backgrounds, so we no longer generate random pixel decor.
       },
 
       handleKey(e) {
-        if (G.inCombat || document.querySelector('.modal-overlay.open') || !G.player) return;
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-        console.log("Keydown detected in World viewport:", e.key);
-
-        const speed = 12;
-        let dx = 0, dy = 0;
-        const k = e.key.toLowerCase();
-
-        if (k === 'w' || k === 'arrowup') dy = -speed;
-        if (k === 's' || k === 'arrowdown') dy = speed;
-        if (k === 'a' || k === 'arrowleft') dx = -speed;
-        if (k === 'd' || k === 'arrowright') dx = speed;
-
-        if (dx !== 0 || dy !== 0) {
-          this.move(dx, dy);
-          e.preventDefault();
-        }
+        return; // Disabled WASD movement as per user request (Explore button only)
       },
 
       move(dx, dy) {
