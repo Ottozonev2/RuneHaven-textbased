@@ -1626,6 +1626,16 @@
       z-index: 1;
     }
 
+    #world-entities-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
     /* Terrain Types */
     #world-grid.terrain-solmara {
       background-color: #1a1a1f;
@@ -4148,9 +4158,10 @@
 
       decor: [],
       generateDecor() {
-        const seed = LOCATIONS[G.location].name.length + G.location.length;
-        const rng = (s) => {
-          let t = s + 0x6D2B79F5;
+        let seed = LOCATIONS[G.location].name.length + G.location.length;
+        const rng = () => {
+          seed += 0x6D2B79F5;
+          let t = seed;
           t = Math.imul(t ^ t >>> 15, t | 1);
           t ^= t + Math.imul(t ^ t >>> 7, t | 61);
           return ((t ^ t >>> 14) >>> 0) / 4294967296;
@@ -4159,23 +4170,24 @@
         const loc = G.location;
         const config = {
           solmara: { count: 35, types: ['🏘️', '🛖', '📦', '🪜', '⛲'], decorClass: 'decor-building' },
-          ashfall: { count: 45, types: ['🔥', '🌋', '🪵', '🕳️', '💀'], decorClass: 'decor-tree' },
-          frostvein: { count: 50, types: ['🏔️', '🧊', '🌲', '❄️', '🗿'], decorClass: 'decor-tree' },
-          blackMarsh: { count: 60, types: ['🌿', '💀', '🍄', '🕸️', '🧟'], decorClass: 'decor-bush' },
-          emberfallWastes: { count: 40, types: ['🌵', '🏜️', '☄️', '🦴', '🦂'], decorClass: 'decor-rock' },
-          hollowWilds: { count: 80, types: ['🌳', '🌲', '🌿', '🍄', '🐝'], decorClass: 'decor-tree' },
-          bloodspire: { count: 55, types: ['🏰', '🚩', '🔥', '💀', '⛓️'], decorClass: 'decor-building' },
-          catacombs: { count: 40, types: ['⚰️', '🕯️', '💀', '🕸️', '🏺'], decorClass: 'decor-rock' }
+          ashfall: { count: 45, types: ['🪵', '🪨', '🕳️'], decorClass: 'decor-rock' },
+          frostvein: { count: 50, types: ['🌲', '🏔️', '🪨', '🧊'], decorClass: 'decor-tree' },
+          blackMarsh: { count: 60, types: ['🌿', '🥀', '🪨', '🍄'], decorClass: 'decor-bush' },
+          emberfallWastes: { count: 40, types: ['🌵', '🪨', '🦴', '🦂'], decorClass: 'decor-rock' },
+          hollowWilds: { count: 80, types: ['🌳', '🌲', '🍄', '🌿'], decorClass: 'decor-tree' },
+          bloodspire: { count: 55, types: ['🏰', '🚩', '⛓️', '🩸'], decorClass: 'decor-building' },
+          catacombs: { count: 40, types: ['⚰️', '🕯️', '💀', '🕸️', '🏺'], decorClass: 'decor-rock' },
+          garrison: { count: 45, types: ['🛡️', '⚔️', '⛓️', '🚩'], decorClass: 'decor-building' },
+          voidrift: { count: 30, types: ['🌌', '✨', '🌀', '☄️'], decorClass: 'decor-rock' },
+          throne: { count: 35, types: ['👑', '🔥', '⛓️', '🩸'], decorClass: 'decor-building' },
+          velkaris: { count: 50, types: ['🏚️', '🌀', '🪵', '🪨'], decorClass: 'decor-building' }
         };
-
-        const conf = config[loc] || { count: 30, types: ['🗿', '🕳️'], decorClass: 'decor-rock' };
+        const conf = config[loc] || { count: 30, types: ['🌲', '🪨', '🌿'], decorClass: 'decor-rock' };
         this.decor = [];
-        let r = seed;
         for (let i = 0; i < conf.count; i++) {
-          r = rng(r) * 10000;
-          const x = rng(r++) * 1900 + 50;
-          const y = rng(r++) * 1900 + 50;
-          const type = conf.types[Math.floor(rng(r++) * conf.types.length)];
+          const x = rng() * 1900 + 50;
+          const y = rng() * 1900 + 50;
+          const type = conf.types[Math.floor(rng() * conf.types.length)];
           this.decor.push({ x, y, type, cls: conf.decorClass });
         }
       },
@@ -5186,8 +5198,8 @@
         Log.add(`You stand at <strong>Solmara Outpost</strong>. Rest, trade, then explore Eryndor.`, 'system');
         Log.add(`Use the buttons below to act. On mobile, use the bottom nav.`, 'system');
         UI.refresh(); Explore.showTownActions();
-        World.render();
         World.updateTerrain();
+        World.render();
       },
 
       saveGame() {
@@ -5225,15 +5237,21 @@
           G.companions = data.companions || (data.companion ? [data.companion] : []);
           G.partyMembers = {}; // Initialize party members on load
           G.lastPartyCmdTs = 0; // Initialize last party command timestamp on load
-          G.world = data.world || { x: 1000, y: 1000, steps: 0, entities: {} }; // Restore or init coords
+
+          let wData = data.world;
+          if (!wData || typeof wData.x !== 'number' || isNaN(wData.x) || isNaN(wData.y)) {
+            wData = { x: 1000, y: 1000, steps: 0, entities: {} };
+          }
+          G.world = wData;
+
           this._show('screen-game');
           GlobalChat.init(); // start persistent chat polling
           Log.clear();
           Log.add(`📂 Chronicle restored. Welcome back, <strong>${G.player.name}</strong>.`, 'system');
           Log.add(`${factionLabel(G.player.faction)} · Level ${G.player.level} · ${LOCATIONS[G.location].name}.`, 'story');
           UI.refresh(); UI.showEnemyPanel(null);
-          World.render();
           World.updateTerrain();
+          World.render();
           LOCATIONS[G.location].isTown ? Explore.showTownActions() : Explore.showExploreActions();
         } catch (e) { Log.add('Failed to restore chronicle.', 'system'); }
       },
@@ -5253,6 +5271,7 @@
         Log.add(`You awaken at the gates of Solmara Outpost.`, 'veil');
         UI.refresh(); Game.autosave(); Explore.showTownActions();
         World.updateTerrain();
+        World.render();
       },
 
       togglePermadeath(on) {
