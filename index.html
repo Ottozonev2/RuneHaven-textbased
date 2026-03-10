@@ -2824,8 +2824,8 @@
       prismRay: { name: 'Prism Ray', icon: '🌈', cost: 20, type: 'magic', dmgType: 'holy', mult: 2.5, levelReq: 5, desc: 'Splits light into many beams. 2.5x INT.' },
       mirrorImage: { name: 'Mirror Image', icon: '👥', cost: 40, type: 'buff', dmgType: 'holy', dodgeBonus: 50, duration: 3, levelReq: 15, desc: 'Create light decoys. +50% dodge for 3 turns.' },
       luminousBeam: { name: 'Luminous Beam', icon: '🌠', cost: 45, type: 'magic', dmgType: 'holy', mult: 6.0, levelReq: 30, desc: 'Concentrated starlight. 6.0x INT damage.' },
-      supernova: { name: 'Supernova', icon: '💥', cost: 80, type: 'magic', dmgType: 'fire', mult: 10.0, levelReq: 60, desc: 'The death of a star. 10.0x INT fire damage.' },
-      purestLight: { name: 'Purest Light', icon: '🕯️', cost: 120, type: 'magic', dmgType: 'holy', mult: 20.0, levelReq: 100, desc: 'Light that erases darkness. 20.0x INT holy damage.' },
+      supernova: { name: 'Supernova', icon: '💥', cost: 80, type: 'magic', dmgType: 'fire', mult: 8.5, levelReq: 60, desc: 'The death of a star. 8.5x INT fire damage.' },
+      purestLight: { name: 'Purest Light', icon: '🕯️', cost: 120, type: 'magic', dmgType: 'holy', mult: 14.0, levelReq: 100, desc: 'Light that erases darkness. 14.0x INT holy damage.' },
       // Necromancer
       deathBolt: { name: 'Death Bolt', icon: '💀', cost: 14, type: 'magic', dmgType: 'shadow', mult: 2.5, levelReq: 1, desc: 'Bolt of necrotic energy (2.5× INT).' },
       soulDrain: { name: 'Soul Drain', icon: '🌑', cost: 12, type: 'drain', dmgType: 'shadow', mult: 1.8, levelReq: 1, desc: 'Drains enemy HP and restores your own.' },
@@ -2834,7 +2834,7 @@
       carrionPlague: { name: 'Carrion Plague', icon: '🤮', cost: 25, type: 'magic', dmgType: 'poison', dot: { type: 'poison', dmg: 1.5, duration: 5 }, levelReq: 15, desc: 'Infection that spreads. Poison damage over 5 turns.' },
       lichForm: { name: 'Lich Form', icon: '🧛', cost: 50, type: 'buff', dmgType: 'shadow', intBonus: 20, defBonus: 10, duration: 5, levelReq: 30, desc: 'Undeath ascension. +20 INT, +10 DEF.' },
       armyOfDead: { name: 'Army of Dead', icon: '🧟', cost: 80, type: 'summon', dmgType: 'shadow', summonCount: 3, levelReq: 60, desc: 'Raise 3 skeletons at once.' },
-      soulReaper: { name: 'Soul Reaper', icon: '🧥', cost: 100, type: 'magic', dmgType: 'shadow', mult: 15.0, levelReq: 100, desc: 'Cut the thread of life. 15.0x INT shadow damage.' },
+      soulReaper: { name: 'Soul Reaper', icon: '🧥', cost: 100, type: 'magic', dmgType: 'shadow', mult: 12.0, levelReq: 100, desc: 'Cut the thread of life. 12.0x INT shadow damage.' },
       // Warlock
       demonicPact: { name: 'Demonic Pact', icon: '😈', cost: 0, type: 'pact', dmgType: 'shadow', levelReq: 1, desc: 'Sacrifice 15 HP for 20 MP. Dangerous power.' },
       shadowBolt: { name: 'Shadow Bolt', icon: '🌑', cost: 12, type: 'magic', dmgType: 'shadow', mult: 2.2, levelReq: 1, desc: 'Demonic shadow energy (2.2× INT).' },
@@ -2843,7 +2843,7 @@
       darkSacrifice: { name: 'Dark Sacrifice', icon: '🩸', cost: 0, type: 'pact_hp', dmgType: 'shadow', mult: 5.0, hpCost: 40, levelReq: 15, desc: 'Spend 40 HP for massive 5.0x INT shadow strike.' },
       voidRift: { name: 'Void Rift', icon: '🕳️', cost: 45, type: 'magic', dmgType: 'shadow', mult: 7.0, levelReq: 30, desc: 'Open a rift to the void. 7.0x INT.' },
       infernalPact: { name: 'Infernal Pact', icon: '🔥', cost: 70, type: 'summon', dmgType: 'fire', summonType: 'demon', levelReq: 60, desc: 'Summon a Greater Demon for 5 turns.' },
-      doom: { name: 'Doom', icon: '⌛', cost: 120, type: 'magic', dmgType: 'shadow', mult: 25.0, levelReq: 100, desc: 'Inevitable destruction. 25.0x INT shadow damage.' },
+      doom: { name: 'Doom', icon: '⌛', cost: 120, type: 'magic', dmgType: 'shadow', mult: 18.0, levelReq: 100, desc: 'Inevitable destruction. 18.0x INT shadow damage.' },
       // Barbarian
       berserkRage: { name: 'Berserk Rage', icon: '😡', cost: 10, type: 'buff', dmgType: 'physical', strBonus: 8, duration: 3, levelReq: 1, desc: 'Unleashes rage — +8 STR for 3 turns.' },
       brutalSlam: { name: 'Brutal Slam', icon: '💥', cost: 8, type: 'damage', dmgType: 'physical', mult: 2.4, levelReq: 1, desc: 'Ground-splitting strike (2.4× STR).' },
@@ -2872,7 +2872,8 @@
       mercenary: { name: 'Mercenary', icon: '⚔️', str: 10, hp: 100, desc: 'A seasoned fighter with a sharp sword.' },
       guardsman: { name: 'Guardsman', icon: '🛡️', str: 7, hp: 130, desc: 'A stalwart shield-brother from Solmara.' },
       cleric: { name: 'Cleric', icon: '⛪', str: 4, hp: 80, desc: 'A holy healer. Heals the player for 10% HP each turn.' },
-      shadowBlade: { name: 'Shadow Blade', icon: '🗡️', str: 12, hp: 90, desc: 'An elite Dominion hunter — costly but deadly.' }
+      shadowBlade: { name: 'Shadow Blade', icon: '🗡️', str: 12, hp: 90, desc: 'An elite Dominion hunter — costly but deadly.' },
+      demon: { name: 'Greater Demon', icon: '🔥', str: 15, hp: 200, desc: 'A towering infernal beast.' }
     };
 
     /* ============================================================
@@ -3348,7 +3349,7 @@
     /* ============================================================
        GAME STATE
        ============================================================ */
-    const MAX_LEVEL = 60;
+    const MAX_LEVEL = 100;
 
     let G = {
       player: null, location: 'solmara',
@@ -4260,12 +4261,15 @@
           const skill = SKILLS[sk];
           const lv = pSkills[sk];
           const cost = lv * 100;
+          const isMaxed = lv >= p.level;
           return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
             <div style="flex:1;">
               <div style="font-size:12px;font-weight:600;color:var(--text-lt);">${skill.icon} ${skill.name} <span style="color:var(--violet-lt);font-size:10px;">(Lv.${lv})</span></div>
               <div style="font-size:10px;color:var(--text-dim);">${skill.desc}</div>
             </div>
-            <button class="btn btn-sm btn-gold" onclick="Explore.upgradeSkill('${sk}')" ${p.gold < cost ? 'disabled' : ''}>Upgrade (${cost}g)</button>
+            <button class="btn btn-sm ${isMaxed ? 'btn-dim' : 'btn-gold'}" onclick="Explore.upgradeSkill('${sk}')" ${(p.gold < cost || isMaxed) ? 'disabled' : ''}>
+              ${isMaxed ? `MAX (Lv.${p.level})` : `Upgrade (${cost}g)`}
+            </button>
           </div>`;
         }).join('');
         UI.openModal('modal-trainer');
@@ -4275,7 +4279,7 @@
         const p = G.player;
         const lv = p.skills[sk];
         const cost = lv * 100;
-        if (p.gold < cost) return;
+        if (p.gold < cost || lv >= p.level) return;
         p.gold -= cost;
         p.skills[sk]++;
         Log.add(`🔥 <strong>${SKILLS[sk].name}</strong> upgraded to level ${p.skills[sk]}!`, 'success');
@@ -4823,9 +4827,9 @@
         if (p.mp < skill.cost) { Log.add('Not enough mana!', 'system'); return; }
         p.mp -= skill.cost;
 
-        // Apply skill level modifier (15% per level above 1)
+        // Apply skill level modifier (8% per level above 1 to prevent broken scaling)
         const skLevel = (p.skills && p.skills[skillKey]) || 1;
-        const lvMult = 1 + (skLevel - 1) * 0.15;
+        const lvMult = 1 + (skLevel - 1) * 0.08;
 
         // Type bonuses (e.g. Holy vs Undead)
         let typeMult = 1.0;
@@ -4914,35 +4918,33 @@
         } else if (skill.type === 'summon') {
           if (!G.companions) G.companions = [];
 
-          // Party limit: Player + 3 companions max
-          // If there's a mercenary (non-summon), only 2 summon slots available
           const hasMercenary = G.companions.some(c => !c.isSummon);
           const maxSummons = hasMercenary ? 2 : 3;
-          const currentSummons = G.companions.filter(c => c.isSummon).length;
+          let currentSummons = G.companions.filter(c => c.isSummon).length;
 
-          if (G.companions.length >= 3) {
-            Log.add('Your party is full! Maximum party size is 4 members (you + 3 companions).', 'system');
+          const requestedCount = skill.summonCount || 1;
+          const sTypeKey = skill.summonType || 'skeleton';
+          const ct = COMPANION_TYPES[sTypeKey];
+
+          if (currentSummons + requestedCount > maxSummons) {
+            Log.add(`Cannot summon more! Maximum party limit reached.`, 'system');
             return;
           }
 
-          if (currentSummons >= maxSummons) {
-            const msg = hasMercenary
-              ? 'Maximum summons reached! With a mercenary, you can only have 2 summons.'
-              : 'Maximum summons reached! You can have up to 3 summons.';
-            Log.add(msg, 'system');
-            return;
-          }
+          for (let i = 0; i < requestedCount; i++) {
+            // Enhanced scaling: HP and STR based on player level + primary stats
+            const sHp = Math.floor((ct.hp + p.level * 60 + effectiveStat('vit') * 10) * lvMult);
+            const sStr = Math.floor((ct.str + p.level * 2.5 + effectiveStat('int') * 0.75) * lvMult);
 
-          const ct = COMPANION_TYPES['skeleton'];
-          const hpOff = Math.floor(G.player.level * 15);
-          G.companions.push({
-            type: 'skeleton', name: ct.name, icon: ct.icon,
-            hp: ct.hp + hpOff, maxHp: ct.hp + hpOff,
-            str: Math.floor(ct.str + (G.player.level / 2)),
-            isSummon: true,
-            turnsLeft: 5  // Summons last 5 turns
-          });
-          Log.add(`${skill.icon} <strong>${skill.name}</strong>! A skeletal warrior rises to fight for you!`, 'veil');
+            G.companions.push({
+              type: sTypeKey, name: ct.name, icon: ct.icon,
+              hp: sHp, maxHp: sHp,
+              str: sStr,
+              isSummon: true,
+              turnsLeft: 5
+            });
+          }
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! ${requestedCount > 1 ? requestedCount + ' minions rise' : ct.name + ' rises'} to fight for you!`, 'veil');
         } else if (skill.type === 'buff') {
           G.combatBuffs = { strBonus: skill.strBonus, turns: 3 };
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! Power surges through you!`, 'player');
@@ -5125,7 +5127,7 @@
         scaled.str = Math.floor((base.str || 5) * ratio * 1.5);  // +50% more damage (up from 30%)
         scaled.def = Math.floor((base.def || 1) * ratio * 1.25);  // +25% more defense
         scaled.crit = Math.min(45, (base.crit || 0) + Math.floor(ratio * 3.5)); // crits scale up
-        scaled.xp = Math.floor((base.xp || 10) * ratio);
+        scaled.xp = Math.floor((base.xp || 10) * ratio * 1.5);
         scaled.gold = [Math.floor(base.gold[0] * ratio), Math.floor(base.gold[1] * ratio)];
         return scaled;
       },
@@ -5336,6 +5338,16 @@
             }
           }
         });
+
+        // Retroactive capping: Ensure no skill exceeds player level
+        Object.keys(p.skills).forEach(sk => {
+          if (p.skills[sk] > p.level) {
+            p.skills[sk] = p.level;
+            Log.add(`⚖️ <strong>Balance Check:</strong> ${SKILLS[sk].name} capped to Level ${p.level}.`, 'system');
+            added = true;
+          }
+        });
+
         if (added) UI.refresh();
       },
 
@@ -5346,7 +5358,7 @@
         p.level++; p.maxHp += g.hp; p.maxMp += g.mp; p.hp = effectiveMaxHp(); p.mp = effectiveMaxMp();
         p.str += g.str; p.int += g.int; p.wis += g.wis; p.agi += g.agi; p.vit += g.vit; p.def += g.def; p.crit += g.crit;
         p.statPoints = (p.statPoints || 0) + 3;
-        p.xpToNext = Math.floor(p.xpToNext * 1.7);
+        p.xpToNext = Math.floor(p.xpToNext * 1.45);
         Log.divider();
         Log.add(`🌀 <strong>LEVEL ${p.level}${p.level === MAX_LEVEL ? ' — MAX!' : ''}!</strong> The Veil responds to your growing power.`, 'levelup');
         Log.add(`All stats increased. +3 Stat Points granted. HP/MP restored.`, 'levelup');
