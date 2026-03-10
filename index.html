@@ -5212,6 +5212,9 @@
         if (G.partyCode) {
           G.canAct = false;
           GlobalChat._broadcastPartyCmd(`/party_end_turn ${G.player.name}`);
+          if (G.isPartyLeader) {
+            GlobalChat._advanceTurn(G.player.name);
+          }
           UI.refresh();
           return;
         }
@@ -6270,10 +6273,10 @@
           const dmg = parseInt(parts[2]);
           if (G.inCombat && G.enemies[idx]) {
             G.enemies[idx].hp -= dmg;
-            Log.add(`🛡️ <strong>${m.author}</strong> strikes enemy ${idx + 1} for <strong>${dmg}</strong>!`, 'combat');
+            Log.add(`⚔️ <strong>${m.author}</strong> deals <strong>${dmg}</strong> damage to ${G.enemies[idx].name}!`, 'combat');
             UI.showEnemyPanel(G.enemies);
-            if (G.enemies.every(e => e.hp <= 0)) Combat.endCombat(true);
             UI.refresh();
+            if (G.enemies.every(e => e.hp <= 0)) Combat.endCombat(true);
           }
         } else if (m.text.startsWith('/party_enemy_atk')) {
           const parts = m.text.split(' ');
@@ -6356,21 +6359,26 @@
           }
         } else if (m.text.startsWith('/party_end_turn')) {
           if (!G.isPartyLeader) return;
-          // Leader coordinates the next turn
-          const members = Object.keys(G.partyMembers).sort();
-          const pData = G.partyState;
-          if (!pData || pData.turnPhase !== 'players') return;
+          this._advanceTurn(m.author);
+        }
+      },
 
-          const currentIndex = members.indexOf(m.author);
-          if (currentIndex < members.length - 1) {
-            // Next player's turn
-            WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase()).update({
-              currentTurn: members[currentIndex + 1]
-            });
-          } else {
-            // All players done, Leader processes non-player turns
-            this._processAITurns();
-          }
+      _advanceTurn(author) {
+        if (!G.isPartyLeader) return;
+        // Leader coordinates the next turn
+        const members = Object.keys(G.partyMembers).sort();
+        const pData = G.partyState;
+        if (!pData || pData.turnPhase !== 'players') return;
+
+        const currentIndex = members.indexOf(author);
+        if (currentIndex < members.length - 1 && currentIndex !== -1) {
+          // Next player's turn
+          WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase()).update({
+            currentTurn: members[currentIndex + 1]
+          });
+        } else {
+          // All players done, Leader processes non-player turns
+          this._processAITurns();
         }
       },
 
