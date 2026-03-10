@@ -4593,6 +4593,7 @@
       },
 
       renderDecor(layer) {
+        return; // Disabled per user request - keeps map clean and avoids broken image icons
         let dc = document.getElementById('world-decor-container');
         if (!dc) {
           dc = document.createElement('div');
@@ -7596,28 +7597,42 @@
         if (this._guilds.some(g => g.name.toLowerCase() === name.toLowerCase())) {
           this._status('A guild with that name already exists.'); return;
         }
-        const focuses = GUILD_FOCUSES.filter(fd => document.getElementById('gfoc-' + fd.id)?.checked).map(fd => fd.id);
-        const desc = (document.getElementById('gcreate-desc')?.value || '').trim();
-        const guild = {
-          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-          name, faction: p.faction, leader: p.name,
-          description: desc, focus: focuses,
-          members: [{
-            name: p.name,
-            uid: AuthSystem.user?.uid,
-            role: 'leader',
-            level: p.level,
-            cls: CLASSES[p.classKey]?.name || '',
-            joinedAt: Date.now()
-          }],
-          requests: [], invites: [], createdAt: Date.now()
-        };
-        this._guilds.push(guild);
-        p.gold -= 500;
-        this._syncMyGuild(); // Update local state immediately before save
-        await this._save();
-        Log.add(`🏰 Guild <strong>${name}</strong> founded! You are the Guild Leader.`, 'success');
-        this.showTab('mine');
+
+        this._status('Establishing foundation...');
+        try {
+          const focuses = GUILD_FOCUSES.filter(fd => document.getElementById('gfoc-' + fd.id)?.checked).map(fd => fd.id);
+          const desc = (document.getElementById('gcreate-desc')?.value || '').trim();
+          const guild = {
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            name, faction: p.faction, leader: p.name,
+            description: desc, focus: focuses,
+            members: [{
+              name: p.name,
+              uid: AuthSystem.user?.uid,
+              role: 'leader',
+              level: p.level,
+              cls: CLASSES[p.classKey]?.name || '',
+              joinedAt: Date.now()
+            }],
+            requests: [], invites: [], createdAt: Date.now()
+          };
+
+          // Update local state first
+          this._guilds.push(guild);
+          p.gold -= 500;
+          this._syncMyGuild();
+
+          // Attempt save
+          await this._save(guild.id);
+
+          Log.add(`🏰 Guild <strong>${name}</strong> founded! You are the Guild Leader.`, 'success');
+          this.showTab('mine');
+          UI.refresh();
+        } catch (e) {
+          console.error("Guild Creation Failed:", e);
+          this._status('Creation failed. Check permissions.');
+          Log.add("❌ Failed to create guild. The Realm of Firebase has denied your request.", "error");
+        }
       },
 
       async requestJoin(guildId) {
