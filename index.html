@@ -1570,6 +1570,40 @@
       text-align: center;
     }
 
+    /* Server Announcement Banner */
+    .server-banner {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 700px;
+      background: rgba(10, 5, 20, 0.95);
+      border: 2px solid var(--violet);
+      border-radius: 8px;
+      padding: 24px;
+      z-index: 500;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(138, 43, 226, 0.6), inset 0 0 20px rgba(138, 43, 226, 0.2);
+      animation: serverBannerIn 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+      backdrop-filter: blur(8px);
+      border-top: 4px solid var(--violet);
+    }
+
+    @keyframes serverBannerIn {
+      from {
+        top: -200px;
+        opacity: 0;
+        scale: 0.9;
+      }
+
+      to {
+        top: 20px;
+        opacity: 1;
+        scale: 1;
+      }
+    }
+
     @keyframes bannerAnim {
       0% {
         opacity: 0;
@@ -6271,18 +6305,23 @@
       },
 
       showAnnouncement(text) {
-        // Build a simple pop-up or use an existing modal
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay active';
-        modal.style.zIndex = '10000';
-        modal.innerHTML = `
-          <div class="modal" style="border:2px solid var(--violet); text-align:center;">
-            <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:18px; margin-bottom:12px;">📣 DIVINE DECREE</div>
-            <div style="font-size:16px; margin-bottom:20px; line-height:1.6;">${text}</div>
-            <button class="btn btn-violet" onclick="this.parentElement.parentElement.remove()">I Hear the Veil</button>
-          </div>
+        // Build a grand banner instead of a modal
+        const container = document.getElementById('world-viewport');
+        if (!container) return;
+
+        // Remove existing banner if any
+        const old = document.getElementById('server-announcement-banner');
+        if (old) old.remove();
+
+        const banner = document.createElement('div');
+        banner.id = 'server-announcement-banner';
+        banner.className = 'server-banner';
+        banner.innerHTML = `
+          <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:20px; margin-bottom:14px; letter-spacing:3px; text-shadow:0 0 10px var(--violet);">📣 DIVINE DECREE</div>
+          <div style="font-size:18px; color:var(--text-lt); margin-bottom:24px; line-height:1.6; font-family:'IM Fell English',serif;">${this._e(text)}</div>
+          <button class="btn btn-violet" style="padding:10px 40px; font-size:12px;" onclick="this.parentElement.remove()">I Hear the Veil</button>
         `;
-        document.body.appendChild(modal);
+        container.appendChild(banner);
       },
 
       async kick(targetUid) {
@@ -6328,7 +6367,19 @@
         const snap = await firebase.database().ref('leaderboard').once('value');
         const data = snap.val() || {};
         const container = document.getElementById('admin-player-list');
-        container.innerHTML = Object.entries(data).map(([name, p]) => {
+        const now = Date.now();
+
+        // Filter: Must have a UID AND have been active in the last 60 seconds
+        const onlinePlayers = Object.entries(data).filter(([name, p]) => {
+          return p.uid && p.ts && (now - p.ts < 60000);
+        });
+
+        if (onlinePlayers.length === 0) {
+          container.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:12px;">No players currently online.</div>';
+          return;
+        }
+
+        container.innerHTML = onlinePlayers.map(([name, p]) => {
           return `<div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
             <div>
               <div style="font-size:12px; color:var(--text-lt);">${p.icon} ${p.name} (Lv.${p.level})</div>
@@ -6567,7 +6618,7 @@
           this._updateBadges();
         });
 
-        // Dynamic Party Listener management
+        // Dynamic Party Listener & Presence management
         setInterval(() => {
           const code = (G.partyCode || '').toUpperCase();
           if (code && this._currentPartyCode !== code) {
@@ -6576,6 +6627,8 @@
             this._cleanupPartyListener();
           }
           this._sendPulse();
+          // Global presence pulse for Admin Player List
+          WorldServer.submitScore();
         }, 10000);
 
         this._initialized = true;
