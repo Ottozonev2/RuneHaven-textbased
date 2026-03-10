@@ -1979,7 +1979,7 @@
       <button class="btn btn-sm btn-gold" onclick="UI.openModal('modal-updates')">📜 Latest Updates</button>
     </div>
     <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
-      v3.8 &middot; Rune Haven &middot; Mobile &amp; Desktop
+      v3.9 &middot; Rune Haven &middot; Mobile &amp; Desktop
     </div>
   </div>
 
@@ -2377,6 +2377,12 @@
               Decree</button>
           </div>
           <div style="border-top:1px dashed var(--border); padding-top:16px;">
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeGuilds()">⚠️
+              WIPE ALL GUILDS</button>
+            <button class="btn btn-violet" style="width:100%;" onclick="AdminSystem.checkDbHealth()">🧪 Database Health
+              Check</button>
+          </div>
+          <div style="border-top:1px dashed var(--border); padding-top:16px;">
             <button class="btn btn-red" style="width:100%;" onclick="AuthSystem.logout()">Forced System Purge
               (Logout)</button>
           </div>
@@ -2515,10 +2521,10 @@
     <div class="modal"
       style="max-width:550px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
       <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
-        <div class="modal-title">📜 The Outworlder's Resilience – Party & Skills Update</div>
+        <div class="modal-title">📜 The Ascended Update – Accounts & Mastery</div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
           <div style="color:var(--violet-lt); font-size:10px; font-family:'Cinzel',serif; letter-spacing:1px;">VERSION
-            3.8</div>
+            3.9</div>
           <div style="color:var(--text-dim); font-size:10px; opacity:0.6; font-family:'Cinzel',serif;">MAR 10, 2026
           </div>
         </div>
@@ -2526,71 +2532,59 @@
 
       <div style="flex:1; overflow-y:auto; padding:20px; font-size:13px; line-height:1.7; color:var(--text-dim);">
         <div style="margin-bottom:16px; font-style:italic; color:var(--gold-lt);">
-          Today was a huge step forward for the game.
+          The world of Eryndor has evolved. Your progress is now eternal.
         </div>
 
         <div style="margin-bottom:24px;">
           <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
-            <span>✨ Retroactive Skill Unlocks</span>
+            <span>☁️ Account System & Cloud Saves</span>
           </div>
           <div style="padding-left:18px;">
-            Experienced Outworlders will no longer miss out on new techniques. Any skills added to your class for levels
-            you've already surpassed will now be granted automatically upon your next login or level-up.
-          </div>
-        </div>
-
-        <div style="margin-bottom:24px;">
-          <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
-            <span>🤝 Party Combat Stability</span>
-          </div>
-          <div style="padding-left:18px;">
-            Major improvements to grouping! We've implemented a robust turn-recovery system, eliminated "stuck" turns at
-            combat end, and fixed the "one-turn behind" health display. Enemy health now synchronizes instantly across
-            all party members.
+            You can now register an account to bind your Chronicles to the cloud. Log in from any device to continue
+            your journey. Your inventory, levels, and progress are now synchronized across all Outworlders.
           </div>
         </div>
 
         <div style="margin-bottom:24px;">
           <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
-            <span>⚔️ Combat & UI Improvements</span>
+            <span>🌀 Elixir of Rebirth & Stat Resets</span>
           </div>
           <div style="padding-left:18px;">
-            Enemy targeting info (name and HP) now appears as a clean overlay in the bottom-right of the map instead of
-            being buried in menus. The combat action buttons were also moved above the Chronicle Log so skills and
-            attacks appear right next to the battle text, making fights much easier to follow.
+            Misstepped in your growth? The <strong>Elixir of Rebirth</strong> is now available in the market. Consuming
+            it will return all your spent stat points, allowing you to re-specialize your Outworlder for the challenges
+            ahead.
           </div>
         </div>
 
         <div style="margin-bottom:24px;">
           <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
-            <span>⚖️ Combat Balance Changes</span>
+            <span>⚔️ New Skill Training System</span>
           </div>
           <div style="padding-left:18px;">
-            Melee classes got some love. Paladins and Barbarians now have much better defense and HP scaling, while
-            Assassins gained extra agility and starting health. Physical attacks were buffed to make basic strikes more
-            reliable. At the same time, caster power was toned down a bit—Lightbinders and Necromancers now have lower
-            INT scaling, and the Holy damage bonus against undead was reduced. Potions were also restored to stronger
-            healing and their inventory bug during combat has been fixed.
+            Skills are no longer just granted; they are earned. Visit the <strong>Skill Trainer</strong> in the Outpost
+            to unlock and upgrade your class abilities. You can only train skills you have actually unlocked through
+            your level!
           </div>
         </div>
 
         <div style="margin-bottom:24px;">
           <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
-            <span>🌐 Multiplayer Progress</span>
+            <span>⚖️ Balance Adjustments (Buffs & Nerfs)</span>
           </div>
           <div style="padding-left:18px;">
-            Work has started preparing the game for Firebase, which will power real-time chat, party syncing, and cloud
-            saves. Party invites were also added to chat and guild member lists to make grouping up easier.
+            Stat scaling has been adjusted across all classes. Melee classes (Paladin, Barbarian) have received boosts
+            to physical damage and armor effectiveness. Casters have had their mana costs adjusted to encourage more
+            tactical play. The "Veil Flash" effect during level-ups has been intensified.
           </div>
         </div>
 
         <div style="margin-bottom:12px;">
           <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
-            <span>🛠️ Fixes & Stability</span>
+            <span>🛠️ Guilds & Multiplayer Remake</span>
           </div>
           <div style="padding-left:18px;">
-            Several rendering and spawn issues were fixed so players no longer appear off-screen when changing zones or
-            refreshing.
+            Guilds have been remade on a real-time Firebase back-end. Membership is now bound to your account UID rather
+            than just your name, ensuring guild stability across name changes and character resets.
           </div>
         </div>
       </div>
@@ -6338,20 +6332,47 @@
         container.appendChild(banner);
       },
 
-      async kick(targetUid) {
-        await this.sendRemoteCommand(targetUid, { type: 'KICK' });
-        Log.add(`🦵 Kicked player.`, 'system');
+      // Command Bridge
+      async sendRemoteCommand(targetUid, cmd) {
+        if (!targetUid || targetUid === 'undefined') return;
+        await firebase.database().ref(`world/commands/${targetUid}`).set({ ...cmd, ts: Date.now() });
       },
 
       async ban(targetUid, hours = 24) {
+        if (!targetUid || targetUid === 'undefined') {
+          alert("Cannot ban a player without a valid Account ID (UID).");
+          return;
+        }
         const expiry = Date.now() + (hours * 3600000);
         await firebase.database().ref(`world/blacklist/${targetUid}`).set({ expiry });
         await this.kick(targetUid);
       },
 
-      // Command Bridge
-      async sendRemoteCommand(targetUid, cmd) {
-        await firebase.database().ref(`world/commands/${targetUid}`).set({ ...cmd, ts: Date.now() });
+      async kick(targetUid) {
+        if (!targetUid || targetUid === 'undefined') return;
+        await this.sendRemoteCommand(targetUid, { type: 'KICK' });
+        Log.add(`🦵 Kicked player.`, 'system');
+      },
+
+      async checkDbHealth() {
+        Log.add("🧪 Performing Database Health Check...", "system");
+        try {
+          const rootRef = firebase.database().ref('world');
+          // Ensure base nodes exist with dummy data if empty
+          const nodes = ['guilds', 'announcement', 'blacklist', 'commands'];
+          for (const node of nodes) {
+            const snap = await rootRef.child(node).once('value');
+            if (!snap.exists()) {
+              Log.add(`🔧 Initializing missing node: ${node}`, "system");
+              await rootRef.child(node).set({ _init: true });
+            }
+          }
+          Log.add("✅ Database is healthy and nodes are visible.", "success");
+          alert("Database structure initialized. Check your Firebase console now!");
+        } catch (e) {
+          console.error(e);
+          Log.add("❌ Database Health Check failed. Check console.", "error");
+        }
       },
 
       handleRemoteCommand(cmd) {
@@ -7738,7 +7759,15 @@
         // REMAKE: If we have a specific ID, save just that node. Otherwise save the last changed guild.
         const g = guildId ? this._guilds.find(x => x.id === guildId) : this._mine;
         if (g && g.id) {
-          await firebase.database().ref('world/' + WORLD_CONFIG.guildId + '/' + g.id).set(g);
+          try {
+            await firebase.database().ref('world/' + WORLD_CONFIG.guildId + '/' + g.id).set(g);
+            console.log("Guild Saved:", g.name);
+          } catch (e) {
+            console.error("Guild Save Error:", e);
+            Log.add("❌ Failed to save guild data to the cloud.", "error");
+          }
+        } else {
+          console.warn("Save ignored: No guild context found.");
         }
       },
 
