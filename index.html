@@ -6220,6 +6220,8 @@
         if (this._partyRef) this._partyRef.off();
         this._partyRef = null;
         this._currentPartyCode = null;
+        G.partyMembers = {};
+        Combat.updatePartyOverlay();
       },
 
       _processIncoming() {
@@ -6607,7 +6609,11 @@
 
       leaveChannel() {
         if (this._channel === 'guild' && G.player) G.player.guildName = '';
-        if (this._channel === 'party') { G.partyCode = null; G.isPartyLeader = false; G.partyMembers = {}; }
+        if (this._channel === 'party') {
+          G.partyCode = null; G.isPartyLeader = false; G.partyMembers = {};
+          Combat.updatePartyOverlay();
+          this._cleanupPartyListener();
+        }
         this._updateChannelTabs();
         this._renderMessages();
       },
