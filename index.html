@@ -6420,6 +6420,7 @@
         // Admins can bypass maintenance to test things
         if (enabled && !this.isAdmin) {
           screen.classList.add('active');
+          if (typeof Game !== 'undefined' && Game.showTitle) Game.showTitle();
         } else {
           screen.classList.remove('active');
         }
