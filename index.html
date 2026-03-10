@@ -2379,6 +2379,18 @@
     </div>
   </div>
 
+  <!-- Stats Modal -->
+  <div class="modal-overlay" id="modal-stats">
+    <div class="modal">
+      <div class="modal-title">⚔️ Outworlder Stats</div>
+      <div id="stat-points-remaining"
+        style="color:var(--violet-lt); font-family:'Cinzel',serif; font-size:11px; margin-bottom:12px; text-align:center; letter-spacing:1px;">
+        AVAILABLE POINTS: 0</div>
+      <div id="stats-list-container" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;"></div>
+      <button class="btn btn-violet" style="width:100%;" onclick="UI.closeModal('modal-stats')">Close Stats</button>
+    </div>
+  </div>
+
   <!-- Skill Trainer Modal -->
   <div class="modal-overlay" id="modal-trainer">
     <div class="modal">
