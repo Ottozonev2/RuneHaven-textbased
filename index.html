@@ -3568,6 +3568,9 @@
         // Location
         document.getElementById('location-name').textContent = LOCATIONS[G.location].name;
         this.refreshInventory(); this.refreshEquipment(); this.refreshMapTab(); this.refreshCompanions();
+
+        // Ensure enemy UI is refreshed if in combat (Fixes Leader HUD lag)
+        if (G.inCombat) this.showEnemyPanel(G.enemies);
       },
 
       refreshCompanions() {
@@ -4785,6 +4788,7 @@
         // Sync damage to party
         if (G.partyCode) {
           GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+          if (G.isPartyLeader) GlobalChat._broadcastEnemyHealth();
         }
 
         this.afterPlayerTurn();
@@ -4839,7 +4843,10 @@
             const crit = skill.alwaysCrit || Math.random() * 100 < p.crit;
             Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${totalDmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
           }
-          if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${totalDmg}`);
+          if (G.partyCode) {
+            GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${totalDmg}`);
+            if (G.isPartyLeader) GlobalChat._broadcastEnemyHealth();
+          }
 
           // Apply Status Effects (Stun, DOT, etc.)
           if (skill.stunChance && Math.random() < skill.stunChance) {
@@ -4868,6 +4875,7 @@
           Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong> arcane damage${crit ? ' (CRIT!)' : ''}!`, 'player');
           if (G.partyCode) {
             GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+            if (G.isPartyLeader) GlobalChat._broadcastEnemyHealth();
           }
           if (enemy.isBoss) UI.veilFlash();
         } else if (skill.type === 'drain') {
@@ -4877,6 +4885,7 @@
           Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! Drained <strong>${dmg}</strong> HP, restored <strong>${heal}</strong>.`, 'heal');
           if (G.partyCode) {
             GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+            if (G.isPartyLeader) GlobalChat._broadcastEnemyHealth();
           }
         } else if (skill.type === 'heal') {
           if (G.partyCode && !skill.isSelfOnly) {
@@ -6475,6 +6484,14 @@
         if (!G.partyCode || !WorldServer._db) return;
         const cmd = { author: G.player.name, text: text, ts: Date.now() };
         WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase() + '/commands').push(cmd);
+      },
+
+      _broadcastEnemyHealth() {
+        if (!G.partyCode || !G.isPartyLeader || !WorldServer._db) return;
+        const hpArray = G.enemies.map(e => e.hp);
+        WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase()).update({
+          enemySync: hpArray
+        });
       },
 
       _setDot(color) {
