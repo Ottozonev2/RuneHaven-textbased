@@ -1620,13 +1620,74 @@
       left: 0;
       width: 2000px;
       height: 2000px;
-      background-color: #08080a;
-      /* Fallback slightly above pure black */
-      background-image:
-        linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+      background-color: #0d0d12;
       background-size: 80px 80px;
+      transition: background 1s ease;
       z-index: 1;
+    }
+
+    /* Terrain Types */
+    #world-grid.terrain-solmara {
+      background-color: #1a1a1f;
+      background-image:
+        linear-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.08) 1px, transparent 1px);
+    }
+
+    #world-grid.terrain-ash {
+      background-color: #12100e;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(255, 69, 0, 0.05) 0%, transparent 80%),
+        linear-gradient(rgba(255, 69, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 69, 0, 0.1) 1px, transparent 1px);
+    }
+
+    #world-grid.terrain-snow {
+      background-color: #1a1e26;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(135, 206, 250, 0.05) 0%, transparent 80%),
+        linear-gradient(rgba(135, 206, 250, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(135, 206, 250, 0.1) 1px, transparent 1px);
+    }
+
+    #world-grid.terrain-swamp {
+      background-color: #0e120e;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(50, 205, 50, 0.05) 0%, transparent 80%),
+        linear-gradient(rgba(50, 205, 50, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(50, 205, 50, 0.1) 1px, transparent 1px);
+    }
+
+    #world-grid.terrain-desert {
+      background-color: #1a140d;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(255, 165, 0, 0.05) 0%, transparent 80%),
+        linear-gradient(rgba(255, 165, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 165, 0, 0.1) 1px, transparent 1px);
+    }
+
+    #world-grid.terrain-forest {
+      background-color: #0b150b;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(34, 139, 34, 0.05) 0%, transparent 80%),
+        linear-gradient(rgba(34, 139, 34, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 139, 34, 0.1) 1px, transparent 1px);
+    }
+
+    #world-grid.terrain-crimson {
+      background-color: #1a0a0a;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(220, 20, 60, 0.05) 0%, transparent 80%),
+        linear-gradient(rgba(220, 20, 60, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(220, 20, 60, 0.1) 1px, transparent 1px);
+    }
+
+    #world-grid.terrain-dungeon {
+      background-color: #0a0a0f;
+      background-image:
+        linear-gradient(rgba(100, 100, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100, 100, 255, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
     }
 
     /* World View Entities */
@@ -1642,8 +1703,8 @@
 
     .world-entity {
       position: absolute;
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1652,26 +1713,54 @@
       z-index: 10;
     }
 
-    .entity-sprite {
+    .entity-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-panel);
+      border: 2px solid var(--violet);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 24px;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+      box-shadow: 0 0 15px rgba(144, 96, 216, 0.4);
+      position: relative;
+    }
+
+    #world-player .entity-avatar {
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(201, 168, 76, 0.5);
+      animation: playerPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes playerPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(201, 168, 76, 0.5);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(201, 168, 76, 0.7);
+      }
     }
 
     .entity-name {
       font-family: 'Cinzel', serif;
-      font-size: 9px;
-      color: #fff;
-      text-shadow: 0 1px 2px #000;
+      font-size: 10px;
+      color: var(--text-lt);
+      text-shadow: 1px 1px 2px #000;
       white-space: nowrap;
-      margin-top: 2px;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 1px 4px;
-      border-radius: 3px;
+      margin-top: 4px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 1px 6px;
+      border-radius: 4px;
     }
 
-    #world-player .entity-name {
-      color: var(--gold-lt);
-      border: 1px solid var(--gold-dk);
+    #world-player {
+      z-index: 100 !important;
     }
   </style>
 </head>
@@ -2474,8 +2563,8 @@
       paladin: {
         name: 'Paladin', icon: '⚔️', faction: 'saints',
         desc: 'Holy warrior of the Covenant. Wields divine light and unbreakable faith.',
-        base: { hp: 110, mp: 40, str: 10, int: 6, wis: 8, agi: 5, vit: 10, def: 9, crit: 5 },
-        growth: { hp: 16, mp: 5, str: 1.8, int: 0.8, wis: 1.0, agi: 0.8, vit: 1.5, def: 1.5, crit: .3 },
+        base: { hp: 110, mp: 40, str: 10, int: 6, wis: 8, agi: 5, vit: 10, def: 10, crit: 5 },
+        growth: { hp: 16, mp: 5, str: 2.3, int: 0.8, wis: 1.0, agi: 0.8, vit: 1.8, def: 1.5, crit: .3 },
         skills: ['divineStrike', 'holyShield', 'consecrate'],
         bars: { hp: 95, mp: 40, str: 80, int: 45, wis: 50, agi: 35, def: 80 }
       },
@@ -2498,8 +2587,8 @@
       lightbinder: {
         name: 'Lightbinder', icon: '✨', faction: 'saints',
         desc: 'Arcane saint who weaves light into devastating magical constructs.',
-        base: { hp: 70, mp: 100, str: 4, int: 14, wis: 15, agi: 7, vit: 6, def: 3, crit: 10 },
-        growth: { hp: 9, mp: 15, str: 0.8, int: 2.5, wis: 2.0, agi: 0.8, vit: 1, def: 0.8, crit: .4 },
+        base: { hp: 70, mp: 100, str: 4, int: 12, wis: 15, agi: 7, vit: 6, def: 3, crit: 10 },
+        growth: { hp: 9, mp: 15, str: 0.8, int: 2.1, wis: 2.0, agi: 0.8, vit: 1, def: 0.8, crit: .4 },
         skills: ['radiantBlast', 'holyNova', 'solarFlare'],
         bars: { hp: 45, mp: 98, str: 22, int: 98, wis: 95, agi: 50, def: 20 }
       },
@@ -2507,8 +2596,8 @@
       necromancer: {
         name: 'Necromancer', icon: '💀', faction: 'demons',
         desc: 'Master of death magic. Raises the dead and drains life from the living.',
-        base: { hp: 65, mp: 100, str: 4, int: 15, wis: 14, agi: 6, vit: 6, def: 2, crit: 9 },
-        growth: { hp: 8, mp: 15, str: 0.8, int: 2.5, wis: 2.0, agi: 0.8, vit: 1, def: 0.8, crit: .4 },
+        base: { hp: 65, mp: 100, str: 4, int: 12, wis: 14, agi: 6, vit: 6, def: 2, crit: 9 },
+        growth: { hp: 8, mp: 15, str: 0.8, int: 2.1, wis: 2.0, agi: 0.8, vit: 1, def: 0.8, crit: .4 },
         skills: ['deathBolt', 'soulDrain', 'raiseDead'],
         bars: { hp: 42, mp: 99, str: 18, int: 99, wis: 90, agi: 45, def: 16 }
       },
@@ -2523,16 +2612,16 @@
       barbarian: {
         name: 'Barbarian', icon: '🪓', faction: 'demons',
         desc: 'Berserker of the Bloodspire clans. Embraces rage to ignore pain and deal massive damage.',
-        base: { hp: 120, mp: 20, str: 14, int: 3, wis: 4, agi: 8, vit: 12, def: 6, crit: 12 },
-        growth: { hp: 18, mp: 2, str: 2.5, int: 0, wis: 0.2, agi: 1.5, vit: 2.2, def: 0.8, crit: .6 },
+        base: { hp: 120, mp: 20, str: 14, int: 3, wis: 4, agi: 8, vit: 12, def: 8, crit: 12 },
+        growth: { hp: 20, mp: 2, str: 2.5, int: 0, wis: 0.2, agi: 1.5, vit: 2.2, def: 1.2, crit: .6 },
         skills: ['berserkRage', 'brutalSlam', 'bloodFury'],
         bars: { hp: 99, mp: 20, str: 99, int: 18, wis: 10, agi: 58, def: 42 }
       },
       assassin: {
         name: 'Assassin', icon: '🗡️', faction: 'demons',
         desc: 'Shadow-walker of the Dominion. Strikes from darkness with lethal precision.',
-        base: { hp: 85, mp: 50, str: 9, int: 7, wis: 6, agi: 15, vit: 7, def: 4, crit: 18 },
-        growth: { hp: 11, mp: 7, str: 1.6, int: 0.8, wis: 0.5, agi: 2.2, vit: 1, def: 0.8, crit: 1.0 },
+        base: { hp: 95, mp: 50, str: 9, int: 7, wis: 6, agi: 15, vit: 7, def: 4, crit: 18 },
+        growth: { hp: 11, mp: 7, str: 1.6, int: 0.8, wis: 0.5, agi: 2.6, vit: 1, def: 0.8, crit: 1.3 },
         skills: ['shadowStrike', 'venomBlade', 'smokeBomb'],
         bars: { hp: 60, mp: 45, str: 55, int: 45, wis: 35, agi: 99, def: 35 }
       }
@@ -3479,6 +3568,7 @@
 
       openModal(id) { document.getElementById(id).classList.add('open'); },
       closeModal(id) { document.getElementById(id).classList.remove('open'); },
+      isModalOpen() { return !!document.querySelector('.modal.open'); },
 
       showLevelUpBanner(level) {
         const el = document.createElement('div');
@@ -3575,6 +3665,7 @@
         Log.add(`<em>${loc.desc}</em>`, 'story');
         if (!loc.isTown) Log.add(`📊 Recommended: Lv.${loc.minLevel}–${loc.maxLevel}`, 'system');
         UI.refresh();
+        World.updateTerrain();
         loc.isTown ? this.showTownActions() : this.showExploreActions();
         Game.autosave();
 
@@ -3641,7 +3732,6 @@
       showExploreActions() {
         const loc = LOCATIONS[G.location];
         UI.setActions([
-          { label: `🔍 Explore ${loc.icon}`, fn: "Explore.explore()", cls: 'btn-violet' },
           { label: '📝 Zone Notes', fn: "WorldServer.openZoneNotes()", cls: 'btn-gold btn-sm' },
           { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' },
           { label: '🏛️ Solmara', fn: "Explore.travel('solmara')", cls: '' },
@@ -4011,7 +4101,29 @@
       init() {
         window.addEventListener('keydown', e => this.handleKey(e));
         this.startSync();
+        this.updateTerrain();
         Log.add('🗺️ World View initialized. Use <strong>WASD</strong> or <strong>Arrows</strong> to move.', 'system');
+      },
+
+      updateTerrain() {
+        const grid = document.getElementById('world-grid');
+        if (!grid) return;
+        const loc = G.location;
+        const terrainMap = {
+          solmara: 'solmara',
+          ashfall: 'ash',
+          frostvein: 'snow',
+          blackMarsh: 'swamp',
+          emberfallWastes: 'desert',
+          hollowWilds: 'forest',
+          bloodspire: 'crimson',
+          catacombs: 'dungeon'
+        };
+        // Remove all terrain classes
+        Object.values(terrainMap).forEach(t => grid.classList.remove('terrain-' + t));
+        // Add current one
+        const terrain = terrainMap[loc] || 'dungeon';
+        grid.classList.add('terrain-' + terrain);
       },
 
       handleKey(e) {
@@ -4051,7 +4163,13 @@
           if (!loc.isTown && Math.random() < (loc.encounterChance || 0.4)) {
             const key = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
             Log.add('⚠️ <strong>Ambush!</strong> Something emerges from the shadows...', 'death');
+            // Trigger the encounter
             setTimeout(() => Combat.start(key), 300);
+
+            // Also occasionally trigger a non-combat event (20% of the time)
+            if (Math.random() < 0.2) {
+              setTimeout(() => Explore.explore(), 600);
+            }
           }
         }
       },
@@ -4062,11 +4180,11 @@
         const vp = document.getElementById('world-viewport');
         if (!layer || !vp || !G.player) return;
 
-        // Camera follow
+        // Camera follow (center on player)
         const vpw = vp.clientWidth;
         const vph = vp.clientHeight;
-        const camX = Math.max(0, Math.min(2000 - vpw, G.world.x - vpw / 2));
-        const camY = Math.max(0, Math.min(2000 - vph, G.world.y - vph / 2));
+        const camX = G.world.x - vpw / 2;
+        const camY = G.world.y - vph / 2;
 
         layer.style.transform = `translate(${-camX}px, ${-camY}px)`;
         if (grid) grid.style.transform = `translate(${-camX}px, ${-camY}px)`;
@@ -4080,7 +4198,7 @@
           layer.appendChild(pEl);
         }
         pEl.style.transform = `translate(${G.world.x}px, ${G.world.y}px)`;
-        pEl.innerHTML = `<div class="entity-sprite">${G.player.icon || '🌀'}</div><div class="entity-name">${G.player.name}</div>`;
+        pEl.innerHTML = `<div class="entity-avatar">${G.player.icon || '🌀'}</div><div class="entity-name">${G.player.name}</div>`;
 
         // Others
         for (const uid in G.world.entities) {
@@ -4101,7 +4219,7 @@
             layer.appendChild(eEl);
           }
           eEl.style.transform = `translate(${data.x}px, ${data.y}px)`;
-          eEl.innerHTML = `<div class="entity-sprite">${data.icon || '👤'}</div><div class="entity-name">${data.name}</div>`;
+          eEl.innerHTML = `<div class="entity-avatar">${data.icon || '👤'}</div><div class="entity-name">${data.name}</div>`;
         }
       },
 
@@ -4254,10 +4372,10 @@
         });
 
         const effStrObj = condenseStat(effectiveStat('str'));
-        const basicDmg = Math.floor(effStrObj * 1.5) + 3; // +3 avg variance
+        const basicDmg = Math.floor(effStrObj * 1.7) + 3; // +3 avg variance
 
         UI.setActions([
-          { label: '⚔️ Basic Attack', fn: "Combat.attack()", cls: 'btn-red', tooltip: `Basic strike. Est. Dmg: ~${basicDmg} (1.5x STR)` },
+          { label: '⚔️ Basic Attack', fn: "Combat.attack()", cls: 'btn-red', tooltip: `Basic strike. Est. Dmg: ~${basicDmg} (1.7x STR)` },
           ...skillBtns,
           { label: '🧪 Use Item', fn: "Combat.showItemMenu()", cls: 'btn-green', tooltip: 'Use a consumable from your inventory.' },
           { label: '← Back', fn: "Combat.showCombatActions()", cls: 'btn-sm' }
@@ -4271,8 +4389,8 @@
         if (!enemy || enemy.hp <= 0) {
           Log.add('Select a living target!', 'system'); return;
         }
-        // Basic attack boosted: 1.5x STR + (0-7 variance)
-        let dmg = Math.max(1, Math.floor(effectiveStat('str') * 1.5) + Math.floor(Math.random() * 8) - enemy.def);
+        // Basic attack boosted: 1.7x STR + (0-7 variance)
+        let dmg = Math.max(1, Math.floor(effectiveStat('str') * 1.7) + Math.floor(Math.random() * 8) - enemy.def);
         const crit = Math.random() * 100 < G.player.crit;
         if (crit) dmg = Math.floor(dmg * 1.8);
         enemy.hp -= dmg;
@@ -4310,8 +4428,8 @@
         // Type bonuses (e.g. Holy vs Undead)
         let typeMult = 1.0;
         if (skill.dmgType === 'holy' && (enemy.enemyType === 'undead' || enemy.enemyType === 'corrupted')) {
-          typeMult = 1.5;
-          Log.add(`☀️ <strong>Holy bonus!</strong> The ${enemy.name} shudders under the light (+50% damage).`, 'success');
+          typeMult = 1.15;
+          Log.add(`☀️ <strong>Holy bonus!</strong> The ${enemy.name} shudders under the light (+15% damage).`, 'success');
         }
 
         if (skill.type === 'damage') {
@@ -4972,6 +5090,7 @@
         Log.add(`Use the buttons below to act. On mobile, use the bottom nav.`, 'system');
         UI.refresh(); Explore.showTownActions();
         World.render();
+        World.updateTerrain();
       },
 
       saveGame() {
@@ -5015,6 +5134,7 @@
           Log.add(`${factionLabel(G.player.faction)} · Level ${G.player.level} · ${LOCATIONS[G.location].name}.`, 'story');
           UI.refresh(); UI.showEnemyPanel(null);
           World.render();
+          World.updateTerrain();
           LOCATIONS[G.location].isTown ? Explore.showTownActions() : Explore.showExploreActions();
         } catch (e) { Log.add('Failed to restore chronicle.', 'system'); }
       },
@@ -5033,6 +5153,7 @@
         Log.divider();
         Log.add(`You awaken at the gates of Solmara Outpost.`, 'veil');
         UI.refresh(); Game.autosave(); Explore.showTownActions();
+        World.updateTerrain();
       },
 
       togglePermadeath(on) {
