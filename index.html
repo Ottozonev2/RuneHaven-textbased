@@ -4995,113 +4995,96 @@
 
       enemyTurn() {
         const livingEnemies = G.enemies.filter(e => e.hp > 0);
-        if (livingEnemies.length === 0) { this.afterPlayerTurn(); return; }
+        if (livingEnemies.length === 0) { this.afterPlayerTurn(); return Promise.resolve(); }
 
-        livingEnemies.forEach((enemy, idx) => {
-          setTimeout(() => {
-            if (!G.inCombat || enemy.hp <= 0) return;
+        return new Promise(resolve => {
+          let finished = 0;
+          livingEnemies.forEach((enemy, idx) => {
+            setTimeout(() => {
+              if (!G.inCombat || enemy.hp <= 0) {
+                finished++; if (finished === livingEnemies.length) resolve();
+                return;
+              }
 
-            // Handle Status Effects
-            if (enemy.status.poison > 0) {
-              const poiDmg = Math.floor(enemy.maxHp * 0.08);
-              enemy.hp -= poiDmg;
-              enemy.status.poison--;
-              Log.add(`🤢 The ${enemy.name} takes <strong>${poiDmg}</strong> poison damage!`, 'combat');
-              if (enemy.hp <= 0) { UI.showEnemyPanel(G.enemies); return; }
-            }
+              // Handle Status Effects
+              if (enemy.status.poison > 0) {
+                const poiDmg = Math.floor(enemy.maxHp * 0.08);
+                enemy.hp -= poiDmg;
+                enemy.status.poison--;
+                Log.add(`🤢 The ${enemy.name} takes <strong>${poiDmg}</strong> poison damage!`, 'combat');
+                if (enemy.hp <= 0) { UI.showEnemyPanel(G.enemies); finished++; if (finished === livingEnemies.length) resolve(); return; }
+              }
 
-            if (enemy.status.stun > 0) {
-              enemy.status.stun--;
-              Log.add(`💫 The ${enemy.name} is stunned and cannot move!`, 'combat');
-              return;
-            }
+              if (enemy.status.stun > 0) {
+                enemy.status.stun--;
+                Log.add(`💫 The ${enemy.name} is stunned and cannot move!`, 'combat');
+                finished++; if (finished === livingEnemies.length) resolve();
+                return;
+              }
 
-            // Pick a Target: Player, living Companion, or living Party Member
-            const targets = [];
-            if (G.player.hp > 0) targets.push({ type: 'player', name: G.player.name, ref: G.player, icon: G.player.icon });
-
-            if (G.companions) {
-              G.companions.forEach(c => {
-                if (c.hp > 0) targets.push({ type: 'companion', name: c.name, ref: c, icon: c.icon });
-              });
-            }
-
-            if (G.partyCode) {
-              for (const name in G.partyMembers) {
-                const m = G.partyMembers[name];
-                if (m.hp > 0 && name !== G.player.name) {
-                  targets.push({ type: 'party', name: name, ref: m, icon: m.icon });
+              // Pick a Target
+              const targets = [];
+              if (G.player.hp > 0) targets.push({ type: 'player', name: G.player.name, ref: G.player, icon: G.player.icon });
+              if (G.companions) G.companions.forEach(c => { if (c.hp > 0) targets.push({ type: 'companion', name: c.name, ref: c, icon: c.icon }); });
+              if (G.partyCode) {
+                for (const name in G.partyMembers) {
+                  const m = G.partyMembers[name];
+                  if (m.hp > 0 && name !== G.player.name) targets.push({ type: 'party', name: name, ref: m, icon: m.icon });
                 }
               }
-            }
 
-            if (targets.length === 0) {
-              // Entire party wiped
-              if (G.isPartyLeader) {
-                GlobalChat._broadcastPartyCmd(`/party_wipe`);
-                this.endCombat(false, false, true);
+              if (targets.length === 0) {
+                if (G.isPartyLeader) { GlobalChat._broadcastPartyCmd(`/party_wipe`); this.endCombat(false, false, true); }
+                finished++; if (finished === livingEnemies.length) resolve();
+                return;
               }
-              return;
-            }
 
-            const target = targets[Math.floor(Math.random() * targets.length)];
+              const target = targets[Math.floor(Math.random() * targets.length)];
+              const atk = enemy.attacks[Math.floor(Math.random() * enemy.attacks.length)];
+              const targetAgi = (target.type === 'player' || target.type === 'party') ? (target.ref.agi || 10) : 10;
+              const dodge = Math.min(.25, (targetAgi - enemy.agi) * .015 + .04);
 
-            const atk = enemy.attacks[Math.floor(Math.random() * enemy.attacks.length)];
-            const targetAgi = (target.type === 'player' || target.type === 'party') ? (target.ref.agi || 10) : 10;
-            const dodge = Math.min(.25, (targetAgi - enemy.agi) * .015 + .04);
-
-            if (Math.random() < dodge) {
-              const dodgeMsg = (target.type === 'player') ? 'you barely dodge' : 'they dodge';
-              Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${target.name} — ${dodgeMsg}!`, 'player');
-              if (G.partyCode && G.isPartyLeader) {
-                GlobalChat._broadcastPartyCmd(`/party_enemy_miss ${target.name} ${enemyIdx}`);
-              }
-            } else {
-              let dmg = Math.max(1, enemy.str + Math.floor(Math.random() * Math.ceil(enemy.str * 0.2)));
-              if (target.type === 'player' || target.type === 'party') {
-                const def = (target.ref.def || 0);
-                dmg = Math.max(1, dmg - Math.floor(def * 0.4));
-                if (target.type === 'player' && G.playerDefending) dmg = Math.floor(dmg * 0.5);
+              if (Math.random() < dodge) {
+                const dodgeMsg = (target.type === 'player') ? 'you barely dodge' : 'they dodge';
+                Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${target.name} — ${dodgeMsg}!`, 'player');
+                if (G.partyCode && G.isPartyLeader) GlobalChat._broadcastPartyCmd(`/party_enemy_miss ${target.name} ${G.enemies.indexOf(enemy)}`);
               } else {
-                dmg = Math.max(1, dmg - 5); // Base def for companions
+                let dmg = Math.max(1, enemy.str + Math.floor(Math.random() * Math.ceil(enemy.str * 0.2)));
+                if (target.type === 'player' || target.type === 'party') {
+                  const def = (target.ref.def || 0);
+                  dmg = Math.max(1, dmg - Math.floor(def * 0.4));
+                  if (target.type === 'player' && G.playerDefending) dmg = Math.floor(dmg * 0.5);
+                } else { dmg = Math.max(1, dmg - 5); }
+
+                const crit = Math.random() * 100 < enemy.crit;
+                if (crit) dmg = Math.floor(dmg * 2.0);
+                target.ref.hp -= dmg;
+                if (target.ref.hp <= 0 && target.type === 'player' && G.combatBuffs.immortal) { target.ref.hp = 1; Log.add(`👼 <strong>Guardian Angel!</strong> You were saved from death!`, 'success'); }
+                if (enemy.isBoss) UI.veilFlash();
+                const targetTitle = target.type === 'player' ? 'you' : `<strong>${target.icon} ${target.name}</strong>`;
+                Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${targetTitle} for <strong>${dmg}</strong>${crit ? ' 💥 (CRITICAL!)' : ''}!`, 'combat');
+                if (G.partyCode && G.isPartyLeader) GlobalChat._broadcastPartyCmd(`/party_enemy_atk ${target.type} ${target.name} ${dmg} ${crit} ${G.enemies.indexOf(enemy)} ${atk}`);
+
+                if (target.type === 'player' && G.player.hp <= 0) {
+                  G.player.hp = 0; UI.refresh();
+                  Log.add(`💀 <strong>You</strong> have been incapacitated!`, 'death');
+                  if (!G.partyCode) this.endCombat(false, false, true);
+                } else if (target.ref.hp <= 0) {
+                  Log.add(`💀 <strong>${target.name}</strong> has been ${target.type === 'companion' ? 'slain' : 'incapacitated'}!`, 'death');
+                  target.ref.hp = 0;
+                }
               }
-
-              const crit = Math.random() * 100 < enemy.crit;
-              if (crit) dmg = Math.floor(dmg * 2.0);
-
-              target.ref.hp -= dmg;
-              if (target.ref.hp <= 0 && target.type === 'player' && G.combatBuffs.immortal) {
-                target.ref.hp = 1;
-                Log.add(`👼 <strong>Guardian Angel!</strong> You were saved from death!`, 'success');
-              }
-              if (enemy.isBoss) UI.veilFlash();
-
-              const targetTitle = target.type === 'player' ? 'you' : `<strong>${target.icon} ${target.name}</strong>`;
-              Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${targetTitle} for <strong>${dmg}</strong>${crit ? ' 💥 (CRITICAL!)' : ''}!`, 'combat');
-
-              if (G.partyCode && G.isPartyLeader) {
-                GlobalChat._broadcastPartyCmd(`/party_enemy_atk ${target.type} ${target.name} ${dmg} ${crit} ${idx} ${atk}`);
-              }
-
-              if (target.type === 'player' && G.player.hp <= 0) {
-                G.player.hp = 0; UI.refresh();
-                Log.add(`💀 <strong>You</strong> have been incapacitated!`, 'death');
-                if (!G.partyCode) this.endCombat(false, false, true);
-              } else if (target.type === 'companion' && target.ref.hp <= 0) {
-                Log.add(`💀 <strong>${target.name}</strong> has been slain!`, 'death');
-                target.ref.hp = 0;
-              } else if (target.type === 'party' && target.ref.hp <= 0) {
-                target.ref.hp = 0;
-                Log.add(`💀 <strong>${target.name}</strong> has been incapacitated!`, 'death');
-              }
-            }
-            UI.refresh();
-          }, idx * 400);
+              UI.refresh();
+              finished++;
+              if (finished === livingEnemies.length) resolve();
+            }, idx * 400);
+          });
         });
       },
 
       companionAttack() {
-        if (!G.companions || !G.companions.length || !G.inCombat) return;
+        if (!G.companions || !G.companions.length || !G.inCombat) return Promise.resolve();
+
         G.companions.forEach(c => {
           if (c.hp <= 0) return;
 
@@ -5110,21 +5093,21 @@
             const heal = Math.floor(effectiveMaxHp() * 0.10);
             G.player.hp = Math.min(effectiveMaxHp(), G.player.hp + heal);
             Log.add(`${c.icon} <strong>${c.name}</strong> prays for you, restoring <strong>${heal}</strong> HP!`, 'heal');
+            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_heal ${G.player.name} ${heal}`);
             return;
           }
 
           // Target current targeted enemy or first living enemy
           let enemy = G.enemies[G.targetIndex];
-          if (!enemy || enemy.hp <= 0) {
-            enemy = G.enemies.find(e => e.hp > 0);
-          }
+          if (!enemy || enemy.hp <= 0) enemy = G.enemies.find(e => e.hp > 0);
           if (!enemy) return;
 
           const dmg = Math.max(1, c.str + Math.floor(Math.random() * 4) - Math.floor(enemy.def / 2));
           enemy.hp -= dmg;
           Log.add(`${c.icon} <strong>${c.name}</strong> strikes the ${enemy.name} for <strong>${dmg}</strong>!`, 'player');
-          if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+          if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.enemies.indexOf(enemy)} ${dmg}`);
         });
+        return Promise.resolve();
       },
 
       // Scale enemy stats based on player level vs enemy base level
@@ -6359,6 +6342,19 @@
             Log.add(`🚀 <strong>Party Sync:</strong> Moving to ${LOCATIONS[key].name}...`, 'system');
             Explore.travel(key, true);
           }
+        } else if (m.text.startsWith('/party_enemy_sync')) {
+          const parts = m.text.split(' ');
+          try {
+            const hpArray = JSON.parse(parts.slice(1).join(' '));
+            hpArray.forEach((hp, idx) => {
+              if (G.enemies[idx]) {
+                G.enemies[idx].hp = hp;
+                if (hp <= 0) G.enemies[idx].hp = 0;
+              }
+            });
+            UI.showEnemyPanel(G.enemies);
+            UI.refresh();
+          } catch (e) { }
         } else if (m.text.startsWith('/party_end_turn')) {
           if (!G.isPartyLeader) return;
           this._advanceTurn(m.author);
@@ -6390,13 +6386,17 @@
 
         // 1. Summons Phase
         await ref.update({ currentTurn: 'SUMMONS', turnPhase: 'summons' });
-        await new Promise(r => setTimeout(r, 1000));
-        Combat.companionAttack(); // This handles summons/mercs locally on leader, who broadcasts results
+        await new Promise(r => setTimeout(r, 800));
+        await Combat.companionAttack(); // Leader handles and broadcasts
 
         // 2. Enemies Phase
         await ref.update({ currentTurn: 'ENEMIES', turnPhase: 'enemies' });
-        await new Promise(r => setTimeout(r, 1000));
-        Combat.enemyTurn();
+        await new Promise(r => setTimeout(r, 400));
+        await Combat.enemyTurn();
+
+        // Final Sync Pulse for Enemy HP (ensures all clients match after AI turns/DOTs)
+        const hpArray = G.enemies.map(e => e.hp);
+        this._broadcastPartyCmd(`/party_enemy_sync ${JSON.stringify(hpArray)}`);
 
         // 3. Back to Leader for next round
         if (G.inCombat) {
