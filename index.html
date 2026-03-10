@@ -1620,9 +1620,11 @@
       left: 0;
       width: 2000px;
       height: 2000px;
-      background-color: #0d0d12;
-      background-size: 80px 80px;
-      transition: background 1s ease;
+      background-color: var(--bg);
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: 0 0;
+      transition: background-color 1.5s ease;
       z-index: 1;
     }
 
@@ -1636,60 +1638,49 @@
       z-index: 2;
     }
 
-    /* Terrain Types */
+    /* Simulate a winding dirt path vertically down the center of the world (X around 1000) */
+    #world-entities-layer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 970px;
+      /* roughly center */
+      width: 60px;
+      background: linear-gradient(90deg, transparent 0%, rgba(90, 60, 30, 0.15) 20%, rgba(90, 60, 30, 0.25) 50%, rgba(90, 60, 30, 0.15) 80%, transparent 100%);
+      z-index: 0;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    /* Terrain Types (Replacing gridlines with ambient colors) */
     #world-grid.terrain-solmara {
-      background-color: #1a1a1f;
-      background-image:
-        linear-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(139, 92, 246, 0.08) 1px, transparent 1px);
+      background-color: #0c0b11;
     }
 
     #world-grid.terrain-ash {
-      background-color: #12100e;
-      background-image:
-        radial-gradient(circle at 50% 50%, rgba(255, 69, 0, 0.05) 0%, transparent 80%),
-        linear-gradient(rgba(255, 69, 0, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 69, 0, 0.1) 1px, transparent 1px);
+      background-color: #0d0908;
     }
 
     #world-grid.terrain-snow {
-      background-color: #1a1e26;
-      background-image:
-        radial-gradient(circle at 50% 50%, rgba(135, 206, 250, 0.05) 0%, transparent 80%),
-        linear-gradient(rgba(135, 206, 250, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(135, 206, 250, 0.1) 1px, transparent 1px);
+      background-color: #0f1318;
     }
 
     #world-grid.terrain-swamp {
-      background-color: #0e120e;
-      background-image:
-        radial-gradient(circle at 50% 50%, rgba(50, 205, 50, 0.05) 0%, transparent 80%),
-        linear-gradient(rgba(50, 205, 50, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(50, 205, 50, 0.1) 1px, transparent 1px);
+      background-color: #080d08;
     }
 
     #world-grid.terrain-desert {
-      background-color: #1a140d;
-      background-image:
-        radial-gradient(circle at 50% 50%, rgba(255, 165, 0, 0.05) 0%, transparent 80%),
-        linear-gradient(rgba(255, 165, 0, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 165, 0, 0.1) 1px, transparent 1px);
+      background-color: #120e09;
     }
 
     #world-grid.terrain-forest {
-      background-color: #0b150b;
-      background-image:
-        radial-gradient(circle at 50% 50%, rgba(34, 139, 34, 0.05) 0%, transparent 80%),
-        linear-gradient(rgba(34, 139, 34, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34, 139, 34, 0.1) 1px, transparent 1px);
+      background-color: #050a06;
+      /* Dark forest green, like the reference screenshot */
     }
 
     #world-grid.terrain-crimson {
-      background-color: #1a0a0a;
-      background-image:
-        radial-gradient(circle at 50% 50%, rgba(220, 20, 60, 0.05) 0%, transparent 80%),
-        linear-gradient(rgba(220, 20, 60, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(220, 20, 60, 0.1) 1px, transparent 1px);
+      background-color: #120505;
     }
 
     #world-grid.terrain-dungeon {
@@ -1724,36 +1715,32 @@
     }
 
     .entity-avatar {
-      width: 40px;
-      height: 40px;
-      background: var(--bg-panel);
-      border: 2px solid var(--violet);
-      border-radius: 50%;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 24px;
-      box-shadow: 0 0 15px rgba(144, 96, 216, 0.4);
       position: relative;
     }
 
     #world-player .entity-avatar {
-      border-color: var(--gold);
-      box-shadow: 0 0 20px rgba(201, 168, 76, 0.5);
-      animation: playerPulse 2s infinite ease-in-out;
+      font-size: 28px;
+      text-shadow: 0 0 15px var(--violet-lt), 0 0 30px var(--violet);
+      animation: playerHover 2s infinite ease-in-out;
     }
 
-    @keyframes playerPulse {
+    @keyframes playerHover {
 
       0%,
       100% {
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(201, 168, 76, 0.5);
+        transform: translateY(0) scale(1);
+        filter: brightness(1) drop-shadow(0 0 5px rgba(184, 144, 255, 0.4));
       }
 
       50% {
-        transform: scale(1.05);
-        box-shadow: 0 0 30px rgba(201, 168, 76, 0.7);
+        transform: translateY(-4px) scale(1.05);
+        filter: brightness(1.2) drop-shadow(0 10px 15px rgba(184, 144, 255, 0.6));
       }
     }
 
@@ -4189,6 +4176,33 @@
           const y = rng() * 1900 + 50;
           const type = conf.types[Math.floor(rng() * conf.types.length)];
           this.decor.push({ x, y, type, cls: conf.decorClass });
+        }
+      },
+
+      renderDecor(layer) {
+        let dc = document.getElementById('world-decor-container');
+        if (!dc) {
+          dc = document.createElement('div');
+          dc.id = 'world-decor-container';
+          layer.appendChild(dc);
+        }
+        if (dc.children.length !== this.decor.length) {
+          dc.innerHTML = '';
+          this.decor.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'decor-object ' + d.cls;
+            el.style.left = d.x + 'px';
+            el.style.top = d.y + 'px';
+
+            // Add slight drop shadow and hue adjustments to make emojis blend better
+            el.style.textShadow = '0 8px 10px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.6)';
+            if (d.type === '🌲' || d.type === '🌳' || d.type === '🌿') {
+              el.style.filter = 'brightness(0.65) contrast(1.1) saturate(0.8)';
+            }
+
+            el.innerText = d.type;
+            dc.appendChild(el);
+          });
         }
       },
 
