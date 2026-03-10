@@ -7317,7 +7317,10 @@
             this._guilds = data.filter(Boolean);
           } else {
             // New format: Object where keys are guild IDs
-            this._guilds = Object.entries(data).map(([id, g]) => ({ ...g, id }));
+            // Only include objects that look like actual guilds (have a name)
+            this._guilds = Object.entries(data)
+              .map(([id, g]) => ({ ...g, id }))
+              .filter(g => g.name);
           }
 
           this._syncMyGuild();
@@ -7594,7 +7597,7 @@
         const name = (document.getElementById('gcreate-name')?.value || '').trim();
         if (!name) { this._status('Enter a guild name.'); return; }
         if (p.gold < 500) { this._status('Not enough gold.'); return; }
-        if (this._guilds.some(g => g.name.toLowerCase() === name.toLowerCase())) {
+        if (this._guilds.some(g => (g.name || '').toLowerCase() === name.toLowerCase())) {
           this._status('A guild with that name already exists.'); return;
         }
 
