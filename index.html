@@ -1612,6 +1612,70 @@
         opacity: 0;
       }
     }
+
+    #world-viewport {
+      position: relative;
+      overflow: hidden;
+      background: #0a0a0c;
+      border-bottom: 2px solid var(--border);
+    }
+
+    #world-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2000px;
+      height: 2000px;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* World View Entities */
+    #world-entities-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2000px;
+      height: 2000px;
+      /* Large world area */
+      pointer-events: none;
+    }
+
+    .world-entity {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s linear;
+      z-index: 10;
+    }
+
+    .entity-sprite {
+      font-size: 24px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    }
+
+    .entity-name {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      color: #fff;
+      text-shadow: 0 1px 2px #000;
+      white-space: nowrap;
+      margin-top: 2px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    #world-player .entity-name {
+      color: var(--gold-lt);
+      border: 1px solid var(--gold-dk);
+    }
   </style>
 </head>
 
@@ -3003,6 +3067,7 @@
 
     let G = {
       player: null, location: 'solmara',
+      world: { x: 400, y: 300, steps: 0, entities: {} },
       inCombat: false, enemies: [], targetIndex: 0,
       playerDefending: false, combatBuffs: {},
       turnCount: 0, canAct: true,
@@ -3937,6 +4002,143 @@
         Log.add(`Purchased <strong style="color:${item.color}">${item.name}</strong> for 🪙${item.buyPrice}.`, 'loot');
         document.getElementById('shop-gold').textContent = p.gold;
         UI.refresh();
+      }
+    };
+    /* ============================================================
+       WORLD SYSTEM (Graphical Movement & Sync)
+       ============================================================ */
+    const World = {
+      _lastSync: 0,
+      _syncRef: null,
+
+      init() {
+        window.addEventListener('keydown', e => this.handleKey(e));
+        this.startSync();
+        Log.add('🗺️ World View initialized. Use <strong>WASD</strong> or <strong>Arrows</strong> to move.', 'system');
+      },
+
+      handleKey(e) {
+        if (G.inCombat || UI.isModalOpen() || !G.player) return;
+        const speed = 12;
+        let dx = 0, dy = 0;
+        if (e.key === 'w' || e.key === 'ArrowUp') dy = -speed;
+        if (e.key === 's' || e.key === 'ArrowDown') dy = speed;
+        if (e.key === 'a' || e.key === 'ArrowLeft') dx = -speed;
+        if (e.key === 'd' || e.key === 'ArrowRight') dx = speed;
+
+        if (dx !== 0 || dy !== 0) {
+          this.move(dx, dy);
+          e.preventDefault();
+        }
+      },
+
+      move(dx, dy) {
+        G.world.x += dx;
+        G.world.y += dy;
+
+        // Boundaries
+        G.world.x = Math.max(20, Math.min(2000, G.world.x));
+        G.world.y = Math.max(20, Math.min(2000, G.world.y));
+
+        this.render();
+        this.checkEncounters(dx, dy);
+        this.throttledSync();
+      },
+
+      checkEncounters(dx, dy) {
+        G.world.steps += Math.sqrt(dx * dx + dy * dy);
+        const threshold = 180;
+        if (G.world.steps >= threshold) {
+          G.world.steps = 0;
+          const loc = LOCATIONS[G.location];
+          if (!loc.isTown && Math.random() < (loc.encounterChance || 0.4)) {
+            const key = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+            Log.add('⚠️ <strong>Ambush!</strong> Something emerges from the shadows...', 'death');
+            setTimeout(() => Combat.start(key), 300);
+          }
+        }
+      },
+
+      render() {
+        const layer = document.getElementById('world-entities-layer');
+        const grid = document.getElementById('world-grid');
+        const vp = document.getElementById('world-viewport');
+        if (!layer || !vp) return;
+
+        // Camera follow
+        const vpw = vp.clientWidth;
+        const vph = vp.clientHeight;
+        const camX = Math.max(0, Math.min(2000 - vpw, G.world.x - vpw / 2));
+        const camY = Math.max(0, Math.min(2000 - vph, G.world.y - vph / 2));
+
+        layer.style.transform = `translate(${-camX}px, ${-camY}px)`;
+        if (grid) grid.style.transform = `translate(${-camX}px, ${-camY}px)`;
+
+        // Local Player
+        let pEl = document.getElementById('world-player');
+        if (!pEl) {
+          pEl = document.createElement('div');
+          pEl.id = 'world-player';
+          pEl.className = 'world-entity';
+          layer.appendChild(pEl);
+        }
+        pEl.style.transform = `translate(${G.world.x}px, ${G.world.y}px)`;
+        pEl.innerHTML = `<div class="entity-sprite">${G.player.icon || '🌀'}</div><div class="entity-name">${G.player.name}</div>`;
+
+        // Others
+        for (const uid in G.world.entities) {
+          if (uid === G.player.uid) continue;
+          const data = G.world.entities[uid];
+          // Filter inactive
+          if (Date.now() - (data.lastSeen || 0) > 30000) {
+            const old = document.getElementById('entity-' + uid);
+            if (old) old.remove();
+            continue;
+          }
+
+          let eEl = document.getElementById('entity-' + uid);
+          if (!eEl) {
+            eEl = document.createElement('div');
+            eEl.id = 'entity-' + uid;
+            eEl.className = 'world-entity other-player';
+            layer.appendChild(eEl);
+          }
+          eEl.style.transform = `translate(${data.x}px, ${data.y}px)`;
+          eEl.innerHTML = `<div class="entity-sprite">${data.icon || '👤'}</div><div class="entity-name">${data.name}</div>`;
+        }
+      },
+
+      throttledSync() {
+        const now = Date.now();
+        if (now - this._lastSync > 200) {
+          this.sync();
+          this._lastSync = now;
+        }
+      },
+
+      async sync() {
+        if (!WorldServer._db || !G.player?.uid) return;
+        const ref = WorldServer._db.ref(`world_state/players/${G.player.uid}`);
+        await ref.update({
+          x: G.world.x,
+          y: G.world.y,
+          name: G.player.name,
+          icon: CLASSES[G.player.classKey]?.icon || '👤',
+          lastSeen: Date.now()
+        });
+      },
+
+      startSync() {
+        if (!WorldServer._db) {
+          setTimeout(() => this.startSync(), 1000);
+          return;
+        }
+        if (this._syncRef) return;
+        this._syncRef = WorldServer._db.ref(`world_state/players`);
+        this._syncRef.on('value', snap => {
+          G.world.entities = snap.val() || {};
+          this.render();
+        });
       }
     };
 
@@ -6095,6 +6297,7 @@
       CloudSave.init();
       Game.showTitle();
       GlobalChat.init();
+      World.init();
 
       // Prevent elastic scroll on non-scrollable areas (iOS)
       document.addEventListener('touchmove', e => {
