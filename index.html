@@ -1933,7 +1933,7 @@
 
     <div class="game-body">
       <!-- Row 1: Graphical World View -->
-      <div id="world-viewport">
+      <div id="world-viewport" tabindex="0">
         <!-- The visual map and players will be rendered here -->
         <div id="world-grid"></div>
         <div id="world-entities-layer"></div>
@@ -4123,6 +4123,10 @@
       _syncRef: null,
 
       init() {
+        const vp = document.getElementById('world-viewport');
+        if (vp) {
+          vp.addEventListener('click', () => vp.focus());
+        }
         window.addEventListener('keydown', e => this.handleKey(e));
         window.addEventListener('resize', () => this.render());
         this.startSync();
@@ -4249,6 +4253,8 @@
       handleKey(e) {
         if (G.inCombat || UI.isModalOpen() || !G.player) return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        console.log("Keydown detected in World viewport:", e.key);
 
         const speed = 12;
         let dx = 0, dy = 0;
