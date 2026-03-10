@@ -6157,11 +6157,22 @@
             UI.showEnemyPanel(G.enemies);
           }
 
-          // Turn Transition Logic: If it JUST became my turn, enable action
-          if (currentTurn === G.player.name && prevTurn !== G.player.name && G.inCombat) {
-            G.canAct = true;
-            Combat.showCombatActions();
-            Log.add("⚡ <strong>It is your turn!</strong>", "success");
+          // Turn Transition Logic: Act if it's my turn, even if just joining/refreshing
+          if (currentTurn === G.player.name && G.inCombat) {
+            if (prevTurn !== G.player.name || !G.canAct) {
+              G.canAct = true;
+              Combat.showCombatActions();
+              Log.add("⚡ <strong>It is your turn!</strong>", "success");
+            }
+          }
+
+          // Stuck Turn Recovery (Leader side)
+          if (G.isPartyLeader && G.inCombat && currentTurn && currentTurn !== 'SUMMONS' && currentTurn !== 'ENEMIES') {
+            const turnStart = partyData.turnStartTs || Date.now();
+            if (Date.now() - turnStart > 45000) { // 45s stall limit
+              Log.add(`🕒 Turn stuck on <strong>${currentTurn}</strong>. Auto-advancing...`, 'system');
+              this._advanceTurn(currentTurn);
+            }
           }
 
           const now = Date.now();
@@ -6350,24 +6361,31 @@
 
       _advanceTurn(author) {
         if (!G.isPartyLeader) return;
-        // Leader coordinates the next turn
-        const members = Object.keys(G.partyMembers);
-        if (!members.includes(G.player.name)) members.push(G.player.name);
-        members.sort();
+
+        let members = G.partyState.turnOrder;
+        if (!members || members.length === 0) {
+          // Establish turn order if not set
+          members = Object.keys(G.partyMembers);
+          if (!members.includes(G.player.name)) members.push(G.player.name);
+          members.sort();
+        }
 
         const pData = G.partyState;
         if (!pData || pData.turnPhase !== 'players') return;
 
         const currentIndex = members.indexOf(author);
+        const ref = WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase());
+
         if (currentIndex < members.length - 1 && currentIndex !== -1) {
-          // Next player's turn
           const nextPlayer = members[currentIndex + 1];
-          WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase()).update({
+          ref.update({
             currentTurn: nextPlayer,
-            enemySync: G.enemies.map(e => e.hp)
+            turnStartTs: Date.now(),
+            enemySync: G.enemies.map(e => e.hp),
+            turnOrder: members
           });
         } else {
-          // All players done, Leader processes non-player turns
+          // All players done
           this._processAITurns();
         }
       },
