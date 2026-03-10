@@ -6166,9 +6166,16 @@
             G.partyMembers = {};
             return;
           }
-          const prevTurn = (G.partyState && G.partyState.currentTurn) || '';
           G.partyState = partyData;
           const currentTurn = (partyData && partyData.currentTurn) || '';
+
+          // HUD Synchronization: Always sync enemy HP from party state if available
+          if (partyData.enemySync && G.inCombat) {
+            partyData.enemySync.forEach((hp, idx) => {
+              if (G.enemies[idx]) G.enemies[idx].hp = hp;
+            });
+            UI.showEnemyPanel(G.enemies);
+          }
 
           // Turn Transition Logic: If it JUST became my turn, enable action
           if (currentTurn === G.player.name && prevTurn !== G.player.name && G.inCombat) {
@@ -6364,15 +6371,20 @@
       _advanceTurn(author) {
         if (!G.isPartyLeader) return;
         // Leader coordinates the next turn
-        const members = Object.keys(G.partyMembers).sort();
+        const members = Object.keys(G.partyMembers);
+        if (!members.includes(G.player.name)) members.push(G.player.name);
+        members.sort();
+
         const pData = G.partyState;
         if (!pData || pData.turnPhase !== 'players') return;
 
         const currentIndex = members.indexOf(author);
         if (currentIndex < members.length - 1 && currentIndex !== -1) {
           // Next player's turn
+          const nextPlayer = members[currentIndex + 1];
           WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase()).update({
-            currentTurn: members[currentIndex + 1]
+            currentTurn: nextPlayer,
+            enemySync: G.enemies.map(e => e.hp)
           });
         } else {
           // All players done, Leader processes non-player turns
@@ -6396,11 +6408,14 @@
 
         // Final Sync Pulse for Enemy HP (ensures all clients match after AI turns/DOTs)
         const hpArray = G.enemies.map(e => e.hp);
-        this._broadcastPartyCmd(`/party_enemy_sync ${JSON.stringify(hpArray)}`);
 
         // 3. Back to Leader for next round
         if (G.inCombat) {
-          await ref.update({ currentTurn: G.player.name, turnPhase: 'players' });
+          await ref.update({
+            currentTurn: G.player.name,
+            turnPhase: 'players',
+            enemySync: hpArray
+          });
         }
       },
 
