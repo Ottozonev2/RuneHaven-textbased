@@ -2326,6 +2326,8 @@
           onclick="UI.switchTab('self', 'atab-', 'atc-admin-')">Self</button>
         <button class="tab-btn" id="atab-players"
           onclick="UI.switchTab('players', 'atab-', 'atc-admin-')">Players</button>
+        <button class="tab-btn" id="atab-guilds"
+          onclick="UI.switchTab('guilds', 'atab-', 'atc-admin-'); AdminSystem.refreshGuildList();">Guilds</button>
         <button class="tab-btn" id="atab-world" onclick="UI.switchTab('world', 'atab-', 'atc-admin-')">World</button>
       </div>
 
@@ -2348,6 +2350,18 @@
         <div class="tab-content" id="atc-admin-players">
           <div id="admin-player-list" style="display:flex; flex-direction:column; gap:4px;">
             <div class="chat-empty">Seeking Outworlders...</div>
+          </div>
+        </div>
+        <!-- Guilds Tab -->
+        <div class="tab-content" id="atc-admin-guilds">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 10px;">
+            <div style="font-family:'Cinzel',serif; font-size:12px; color:var(--violet-lt);">WORLD GUILDS</div>
+            <button class="btn btn-red btn-sm" style="font-size:10px;" onclick="AdminSystem.wipeGuilds()">⚠️ WIPE
+              ALL</button>
+          </div>
+          <div id="admin-guild-list" style="display:flex; flex-direction:column; gap:8px;">
+            <div class="chat-empty">Fetching chronicles...</div>
           </div>
         </div>
 
@@ -6405,6 +6419,41 @@
           const id = prompt("Item ID (e.g. veilblade):");
           if (id) this.grantItem(id, uid);
         }
+      },
+
+      async wipeGuilds() {
+        if (!confirm("⚠️ DESTROY ALL GUILDS?\nThis will delete every guild and reset all players' guild status. This cannot be undone.")) return;
+        await firebase.database().ref('world/' + WORLD_CONFIG.guildId).set(null);
+        // Also wipe guildName from all players in leaderboard for consistency
+        const snap = await firebase.database().ref('leaderboard').once('value');
+        const players = snap.val() || {};
+        for (let name in players) {
+          await firebase.database().ref('leaderboard/' + name + '/guildName').set('');
+        }
+        alert("The Great Purge is complete. All guilds have returned to the Void.");
+        location.reload();
+      },
+
+      async refreshGuildList() {
+        const snap = await firebase.database().ref('world/' + WORLD_CONFIG.guildId).once('value');
+        const data = snap.val() || {};
+        const container = document.getElementById('admin-guild-list');
+        const guilds = Object.entries(data).map(([id, g]) => ({ ...g, id }));
+
+        if (guilds.length === 0) {
+          container.innerHTML = '<div class="chat-empty">No guilds exist in this world.</div>';
+          return;
+        }
+
+        container.innerHTML = guilds.map(g => {
+          return `<div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:13px; color:var(--text-lt); font-family:'Cinzel',serif;">${g.name}</div>
+              <div style="font-size:10px; color:var(--text-dim);">${g.members?.length || 0} members · Leader: ${g.leader}</div>
+            </div>
+            <button class="btn btn-sm btn-red" onclick="GuildSystem.disband('${g.id}')">Disband</button>
+          </div>`;
+        }).join('');
       }
     };
 
@@ -7230,12 +7279,26 @@
         if (this._initialized) return;
         if (typeof firebase === 'undefined') return;
 
+        // REMAKE: Listen to the entire guild collection (object of objects)
         firebase.database().ref('world/' + WORLD_CONFIG.guildId).on('value', snap => {
-          const data = snap.val() || {};
-          this._guilds = Array.isArray(data.guilds) ? data.guilds : (data.guilds ? Object.values(data.guilds) : []);
+          const data = snap.val();
+          if (!data) {
+            this._guilds = [];
+          } else if (Array.isArray(data)) {
+            // Migration helper for old array format
+            this._guilds = data.filter(Boolean);
+          } else {
+            // New format: Object where keys are guild IDs
+            this._guilds = Object.entries(data).map(([id, g]) => ({ ...g, id }));
+          }
+
           this._syncMyGuild();
           if (document.getElementById('modal-guild')?.classList.contains('active')) {
             this.showTab(this._tab);
+          }
+          // Refresh admin manager if open
+          if (document.getElementById('modal-admin')?.classList.contains('active')) {
+            AdminSystem.refreshGuildList();
           }
         });
         this._initialized = true;
@@ -7246,12 +7309,21 @@
         if (!p) { this._mine = null; this._myMem = null; return; }
 
         const uid = AuthSystem.user?.uid;
-        // Try to find by UID first (new), fallback to name (old)
-        this._mine = this._guilds.find(g =>
-          g.members && g.members.some(m => (m.uid && m.uid === uid) || (!m.uid && m.name === p.name))
-        ) || null;
+        const pname = (p.name || '').trim().toLowerCase();
 
-        this._myMem = this._mine ? (this._mine.members.find(m => (m.uid && m.uid === uid) || (!m.uid && m.name === p.name)) || null) : null;
+        // Find guild by UID or case-insensitive Name
+        this._mine = this._guilds.find(g => {
+          if (!g.members || !Array.isArray(g.members)) return false;
+          return g.members.some(m => {
+            if (uid && m.uid === uid) return true;
+            return (m.name || '').trim().toLowerCase() === pname;
+          });
+        }) || null;
+
+        this._myMem = this._mine ? this._mine.members.find(m => {
+          if (uid && m.uid === uid) return true;
+          return (m.name || '').trim().toLowerCase() === pname;
+        }) : null;
 
         // Upgrade record to include UID if missing
         if (this._myMem && !this._myMem.uid && uid) {
@@ -7261,12 +7333,12 @@
 
         // Sync player details
         if (this._myMem && p) {
-          let changed = false;
-          if (this._myMem.level !== p.level) { this._myMem.level = p.level; changed = true; }
+          let hasChange = false;
+          if (this._myMem.level !== p.level) { this._myMem.level = p.level; hasChange = true; }
           const curCls = CLASSES[p.classKey]?.name || '';
-          if (this._myMem.cls !== curCls) { this._myMem.cls = curCls; changed = true; }
-          if (this._myMem.name !== p.name) { this._myMem.name = p.name; changed = true; }
-          if (changed) this._save();
+          if (this._myMem.cls !== curCls) { this._myMem.cls = curCls; hasChange = true; }
+          if (this._myMem.name !== p.name) { this._myMem.name = p.name; hasChange = true; }
+          if (hasChange) this._save();
         }
 
         p.guildName = this._mine?.name || '';
@@ -7515,6 +7587,7 @@
         };
         this._guilds.push(guild);
         p.gold -= 500;
+        this._syncMyGuild(); // Update local state immediately before save
         await this._save();
         Log.add(`🏰 Guild <strong>${name}</strong> founded! You are the Guild Leader.`, 'success');
         this.showTab('mine');
@@ -7642,11 +7715,14 @@
 
       async disband(guildId) {
         if (!confirm('Disband this guild? This cannot be undone.')) return;
-        this._guilds = this._guilds.filter(g => g.id !== guildId);
-        await this._save();
-        if (G.player) G.player.guildName = '';
-        Log.add('\uD83C\uDFF0 Guild disbanded.', 'system');
-        await this.refresh(); this.showTab('browse');
+        // REMAKE: Delete the specific node
+        await firebase.database().ref('world/' + WORLD_CONFIG.guildId + '/' + guildId).remove();
+        if (G.player) {
+          G.player.guildName = '';
+          G.guildName = '';
+        }
+        Log.add('🏰 Guild disbanded.', 'system');
+        this.showTab('browse');
       },
 
       async saveGuildInfo(guildId) {
@@ -7658,8 +7734,12 @@
         await this.refresh(); this.showTab('mine');
       },
 
-      async _save() {
-        await WorldServer._put(WORLD_CONFIG.guildId, { guilds: this._guilds });
+      async _save(guildId) {
+        // REMAKE: If we have a specific ID, save just that node. Otherwise save the last changed guild.
+        const g = guildId ? this._guilds.find(x => x.id === guildId) : this._mine;
+        if (g && g.id) {
+          await firebase.database().ref('world/' + WORLD_CONFIG.guildId + '/' + g.id).set(g);
+        }
       },
 
       _e(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
