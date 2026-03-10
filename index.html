@@ -6705,6 +6705,12 @@
         this._setDot('green');
       },
 
+      clear() {
+        this._cache = [];
+        this._unread = { global: 0, guild: 0, party: 0 };
+        this._renderMessages();
+      },
+
       _setupPartyListener(code) {
         this._cleanupPartyListener();
         this._currentPartyCode = code;
