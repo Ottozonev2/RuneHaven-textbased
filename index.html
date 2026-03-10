@@ -1836,7 +1836,7 @@
       <button class="btn btn-sm btn-gold" onclick="UI.openModal('modal-updates')">📜 Latest Updates</button>
     </div>
     <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
-      v3.6 &middot; Rune Haven &middot; Mobile &amp; Desktop
+      v3.7 &middot; Rune Haven &middot; Mobile &amp; Desktop
     </div>
   </div>
 
@@ -2282,46 +2282,76 @@
   <!-- Updates Modal -->
   <div class="modal-overlay" id="modal-updates">
     <div class="modal"
-      style="max-width:500px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+      style="max-width:550px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
       <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
-        <div class="modal-title">📜 The Chronicles & Discovery Update</div>
+        <div class="modal-title">📜 Big Update – Visuals, Combat, and Systems Overhaul</div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
           <div style="color:var(--violet-lt); font-size:10px; font-family:'Cinzel',serif; letter-spacing:1px;">VERSION
-            3.6</div>
+            3.7</div>
           <div style="color:var(--text-dim); font-size:10px; opacity:0.6; font-family:'Cinzel',serif;">MAR 9, 2026</div>
         </div>
       </div>
 
       <div style="flex:1; overflow-y:auto; padding:20px; font-size:13px; line-height:1.7; color:var(--text-dim);">
-        <div style="margin-bottom:24px;">
-          <ul style="padding-left:18px; margin:0;">
-            <li><strong>Quest System</strong>: Embark on main story arcs and faction-specific missions via the Quest
-              Log.</li>
-            <li><strong>Random Discoveries</strong>: Find lost travelers, overturned carriages, and hidden chests in the
-              wilds.</li>
-            <li><strong>Mimics & Ambushes</strong>: Beware! Some discovery chests are alive and hungry.</li>
-          </ul>
+        <div style="margin-bottom:16px; font-style:italic; color:var(--gold-lt);">
+          Today was a huge step forward for the game.
         </div>
 
         <div style="margin-bottom:24px;">
           <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
-            <span>The Stash & Hoarder Update</span>
+            <span>🗺️ World Map Visual Upgrade</span>
           </div>
-          <ul style="padding-left:18px; margin:0;">
-            <li><strong>Player Stash</strong>: New 200-slot chest in Solmara for storing gear and gold.</li>
-            <li><strong>Jewelry Slot</strong>: Rings, amulets, and gems can now be equipped for powerful scaling
-              bonuses.</li>
-          </ul>
+          <div style="padding-left:18px;">
+            The old exploration method has changed. Zones now load full-screen 2D pixel art backgrounds like Solmara
+            Outpost, Blood Marsh, and Ashlands, turning each area into a handcrafted scene. The camera no longer drags
+            the map around—everything stays fixed like an interactive painting while your player icon moves smoothly
+            across it. Movement is now handled through the 🧭 <strong>Explore</strong> button again, letting you travel
+            the zone while triggering ambushes and discoveries.
+          </div>
         </div>
 
         <div style="margin-bottom:24px;">
           <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
-            <span>Dungeons & Legends</span>
+            <span>⚔️ Combat & UI Improvements</span>
           </div>
-          <ul style="padding-left:18px; margin:0;">
-            <li><strong>World Dungeons</strong>: Travel to the Ancient Catacombs, Iron Garrison, and more.</li>
-            <li><strong>Boss Loot</strong>: Legendary items are now exclusively guarded by dungeon bosses.</li>
-          </ul>
+          <div style="padding-left:18px;">
+            Enemy targeting info (name and HP) now appears as a clean overlay in the bottom-right of the map instead of
+            being buried in menus. The combat action buttons were also moved above the Chronicle Log so skills and
+            attacks appear right next to the battle text, making fights much easier to follow.
+          </div>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
+            <span>⚖️ Combat Balance Changes</span>
+          </div>
+          <div style="padding-left:18px;">
+            Melee classes got some love. Paladins and Barbarians now have much better defense and HP scaling, while
+            Assassins gained extra agility and starting health. Physical attacks were buffed to make basic strikes more
+            reliable. At the same time, caster power was toned down a bit—Lightbinders and Necromancers now have lower
+            INT scaling, and the Holy damage bonus against undead was reduced. Potions were also restored to stronger
+            healing and their inventory bug during combat has been fixed.
+          </div>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
+            <span>🌐 Multiplayer Progress</span>
+          </div>
+          <div style="padding-left:18px;">
+            Work has started preparing the game for Firebase, which will power real-time chat, party syncing, and cloud
+            saves. Party invites were also added to chat and guild member lists to make grouping up easier.
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
+            <span>🛠️ Fixes & Stability</span>
+          </div>
+          <div style="padding-left:18px;">
+            Several rendering and spawn issues were fixed so players no longer appear off-screen when changing zones or
+            refreshing.
+          </div>
         </div>
       </div>
 
