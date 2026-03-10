@@ -6397,11 +6397,14 @@
                 countdownEl.textContent = `⚠️ SHUTDOWN IN: ${formatted}`;
               }
 
-              // If admin, announce in chat every 60 seconds
+              // If admin, announce via massive banner every 60 seconds
               if (this.isAdmin && secsTotal % 60 === 0 && this._lastShout !== secsTotal) {
                 this._lastShout = secsTotal;
                 const timeStr = (h > 0 ? `${h} hour${h > 1 ? 's' : ''} ` : "") + (m > 0 ? `${m} minute${m > 1 ? 's' : ''}` : (h === 0 ? `${s} seconds` : ""));
-                GlobalChat.broadcastAsSystem(`🚨 NOTICE: Server going down for maintenance in ${timeStr.trim()}! Please logout or risk losing data.`);
+                const announcementText = `🚨 NOTICE: Server going down for maintenance in ${timeStr.trim()}! Please logout or risk losing data.`;
+
+                // Write a temporary dummy node so all clients trigger showAnnouncement via the listener
+                firebase.database().ref('world/announcement').set({ text: announcementText, ts: Date.now() });
               }
             }, 1000);
           } else {
@@ -6501,23 +6504,41 @@
       },
 
       showAnnouncement(text) {
-        // Build a grand banner instead of a modal
-        const container = document.getElementById('world-viewport');
-        if (!container) return;
-
         // Remove existing banner if any
         const old = document.getElementById('server-announcement-banner');
         if (old) old.remove();
 
         const banner = document.createElement('div');
         banner.id = 'server-announcement-banner';
-        banner.className = 'server-banner';
-        banner.innerHTML = `
-          <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:20px; margin-bottom:14px; letter-spacing:3px; text-shadow:0 0 10px var(--violet);">📣 DIVINE DECREE</div>
-          <div style="font-size:18px; color:var(--text-lt); margin-bottom:24px; line-height:1.6; font-family:'IM Fell English',serif;">${this._e(text)}</div>
-          <button class="btn btn-violet" style="padding:10px 40px; font-size:12px;" onclick="this.parentElement.remove()">I Hear the Veil</button>
-        `;
-        container.appendChild(banner);
+        banner.style.position = 'fixed';
+        banner.style.top = '60px'; // Positioned slightly below the maintenance countdown
+        banner.style.left = '50%';
+        banner.style.transform = 'translateX(-50%)';
+        banner.style.background = 'var(--violet)';
+        banner.style.color = 'white';
+        banner.style.padding = '8px 24px';
+        banner.style.borderRadius = '20px';
+        banner.style.fontFamily = "'Cinzel', serif";
+        banner.style.fontWeight = 'bold';
+        banner.style.fontSize = '12px';
+        banner.style.letterSpacing = '1px';
+        banner.style.zIndex = '9998';
+        banner.style.boxShadow = '0 0 15px rgba(138, 43, 226, 0.5)';
+        banner.style.border = '1px solid var(--violet-lt)';
+        banner.style.animation = 'pulse 1.5s infinite';
+        banner.style.textAlign = 'center';
+        banner.innerHTML = `📣 <strong>DIVINE DECREE:</strong> ${this._e(text)}`;
+
+        document.body.appendChild(banner);
+
+        // Auto-dismiss after 10 seconds
+        setTimeout(() => {
+          if (banner.parentElement) {
+            banner.style.opacity = '0';
+            banner.style.transition = 'opacity 1s ease';
+            setTimeout(() => banner.remove(), 1000);
+          }
+        }, 10000);
       },
 
       // Command Bridge
@@ -7550,17 +7571,27 @@
         const uid = AuthSystem.user?.uid;
         const pname = (p.name || '').trim().toLowerCase();
 
+        // Convert members safely in case Firebase objectifies the array
+        this._guilds.forEach(g => {
+          if (g.members && !Array.isArray(g.members)) {
+            g.members = Object.values(g.members).filter(Boolean);
+          }
+          if (g.requests && !Array.isArray(g.requests)) {
+            g.requests = Object.values(g.requests).filter(Boolean);
+          }
+        });
+
         // Find guild by UID or case-insensitive Name
         this._mine = this._guilds.find(g => {
           if (!g.members || !Array.isArray(g.members)) return false;
           return g.members.some(m => {
-            if (uid && m.uid === uid) return true;
+            if (uid && m.uid && m.uid === uid) return true;
             return (m.name || '').trim().toLowerCase() === pname;
           });
         }) || null;
 
         this._myMem = this._mine ? this._mine.members.find(m => {
-          if (uid && m.uid === uid) return true;
+          if (uid && m.uid && m.uid === uid) return true;
           return (m.name || '').trim().toLowerCase() === pname;
         }) : null;
 
@@ -7860,7 +7891,7 @@
           faction: p.faction,
           ts: Date.now()
         });
-        await this._save();
+        await this._save(guildId);
         Log.add(`📧 Join request sent to <strong>${g.name}</strong>.`, 'system');
         this._status('Request sent!');
       },
@@ -7879,7 +7910,7 @@
           cls: req.cls || '',
           joinedAt: Date.now()
         });
-        await this._save();
+        await this._save(guildId);
         this._status(`${playerName} approved!`);
       },
 
@@ -7887,7 +7918,7 @@
         const g = this._guilds.find(x => x.id === guildId);
         if (!g) return;
         g.requests = g.requests.filter(r => r.name !== playerName);
-        await this._save();
+        await this._save(guildId);
         this._status(`${playerName} denied.`);
         await this.refresh(); this.showTab('mine');
       },
@@ -7901,7 +7932,7 @@
         g.invites = g.invites || [];
         if (g.invites.some(i => i.name === name)) { this._status('Already invited.'); return; }
         g.invites.push({ name, invitedBy: G.player.name, ts: Date.now() });
-        await this._save();
+        await this._save(guildId);
         Log.add(`\uD83D\uDCE8 Invite sent to <strong>${name}</strong>.`, 'system');
         this._status(`Invite sent to ${name}`);
         this.showTab('mine');
@@ -7913,7 +7944,7 @@
         if (!g) return;
         g.invites = (g.invites || []).filter(i => i.name !== p.name);
         g.members.push({ name: p.name, role: 'member', level: p.level, cls: CLASSES[p.classKey]?.name || '', joinedAt: Date.now() });
-        await this._save();
+        await this._save(guildId);
         Log.add(`\uD83C\uDFF0 You joined guild <strong>${g.name}</strong>!`, 'success');
         await this.refresh(); this.showTab('mine');
       },
@@ -7923,7 +7954,7 @@
         const g = this._guilds.find(x => x.id === guildId);
         if (!g) return;
         g.invites = (g.invites || []).filter(i => i.name !== p.name);
-        await this._save();
+        await this._save(guildId);
         this._status('Invite declined.');
         await this.refresh(); this.showTab('browse');
       },
@@ -7933,7 +7964,7 @@
         if (!g) return;
         const m = g.members.find(x => x.name === playerName);
         if (m) m.role = role;
-        await this._save();
+        await this._save(guildId);
         this._status(`${playerName} is now ${role}.`);
         await this.refresh(); this.showTab('mine');
       },
@@ -7943,7 +7974,7 @@
         const g = this._guilds.find(x => x.id === guildId);
         if (!g) return;
         g.members = g.members.filter(m => m.name !== playerName);
-        await this._save();
+        await this._save(guildId);
         Log.add(`\uD83D\uDEAB ${playerName} was removed from the guild.`, 'system');
         await this.refresh(); this.showTab('mine');
       },
@@ -7960,7 +7991,7 @@
           if (next) { next.role = 'leader'; g.leader = next.name; }
         }
         g.members = g.members.filter(m => m.name !== p.name);
-        await this._save();
+        await this._save(guildId);
         p.guildName = '';
         Log.add('\uD83C\uDFF0 You left the guild.', 'system');
         await this.refresh(); this.showTab('browse');
@@ -7982,7 +8013,7 @@
         const g = this._guilds.find(x => x.id === guildId); if (!g) return;
         g.description = (document.getElementById('guild-edit-desc')?.value || '').trim();
         g.focus = GUILD_FOCUSES.filter(fd => document.getElementById('gedit-' + fd.id)?.checked).map(fd => fd.id);
-        await this._save();
+        await this._save(guildId);
         this._status('Guild info saved!');
         await this.refresh(); this.showTab('mine');
       },
