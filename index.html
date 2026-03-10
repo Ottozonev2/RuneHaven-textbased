@@ -4682,7 +4682,11 @@
 
       showCombatActions() {
         if (G.player.hp <= 0) {
-          UI.setActions([{ label: '🪦 Waiting...', fn: '', cls: 'btn-dim', tooltip: 'You are incapacitated. Wait for a revive or party wipe.' }]);
+          if (G.partyCode && G.partyState && G.partyState.currentTurn === G.player.name) {
+            UI.setActions([{ label: '⏭️ End Turn (Incap)', fn: 'Combat.afterPlayerTurn()', cls: 'btn-blue', tooltip: 'You are incapacitated. Pass the turn to the next player.' }]);
+          } else {
+            UI.setActions([{ label: '🪦 Waiting...', fn: '', cls: 'btn-dim', tooltip: 'You are incapacitated. Wait for a revive or party wipe.' }]);
+          }
           return;
         }
         // Initial combat menu: Attack, Defend, or Flee
@@ -4818,32 +4822,26 @@
         }
 
         if (skill.type === 'damage') {
-          let dmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
-          const crit = skill.alwaysCrit || Math.random() * 100 < p.crit;
-          if (crit && !skill.alwaysCrit) dmg = Math.floor(dmg * 1.8);
+          let totalDmg = 0;
+          let totalHits = skill.hitCount || (skill.doubleHit ? 2 : 1);
 
-          // Apply Status Effects from Skills
-          if (skill.hitCount) {
-            let totalDmg = 0;
-            for (let i = 0; i < skill.hitCount; i++) {
-              const hDmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
-              totalDmg += hDmg;
-            }
-            enemy.hp -= totalDmg;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! A flurry of ${skill.hitCount} hits deals <strong>${totalDmg}</strong> damage!`, 'player');
-            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${totalDmg}`);
-          } else if (skill.doubleHit) {
-            const dmg2 = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
-            enemy.hp -= dmg + dmg2;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! You strike twice for <strong>${dmg}</strong> and <strong>${dmg2}</strong>!`, 'player');
-            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg + dmg2}`);
-          } else {
-            enemy.hp -= dmg;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
-            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+          for (let i = 0; i < totalHits; i++) {
+            let hDmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
+            const crit = skill.alwaysCrit || Math.random() * 100 < p.crit;
+            if (crit && !skill.alwaysCrit) hDmg = Math.floor(hDmg * 1.8);
+            totalDmg += hDmg;
           }
 
-          // Apply Status Effects from Skills (Expanded)
+          enemy.hp -= totalDmg;
+          if (totalHits > 1) {
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! A flurry of ${totalHits} hits deals <strong>${totalDmg}</strong> damage!`, 'player');
+          } else {
+            const crit = skill.alwaysCrit || Math.random() * 100 < p.crit;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${totalDmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
+          }
+          if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${totalDmg}`);
+
+          // Apply Status Effects (Stun, DOT, etc.)
           if (skill.stunChance && Math.random() < skill.stunChance) {
             enemy.status.stun = 1;
             Log.add(`✨ <strong>${skill.name}!</strong> The ${enemy.name} is stunned!`, 'success');
@@ -4853,26 +4851,7 @@
             Log.add(`🧪 <strong>${skill.name}!</strong> The ${enemy.name} is afflicted with ${skill.dot.type}!`, 'success');
           }
 
-          if (skill.hitCount) {
-            let totalDmg = 0;
-            for (let i = 0; i < skill.hitCount; i++) {
-              const hDmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
-              totalDmg += hDmg;
-            }
-            enemy.hp -= totalDmg;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! A flurry of ${skill.hitCount} hits deals <strong>${totalDmg}</strong> damage!`, 'player');
-            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${totalDmg}`);
-          } else if (skill.doubleHit) {
-            const dmg2 = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
-            enemy.hp -= dmg + dmg2;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! You strike twice for <strong>${dmg}</strong> and <strong>${dmg2}</strong>!`, 'player');
-            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg + dmg2}`);
-          } else {
-            enemy.hp -= dmg;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
-            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
-          }
-
+          // Legacy hardcoded skill checks
           if (skillKey === 'lightBind') {
             enemy.status.stun = 1;
             Log.add(`✨ <strong>Light Bind!</strong> The ${enemy.name} is blinded and will skip their next turn.`, 'success');
@@ -6166,6 +6145,7 @@
             G.partyMembers = {};
             return;
           }
+          const prevTurn = (G.partyState && G.partyState.currentTurn) || '';
           G.partyState = partyData;
           const currentTurn = (partyData && partyData.currentTurn) || '';
 
