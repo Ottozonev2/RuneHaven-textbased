@@ -624,12 +624,11 @@
       z-index: 100;
     }
 
-    #panel-world {
+    #world-viewport {
       position: relative;
-      background: #000 url('world-bg.png');
-      /* Placeholder/Theme background */
-      background-size: cover;
+      background: #000;
       overflow: hidden;
+      border-bottom: 2px solid var(--border);
     }
 
     .dash-col {
@@ -821,7 +820,7 @@
     }
 
     .stat-section {
-      padding: 10px 12px;
+      padding: 6px 12px;
       border-bottom: 1px solid var(--border);
     }
 
@@ -831,29 +830,29 @@
     }
 
     .portrait-icon {
-      font-size: 44px;
+      font-size: 32px;
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 2px;
     }
 
     .char-name-dsp {
       font-family: 'Cinzel', serif;
       color: var(--violet-lt);
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 600;
     }
 
     .char-cls-dsp {
       color: var(--text-dim);
-      font-size: 11px;
+      font-size: 9px;
       font-style: italic;
     }
 
     .char-faction-dsp {
-      font-size: 10px;
+      font-size: 8px;
       font-family: 'Cinzel', serif;
       letter-spacing: 1px;
-      margin-top: 3px;
+      margin-top: 1px;
     }
 
     .bar-wrap {
@@ -928,8 +927,8 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 10px 12px;
-      font-size: 14px;
+      padding: 6px 12px;
+      font-size: 12px;
       color: var(--gold-lt);
       border-bottom: 1px solid var(--border);
     }
@@ -1613,12 +1612,7 @@
       }
     }
 
-    #world-viewport {
-      position: relative;
-      overflow: hidden;
-      background: #0a0a0c;
-      border-bottom: 2px solid var(--border);
-    }
+    /* No more duplicate #world-viewport here, it's consolidated above */
 
     #world-grid {
       position: absolute;
@@ -1626,10 +1620,13 @@
       left: 0;
       width: 2000px;
       height: 2000px;
+      background-color: #08080a;
+      /* Fallback slightly above pure black */
       background-image:
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
+        linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+      background-size: 80px 80px;
+      z-index: 1;
     }
 
     /* World View Entities */
@@ -1639,8 +1636,8 @@
       left: 0;
       width: 2000px;
       height: 2000px;
-      /* Large world area */
       pointer-events: none;
+      z-index: 2;
     }
 
     .world-entity {
@@ -1823,9 +1820,9 @@
 
     <div class="game-body">
       <!-- Row 1: Graphical World View -->
-      <div id="panel-world">
+      <div id="world-viewport">
         <!-- The visual map and players will be rendered here -->
-        <div id="world-map-layer"></div>
+        <div id="world-grid"></div>
         <div id="world-entities-layer"></div>
       </div>
 
@@ -4063,7 +4060,7 @@
         const layer = document.getElementById('world-entities-layer');
         const grid = document.getElementById('world-grid');
         const vp = document.getElementById('world-viewport');
-        if (!layer || !vp) return;
+        if (!layer || !vp || !G.player) return;
 
         // Camera follow
         const vpw = vp.clientWidth;
@@ -4123,7 +4120,7 @@
           x: G.world.x,
           y: G.world.y,
           name: G.player.name,
-          icon: CLASSES[G.player.classKey]?.icon || '👤',
+          icon: CLASSES[G.player.classKey]?.icon || G.player.icon || '👤',
           lastSeen: Date.now()
         });
       },
@@ -4974,6 +4971,7 @@
         Log.add(`You stand at <strong>Solmara Outpost</strong>. Rest, trade, then explore Eryndor.`, 'system');
         Log.add(`Use the buttons below to act. On mobile, use the bottom nav.`, 'system');
         UI.refresh(); Explore.showTownActions();
+        World.render();
       },
 
       saveGame() {
@@ -5016,6 +5014,7 @@
           Log.add(`📂 Chronicle restored. Welcome back, <strong>${G.player.name}</strong>.`, 'system');
           Log.add(`${factionLabel(G.player.faction)} · Level ${G.player.level} · ${LOCATIONS[G.location].name}.`, 'story');
           UI.refresh(); UI.showEnemyPanel(null);
+          World.render();
           LOCATIONS[G.location].isTown ? Explore.showTownActions() : Explore.showExploreActions();
         } catch (e) { Log.add('Failed to restore chronicle.', 'system'); }
       },
