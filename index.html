@@ -1785,6 +1785,28 @@
     }
 
     .decor-icon {
+      position: relative;
+      text-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+      /* Subtle anti-aliasing via contrast to mimic pixel art */
+      filter: contrast(1.1);
+    }
+
+    /* PARTY OVERLAY */
+    #party-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .party-member-card {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid var(--violet-dk);
+      border-radius: 4px;
       padding: 6px 10px;
       min-width: 140px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
@@ -2694,7 +2716,7 @@
         desc: 'Holy warrior of the Covenant. Wields divine light and unbreakable faith.',
         base: { hp: 110, mp: 40, str: 10, int: 6, wis: 8, agi: 5, vit: 10, def: 10, crit: 5 },
         growth: { hp: 16, mp: 5, str: 2.3, int: 0.8, wis: 1.0, agi: 0.8, vit: 1.8, def: 1.5, crit: .3 },
-        skills: ['divineStrike', 'holyShield', 'consecrate'],
+        skills: ['divineStrike', 'holyShield', 'consecrate', 'shieldBash', 'auraOfLight', 'holyVerdict', 'guardianAngel', 'aspectOfDevotion'],
         bars: { hp: 95, mp: 40, str: 80, int: 45, wis: 50, agi: 35, def: 80 }
       },
       inquisitor: {
@@ -2702,7 +2724,7 @@
         desc: 'Ruthless hunter of heretics. Combines blade, light magic, and interrogation.',
         base: { hp: 90, mp: 50, str: 9, int: 9, wis: 9, agi: 8, vit: 7, def: 6, crit: 10 },
         growth: { hp: 12, mp: 8, str: 1.5, int: 1.5, wis: 1.2, agi: 1.5, vit: 1, def: 1, crit: .6 },
-        skills: ['purgeFlame', 'judgement', 'lightBind'],
+        skills: ['purgeFlame', 'judgement', 'lightBind', 'holyBurn', 'zealotsStrike', 'excommunication', 'witchHunt', 'wrathOfCouncil'],
         bars: { hp: 70, mp: 55, str: 65, int: 65, wis: 55, agi: 60, def: 50 }
       },
       cleric: {
@@ -2710,7 +2732,7 @@
         desc: 'Devoted healer of the Covenant. Restores allies and smites with holy light.',
         base: { hp: 95, mp: 70, str: 6, int: 10, wis: 12, agi: 6, vit: 9, def: 7, crit: 6 },
         growth: { hp: 13, mp: 10, str: 0.8, int: 2.2, wis: 1.8, agi: 0.8, vit: 1.5, def: 1.5, crit: .3 },
-        skills: ['holyHeal', 'smite', 'divineFavor'],
+        skills: ['holyHeal', 'smite', 'divineFavor', 'prayerOfHealing', 'sanctuary', 'divineResurrection', 'holyRain', 'avatarOfSolmara'],
         bars: { hp: 75, mp: 70, str: 40, int: 78, wis: 80, agi: 40, def: 55 }
       },
       lightbinder: {
@@ -2718,7 +2740,7 @@
         desc: 'Arcane saint who weaves light into devastating magical constructs.',
         base: { hp: 70, mp: 100, str: 4, int: 12, wis: 15, agi: 7, vit: 6, def: 3, crit: 10 },
         growth: { hp: 9, mp: 15, str: 0.8, int: 2.1, wis: 2.0, agi: 0.8, vit: 1, def: 0.8, crit: .4 },
-        skills: ['radiantBlast', 'holyNova', 'solarFlare'],
+        skills: ['radiantBlast', 'holyNova', 'solarFlare', 'prismRay', 'mirrorImage', 'luminousBeam', 'supernova', 'purestLight'],
         bars: { hp: 45, mp: 98, str: 22, int: 98, wis: 95, agi: 50, def: 20 }
       },
       // ── DEMONS ──
@@ -2727,7 +2749,7 @@
         desc: 'Master of death magic. Raises the dead and drains life from the living.',
         base: { hp: 65, mp: 100, str: 4, int: 12, wis: 14, agi: 6, vit: 6, def: 2, crit: 9 },
         growth: { hp: 8, mp: 15, str: 0.8, int: 2.1, wis: 2.0, agi: 0.8, vit: 1, def: 0.8, crit: .4 },
-        skills: ['deathBolt', 'soulDrain', 'raiseDead'],
+        skills: ['deathBolt', 'soulDrain', 'raiseDead', 'boneSpear', 'carrionPlague', 'lichForm', 'armyOfDead', 'soulReaper'],
         bars: { hp: 42, mp: 99, str: 18, int: 99, wis: 90, agi: 45, def: 16 }
       },
       warlock: {
@@ -2735,7 +2757,7 @@
         desc: 'Wielder of demonic pacts. Trades health for power in forbidden rituals.',
         base: { hp: 80, mp: 80, str: 6, int: 12, wis: 10, agi: 7, vit: 7, def: 4, crit: 11 },
         growth: { hp: 10, mp: 12, str: 0.8, int: 2, wis: 1.5, agi: 0.8, vit: 1, def: 0.8, crit: .5 },
-        skills: ['demonicPact', 'shadowBolt', 'hellfire'],
+        skills: ['demonicPact', 'shadowBolt', 'hellfire', 'corruption', 'darkSacrifice', 'voidRift', 'infernalPact', 'doom'],
         bars: { hp: 55, mp: 90, str: 35, int: 90, wis: 65, agi: 50, def: 25 }
       },
       barbarian: {
@@ -2743,7 +2765,7 @@
         desc: 'Berserker of the Bloodspire clans. Embraces rage to ignore pain and deal massive damage.',
         base: { hp: 120, mp: 20, str: 14, int: 3, wis: 4, agi: 8, vit: 12, def: 8, crit: 12 },
         growth: { hp: 20, mp: 2, str: 2.5, int: 0, wis: 0.2, agi: 1.5, vit: 2.2, def: 1.2, crit: .6 },
-        skills: ['berserkRage', 'brutalSlam', 'bloodFury'],
+        skills: ['berserkRage', 'brutalSlam', 'bloodFury', 'headbutt', 'whirlwind', 'titanGrip', 'earthquake', 'colossusSmash'],
         bars: { hp: 99, mp: 20, str: 99, int: 18, wis: 10, agi: 58, def: 42 }
       },
       assassin: {
@@ -2751,7 +2773,7 @@
         desc: 'Shadow-walker of the Dominion. Strikes from darkness with lethal precision.',
         base: { hp: 95, mp: 50, str: 9, int: 7, wis: 6, agi: 15, vit: 7, def: 4, crit: 18 },
         growth: { hp: 11, mp: 7, str: 1.6, int: 0.8, wis: 0.5, agi: 2.6, vit: 1, def: 0.8, crit: 1.3 },
-        skills: ['shadowStrike', 'venomBlade', 'smokeBomb'],
+        skills: ['shadowStrike', 'venomBlade', 'smokeBomb', 'quickCut', 'shadowStep', 'eviscerate', 'bladeDance', 'deathsShadow'],
         bars: { hp: 60, mp: 45, str: 55, int: 45, wis: 35, agi: 99, def: 35 }
       }
     };
@@ -2760,38 +2782,77 @@
        SKILLS
        ============================================================ */
     const SKILLS = {
-      // Paladin
-      divineStrike: { name: 'Divine Strike', icon: '⚡', cost: 10, type: 'damage', dmgType: 'holy', mult: 2.3, desc: 'Holy-charged blow (2.3× STR + light damage).' },
-      holyShield: { name: 'Holy Shield', icon: '🛡️', cost: 8, type: 'defend', dmgType: 'holy', defense: 5, desc: 'Divine barrier — greatly raises DEF this turn.' },
-      consecrate: { name: 'Consecrate', icon: '✝️', cost: 14, type: 'heal', dmgType: 'holy', healMult: 2.0, desc: 'Consecrates the ground, restoring moderate HP.' },
+      divineStrike: { name: 'Divine Strike', icon: '⚡', cost: 10, type: 'damage', dmgType: 'holy', mult: 2.3, levelReq: 1, desc: 'Holy-charged blow (2.3× STR + light damage).' },
+      holyShield: { name: 'Holy Shield', icon: '🛡️', cost: 8, type: 'defend', dmgType: 'holy', defense: 5, levelReq: 1, desc: 'Divine barrier — greatly raises DEF this turn.' },
+      consecrate: { name: 'Consecrate', icon: '✝️', cost: 14, type: 'heal', dmgType: 'holy', healMult: 2.0, levelReq: 1, desc: 'Consecrates the ground, restoring moderate HP.' },
+      shieldBash: { name: 'Shield Bash', icon: '🛡️', cost: 12, type: 'damage', dmgType: 'physical', mult: 1.8, levelReq: 5, stunChance: 0.3, desc: 'Hurtles shield at enemy. 1.8x STR. 30% stun chance.' },
+      auraOfLight: { name: 'Aura of Light', icon: '✨', cost: 20, type: 'buff', dmgType: 'holy', defBonus: 10, duration: 5, levelReq: 15, desc: 'Radiates holy light. +10 DEF for 5 turns.' },
+      holyVerdict: { name: 'Holy Verdict', icon: '⚖️', cost: 25, type: 'damage', dmgType: 'holy', mult: 4.5, levelReq: 30, desc: 'A final judgement. 4.5x STR holy damage.' },
+      guardianAngel: { name: 'Guardian Angel', icon: '👼', cost: 40, type: 'buff', dmgType: 'holy', immortality: 1, duration: 2, levelReq: 60, desc: 'Cannot die for 2 turns. Extreme holy protection.' },
+      aspectOfDevotion: { name: 'Aspect of Devotion', icon: '👑', cost: 60, type: 'buff', dmgType: 'holy', strBonus: 30, defBonus: 30, duration: 10, levelReq: 100, desc: 'Become an avatar of faith. Massive stats for 10 turns.' },
       // Inquisitor
-      purgeFlame: { name: 'Purge Flame', icon: '🔥', cost: 14, type: 'magic', dmgType: 'fire', mult: 2.4, desc: 'Purifying fire (2.4× INT). Burns heretics.' },
-      judgement: { name: 'Judgement', icon: '⚖️', cost: 10, type: 'damage', dmgType: 'holy', mult: 2.0, alwaysCrit: true, desc: 'Guaranteed crit — divine judgement (2.0× STR).' },
-      lightBind: { name: 'Light Bind', icon: '✨', cost: 8, type: 'defend', dmgType: 'holy', defense: 3, desc: 'Wraps enemy in light — reduces incoming damage.' },
+      purgeFlame: { name: 'Purge Flame', icon: '🔥', cost: 14, type: 'magic', dmgType: 'fire', mult: 2.4, levelReq: 1, desc: 'Purifying fire (2.4× INT). Burns heretics.' },
+      judgement: { name: 'Judgement', icon: '⚖️', cost: 10, type: 'damage', dmgType: 'holy', mult: 2.0, levelReq: 1, alwaysCrit: true, desc: 'Guaranteed crit — divine judgement (2.0× STR).' },
+      lightBind: { name: 'Light Bind', icon: '✨', cost: 8, type: 'defend', dmgType: 'holy', defense: 3, levelReq: 1, desc: 'Wraps enemy in light — reduces incoming damage.' },
+      holyBurn: { name: 'Holy Burn', icon: '🔆', cost: 18, type: 'magic', dmgType: 'holy', mult: 2.2, dot: { type: 'burn', dmg: 1.2, duration: 3 }, levelReq: 5, desc: 'Holy fire that burns over time. 2.2x INT.' },
+      zealotsStrike: { name: 'Zealot Strike', icon: '⚔️', cost: 15, type: 'damage', dmgType: 'physical', mult: 3.2, levelReq: 15, desc: 'Strike with religious fervor. 3.2x STR.' },
+      excommunication: { name: 'Excommunication', icon: '🚫', cost: 30, type: 'magic', dmgType: 'holy', mult: 5.0, levelReq: 30, desc: 'Sunder the heretic. 5.0x INT holy damage.' },
+      witchHunt: { name: 'Witch Hunt', icon: '🏹', cost: 35, type: 'damage', dmgType: 'holy', mult: 4.0, alwaysCrit: true, levelReq: 60, desc: 'Relentless pursuit. Guaranteed crit 4.0x STR.' },
+      wrathOfCouncil: { name: 'Wrath of Council', icon: '🏛️', cost: 70, type: 'magic', dmgType: 'holy', mult: 12.0, levelReq: 100, desc: 'Summon the Councils wrath. 12.0x INT holy damage.' },
       // Cleric
-      holyHeal: { name: 'Holy Heal', icon: '💚', cost: 16, type: 'heal', dmgType: 'holy', healMult: 2.5, desc: 'Restores significant HP with holy light.' },
-      smite: { name: 'Smite', icon: '☀️', cost: 12, type: 'magic', dmgType: 'holy', mult: 2.0, desc: 'Holy energy strike (2.0× INT).' },
-      divineFavor: { name: 'Divine Favor', icon: '🌟', cost: 20, type: 'heal', dmgType: 'holy', healMult: 1.5, desc: 'Heals and cleanses corruption.' },
+      holyHeal: { name: 'Holy Heal', icon: '💚', cost: 16, type: 'heal', dmgType: 'holy', healMult: 2.5, levelReq: 1, desc: 'Restores significant HP with holy light.' },
+      smite: { name: 'Smite', icon: '☀️', cost: 12, type: 'magic', dmgType: 'holy', mult: 2.0, levelReq: 1, desc: 'Holy energy strike (2.0× INT).' },
+      divineFavor: { name: 'Divine Favor', icon: '🌟', cost: 20, type: 'heal', dmgType: 'holy', healMult: 1.5, levelReq: 1, desc: 'Heals and cleanses corruption.' },
+      prayerOfHealing: { name: 'Prayer of Healing', icon: '🙏', cost: 30, type: 'heal', dmgType: 'holy', healMult: 4.0, levelReq: 5, desc: 'Deep prayer restores massive HP. 4.0x INT.' },
+      sanctuary: { name: 'Sanctuary', icon: '🕍', cost: 35, type: 'buff', dmgType: 'holy', defBonus: 20, duration: 3, levelReq: 15, desc: 'Creates a safe harbor. +20 DEF for 3 turns.' },
+      divineResurrection: { name: 'Resurrection', icon: '👼', cost: 50, type: 'heal', dmgType: 'holy', healMult: 5.0, isRevive: true, levelReq: 30, desc: 'Return an ally from the brink. Revives with HP.' },
+      holyRain: { name: 'Holy Rain', icon: '🌧️', cost: 60, type: 'magic', dmgType: 'holy', mult: 7.0, levelReq: 60, desc: 'Rain holy fire from the clouds. 7.0x INT.' },
+      avatarOfSolmara: { name: 'Avatar of Solmara', icon: '⛪', cost: 100, type: 'buff', dmgType: 'holy', healOverTime: 0.2, duration: 10, levelReq: 100, desc: 'Become the light of Solmara. Heal 20% HP per turn.' },
       // Lightbinder
-      radiantBlast: { name: 'Radiant Blast', icon: '💫', cost: 15, type: 'magic', dmgType: 'holy', mult: 2.6, desc: 'Focused beam of pure light (2.6× INT).' },
-      holyNova: { name: 'Holy Nova', icon: '✨', cost: 12, type: 'magic', dmgType: 'holy', mult: 1.8, desc: 'Burst of sacred energy (1.8× INT).' },
-      solarFlare: { name: 'Solar Flare', icon: '🌞', cost: 22, type: 'magic', dmgType: 'fire', mult: 3.2, desc: 'Devastating solar explosion (3.2× INT).' },
+      radiantBlast: { name: 'Radiant Blast', icon: '💫', cost: 15, type: 'magic', dmgType: 'holy', mult: 2.6, levelReq: 1, desc: 'Focused beam of pure light (2.6× INT).' },
+      holyNova: { name: 'Holy Nova', icon: '✨', cost: 12, type: 'magic', dmgType: 'holy', mult: 1.8, levelReq: 1, desc: 'Burst of sacred energy (1.8× INT).' },
+      solarFlare: { name: 'Solar Flare', icon: '🌞', cost: 22, type: 'magic', dmgType: 'fire', mult: 3.2, levelReq: 1, desc: 'Devastating solar explosion (3.2× INT).' },
+      prismRay: { name: 'Prism Ray', icon: '🌈', cost: 20, type: 'magic', dmgType: 'holy', mult: 2.5, levelReq: 5, desc: 'Splits light into many beams. 2.5x INT.' },
+      mirrorImage: { name: 'Mirror Image', icon: '👥', cost: 40, type: 'buff', dmgType: 'holy', dodgeBonus: 50, duration: 3, levelReq: 15, desc: 'Create light decoys. +50% dodge for 3 turns.' },
+      luminousBeam: { name: 'Luminous Beam', icon: '🌠', cost: 45, type: 'magic', dmgType: 'holy', mult: 6.0, levelReq: 30, desc: 'Concentrated starlight. 6.0x INT damage.' },
+      supernova: { name: 'Supernova', icon: '💥', cost: 80, type: 'magic', dmgType: 'fire', mult: 10.0, levelReq: 60, desc: 'The death of a star. 10.0x INT fire damage.' },
+      purestLight: { name: 'Purest Light', icon: '🕯️', cost: 120, type: 'magic', dmgType: 'holy', mult: 20.0, levelReq: 100, desc: 'Light that erases darkness. 20.0x INT holy damage.' },
       // Necromancer
-      deathBolt: { name: 'Death Bolt', icon: '💀', cost: 14, type: 'magic', dmgType: 'shadow', mult: 2.5, desc: 'Bolt of necrotic energy (2.5× INT).' },
-      soulDrain: { name: 'Soul Drain', icon: '🌑', cost: 12, type: 'drain', dmgType: 'shadow', mult: 1.8, desc: 'Drains enemy HP and restores your own.' },
-      raiseDead: { name: 'Raise Dead', icon: '💀', cost: 20, type: 'summon', dmgType: 'shadow', strBonus: 6, desc: 'Raises a skeletal warrior that fights alongside you each turn!' },
+      deathBolt: { name: 'Death Bolt', icon: '💀', cost: 14, type: 'magic', dmgType: 'shadow', mult: 2.5, levelReq: 1, desc: 'Bolt of necrotic energy (2.5× INT).' },
+      soulDrain: { name: 'Soul Drain', icon: '🌑', cost: 12, type: 'drain', dmgType: 'shadow', mult: 1.8, levelReq: 1, desc: 'Drains enemy HP and restores your own.' },
+      raiseDead: { name: 'Raise Dead', icon: '💀', cost: 20, type: 'summon', dmgType: 'shadow', strBonus: 6, levelReq: 1, desc: 'Raises a skeletal warrior that fights alongside you each turn!' },
+      boneSpear: { name: 'Bone Spear', icon: '🦴', cost: 18, type: 'magic', dmgType: 'physical', mult: 3.0, levelReq: 5, desc: 'Hurl a spear of bone. 3.0x INT physical damage.' },
+      carrionPlague: { name: 'Carrion Plague', icon: '🤮', cost: 25, type: 'magic', dmgType: 'poison', dot: { type: 'poison', dmg: 1.5, duration: 5 }, levelReq: 15, desc: 'Infection that spreads. Poison damage over 5 turns.' },
+      lichForm: { name: 'Lich Form', icon: '🧛', cost: 50, type: 'buff', dmgType: 'shadow', intBonus: 20, defBonus: 10, duration: 5, levelReq: 30, desc: 'Undeath ascension. +20 INT, +10 DEF.' },
+      armyOfDead: { name: 'Army of Dead', icon: '🧟', cost: 80, type: 'summon', dmgType: 'shadow', summonCount: 3, levelReq: 60, desc: 'Raise 3 skeletons at once.' },
+      soulReaper: { name: 'Soul Reaper', icon: '🧥', cost: 100, type: 'magic', dmgType: 'shadow', mult: 15.0, levelReq: 100, desc: 'Cut the thread of life. 15.0x INT shadow damage.' },
       // Warlock
-      demonicPact: { name: 'Demonic Pact', icon: '😈', cost: 0, type: 'pact', dmgType: 'shadow', desc: 'Sacrifice 15 HP for 20 MP. Dangerous power.' },
-      shadowBolt: { name: 'Shadow Bolt', icon: '🌑', cost: 12, type: 'magic', dmgType: 'shadow', mult: 2.2, desc: 'Demonic shadow energy (2.2× INT).' },
-      hellfire: { name: 'Hellfire', icon: '🔥', cost: 20, type: 'magic', dmgType: 'fire', mult: 3.0, desc: 'Hellfire eruption (3.0× INT). Highly destructive.' },
+      demonicPact: { name: 'Demonic Pact', icon: '😈', cost: 0, type: 'pact', dmgType: 'shadow', levelReq: 1, desc: 'Sacrifice 15 HP for 20 MP. Dangerous power.' },
+      shadowBolt: { name: 'Shadow Bolt', icon: '🌑', cost: 12, type: 'magic', dmgType: 'shadow', mult: 2.2, levelReq: 1, desc: 'Demonic shadow energy (2.2× INT).' },
+      hellfire: { name: 'Hellfire', icon: '🔥', cost: 20, type: 'magic', dmgType: 'fire', mult: 3.0, levelReq: 1, desc: 'Hellfire eruption (3.0× INT). Highly destructive.' },
+      corruption: { name: 'Corruption', icon: '🧿', cost: 22, type: 'magic', dmgType: 'shadow', dot: { type: 'curse', dmg: 1.2, duration: 10 }, levelReq: 5, desc: 'Long-lasting dark curse. Damage over 10 turns.' },
+      darkSacrifice: { name: 'Dark Sacrifice', icon: '🩸', cost: 0, type: 'pact_hp', dmgType: 'shadow', mult: 5.0, hpCost: 40, levelReq: 15, desc: 'Spend 40 HP for massive 5.0x INT shadow strike.' },
+      voidRift: { name: 'Void Rift', icon: '🕳️', cost: 45, type: 'magic', dmgType: 'shadow', mult: 7.0, levelReq: 30, desc: 'Open a rift to the void. 7.0x INT.' },
+      infernalPact: { name: 'Infernal Pact', icon: '🔥', cost: 70, type: 'summon', dmgType: 'fire', summonType: 'demon', levelReq: 60, desc: 'Summon a Greater Demon for 5 turns.' },
+      doom: { name: 'Doom', icon: '⌛', cost: 120, type: 'magic', dmgType: 'shadow', mult: 25.0, levelReq: 100, desc: 'Inevitable destruction. 25.0x INT shadow damage.' },
       // Barbarian
-      berserkRage: { name: 'Berserk Rage', icon: '😡', cost: 10, type: 'buff', dmgType: 'physical', strBonus: 8, duration: 3, desc: 'Unleashes rage — +8 STR for 3 turns.' },
-      brutalSlam: { name: 'Brutal Slam', icon: '💥', cost: 8, type: 'damage', dmgType: 'physical', mult: 2.4, desc: 'Ground-splitting strike (2.4× STR).' },
-      bloodFury: { name: 'Blood Fury', icon: '🩸', cost: 6, type: 'damage', dmgType: 'physical', mult: 1.6, doubleHit: true, desc: 'Frenzied double strike (1.6× STR each).' },
+      berserkRage: { name: 'Berserk Rage', icon: '😡', cost: 10, type: 'buff', dmgType: 'physical', strBonus: 8, duration: 3, levelReq: 1, desc: 'Unleashes rage — +8 STR for 3 turns.' },
+      brutalSlam: { name: 'Brutal Slam', icon: '💥', cost: 8, type: 'damage', dmgType: 'physical', mult: 2.4, levelReq: 1, desc: 'Ground-splitting strike (2.4× STR).' },
+      bloodFury: { name: 'Blood Fury', icon: '🩸', cost: 6, type: 'damage', dmgType: 'physical', mult: 1.6, doubleHit: true, levelReq: 1, desc: 'Frenzied double strike (1.6× STR each).' },
+      headbutt: { name: 'Headbutt', icon: '🤕', cost: 12, type: 'damage', dmgType: 'physical', mult: 1.5, stunChance: 0.5, levelReq: 5, desc: 'Concussive hit. 1.5x STR. 50% stun chance.' },
+      whirlwind: { name: 'Whirlwind', icon: '🌪️', cost: 25, type: 'damage', dmgType: 'physical', mult: 1.2, hitCount: 4, levelReq: 15, desc: 'Spinning attack. 4 hits of 1.2x STR.' },
+      titanGrip: { name: 'Titan Grip', icon: '💪', cost: 30, type: 'buff', dmgType: 'physical', strBonus: 20, duration: 5, levelReq: 30, desc: 'Inhuman strength. +20 STR for 5 turns.' },
+      earthquake: { name: 'Earthquake', icon: '🪵', cost: 50, type: 'damage', dmgType: 'physical', mult: 8.0, levelReq: 60, desc: 'Shatter the land. 8.0x STR.' },
+      colossusSmash: { name: 'Colossus Smash', icon: '🔨', cost: 90, type: 'damage', dmgType: 'physical', mult: 18.0, levelReq: 100, desc: 'Might of the giants. 18.0x STR.' },
       // Assassin
-      shadowStrike: { name: 'Shadow Strike', icon: '🗡️', cost: 10, type: 'damage', dmgType: 'shadow', mult: 2.8, alwaysCrit: true, desc: 'Guaranteed crit from the shadows (2.8× STR).' },
-      venomBlade: { name: 'Venom Blade', icon: '🐍', cost: 8, type: 'damage', dmgType: 'poison', mult: 1.8, desc: 'Poisoned strike — deals 1.8× STR damage.' },
-      smokeBomb: { name: 'Smoke Bomb', icon: '💨', cost: 8, type: 'escape', dmgType: 'shadow', desc: 'Vanish in shadow smoke — guaranteed escape.' }
+      shadowStrike: { name: 'Shadow Strike', icon: '🗡️', cost: 10, type: 'damage', dmgType: 'shadow', mult: 2.8, alwaysCrit: true, levelReq: 1, desc: 'Guaranteed crit from the shadows (2.8× STR).' },
+      venomBlade: { name: 'Venom Blade', icon: '🐍', cost: 8, type: 'damage', dmgType: 'poison', mult: 1.8, levelReq: 1, desc: 'Poisoned strike — deals 1.8× STR damage.' },
+      smokeBomb: { name: 'Smoke Bomb', icon: '💨', cost: 8, type: 'escape', dmgType: 'shadow', levelReq: 1, desc: 'Vanish in shadow smoke — guaranteed escape.' },
+      quickCut: { name: 'Quick Cut', icon: '⚔️', cost: 12, type: 'damage', dmgType: 'physical', mult: 1.4, doubleHit: true, levelReq: 5, desc: 'Two rapid slices. 1.4x STR each.' },
+      shadowStep: { name: 'Shadow Step', icon: '👣', cost: 18, type: 'buff', dmgType: 'shadow', agiBonus: 20, duration: 3, levelReq: 15, desc: 'Faster than shadows. +20 AGI for 3 turns.' },
+      eviscerate: { name: 'Eviscerate', icon: '🩸', cost: 35, type: 'damage', dmgType: 'physical', mult: 6.0, critChanceBonus: 20, levelReq: 30, desc: 'Mangle the target. 6.0x STR with +20% crit.' },
+      bladeDance: { name: 'Blade Dance', icon: '💃', cost: 60, type: 'damage', dmgType: 'physical', mult: 1.0, hitCount: 10, levelReq: 60, desc: 'A flurry of 10 rapid strikes.' },
+      deathsShadow: { name: 'Deaths Shadow', icon: '👤', cost: 120, type: 'damage', dmgType: 'shadow', mult: 25.0, alwaysCrit: true, levelReq: 100, desc: 'The final strike. 25.0x STR + Crit.' },
     };
 
     /* ============================================================
@@ -4549,6 +4610,10 @@
           }
           if (G.partyCode && G.isPartyLeader) {
             const simplifiedEnemies = G.enemies.map(e => ({ name: e.name, hp: e.hp, maxHp: e.maxHp, level: e.level, def: e.def, icon: e.icon }));
+            WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase()).update({
+              currentTurn: G.player.name,
+              turnPhase: 'players'
+            });
             GlobalChat._broadcastPartyCmd(`/party_battle ${enemyKey} ${JSON.stringify(simplifiedEnemies)}`);
           }
         }
@@ -4588,11 +4653,12 @@
           const mpPct = Math.round((m.mp / m.maxMp) * 100);
           const xpPct = Math.round((m.xp / m.xpToNext) * 100);
           const isYou = name === G.player.name;
+          const isTurn = G.partyState && G.partyState.currentTurn === name;
 
           return `
-            <div class="party-member-card" style="${isYou ? 'border-color:var(--gold);' : ''}">
+            <div class="party-member-card" style="${isYou ? 'border-color:var(--gold);' : ''} ${isTurn ? 'box-shadow: 0 0 10px var(--violet-lt);' : ''}">
               <div class="party-member-header">
-                <span class="party-member-name">${m.icon} ${name} ${isYou ? '<span style="color:var(--gold); font-size:8px;">[YOU]</span>' : ''}</span>
+                <span class="party-member-name">${m.icon} ${name} ${isYou ? '<span style="color:var(--gold); font-size:8px;">[YOU]</span>' : ''} ${isTurn ? '⚡' : ''}</span>
                 <span class="party-member-level">Lv.${m.level}</span>
               </div>
               <div class="party-bar-container">
@@ -4610,6 +4676,10 @@
       },
 
       showCombatActions() {
+        if (G.player.hp <= 0) {
+          UI.setActions([{ label: '🪦 Waiting...', fn: '', cls: 'btn-dim', tooltip: 'You are incapacitated. Wait for a revive or party wipe.' }]);
+          return;
+        }
         // Initial combat menu: Attack, Defend, or Flee
         UI.setActions([
           { label: '⚔️ Attack', fn: "Combat.showAttackMenu()", cls: 'btn-red', tooltip: 'Choose your attack or skill.' },
@@ -4620,58 +4690,60 @@
 
       showAttackMenu() {
         const p = G.player;
-        const skillBtns = Object.keys(p.skills).map(sk => {
-          const s = SKILLS[sk];
-          const hasMp = s.type === 'pact' || (p.mp >= s.cost);
+        const skillBtns = Object.keys(p.skills)
+          .filter(sk => SKILLS[sk] && (SKILLS[sk].levelReq || 1) <= p.level)
+          .map(sk => {
+            const s = SKILLS[sk];
+            const hasMp = s.type === 'pact' || s.type === 'pact_hp' || (p.mp >= s.cost);
 
-          let tooltip = `${s.desc} | Cost: ${s.type === 'pact' ? '15 HP' : s.cost + ' MP'}`;
-          if (s.duration) tooltip += ` | Duration: ${s.duration} turns`;
+            let tooltip = `${s.desc} | Cost: ${s.type === 'pact' ? '15 HP' : s.cost + ' MP'}`;
+            if (s.duration) tooltip += ` | Duration: ${s.duration} turns`;
 
-          // Dynamic tooltip calculation with condensed stats
-          const skLevel = p.skills[sk] || 1;
-          const lvMult = 1 + (skLevel - 1) * 0.15;
-          let effectStr = '';
-          const effStr = condenseStat(effectiveStat('str'));
-          const effInt = condenseStat(effectiveStat('int'));
+            // Dynamic tooltip calculation with condensed stats
+            const skLevel = p.skills[sk] || 1;
+            const lvMult = 1 + (skLevel - 1) * 0.15;
+            let effectStr = '';
+            const effStr = condenseStat(effectiveStat('str'));
+            const effInt = condenseStat(effectiveStat('int'));
 
-          if (s.type === 'damage') {
-            const rawDmg = Math.floor(effStr * s.mult * lvMult);
-            effectStr = `Est. Dmg: ~${rawDmg}${s.doubleHit ? ' x2' : ''}`;
-          } else if (s.type === 'magic') {
-            const rawDmg = Math.floor(effInt * s.mult * lvMult);
-            effectStr = `Est. Dmg: ~${rawDmg}`;
-          } else if (s.type === 'drain') {
-            const rawDmg = Math.floor(effInt * s.mult * lvMult);
-            effectStr = `Est. Dmg: ~${rawDmg} (Heal: ~${Math.floor(rawDmg * 0.5)})`;
-          } else if (s.type === 'heal') {
-            const rawHeal = Math.floor((effInt + p.vit) * s.healMult * lvMult);
-            effectStr = `Est. Heal: ~${rawHeal}`;
-          } else if (s.type === 'summon') {
-            const ct = COMPANION_TYPES['skeleton'];
-            if (ct) {
-              const summonHp = ct.hp + Math.floor(p.level * 15);
-              const summonStr = Math.floor(ct.str + (p.level / 2));
-              effectStr = `Summon: ${summonHp} HP, ${summonStr} STR`;
+            if (s.type === 'damage') {
+              const rawDmg = Math.floor(effStr * s.mult * lvMult);
+              effectStr = `Est. Dmg: ~${rawDmg}${s.doubleHit ? ' x2' : ''}`;
+            } else if (s.type === 'magic') {
+              const rawDmg = Math.floor(effInt * s.mult * lvMult);
+              effectStr = `Est. Dmg: ~${rawDmg}`;
+            } else if (s.type === 'drain') {
+              const rawDmg = Math.floor(effInt * s.mult * lvMult);
+              effectStr = `Est. Dmg: ~${rawDmg} (Heal: ~${Math.floor(rawDmg * 0.5)})`;
+            } else if (s.type === 'heal') {
+              const rawHeal = Math.floor((effInt + p.vit) * s.healMult * lvMult);
+              effectStr = `Est. Heal: ~${rawHeal}`;
+            } else if (s.type === 'summon') {
+              const ct = COMPANION_TYPES['skeleton'];
+              if (ct) {
+                const summonHp = ct.hp + Math.floor(p.level * 15);
+                const summonStr = Math.floor(ct.str + (p.level / 2));
+                effectStr = `Summon: ${summonHp} HP, ${summonStr} STR`;
+              }
+            } else if (s.type === 'buff' && s.strBonus) {
+              effectStr = `Buff: +${s.strBonus} STR`;
             }
-          } else if (s.type === 'buff' && s.strBonus) {
-            effectStr = `Buff: +${s.strBonus} STR`;
-          }
 
-          if (effectStr) {
-            tooltip += ` | ${effectStr}`;
-          }
+            if (effectStr) {
+              tooltip += ` | ${effectStr}`;
+            }
 
-          const itColor = hasMp ? 'btn-violet' : '';
-          const rarColor = s.color || '#fff';
+            const itColor = hasMp ? 'btn-violet' : '';
+            const rarColor = s.color || '#fff';
 
-          return {
-            label: `<span style="color:${rarColor}">${s.icon} ${s.name}</span>${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`,
-            fn: `Combat.useSkill('${sk}')`,
-            cls: itColor,
-            disabled: !hasMp,
-            tooltip: tooltip
-          };
-        });
+            return {
+              label: `<span style="color:${rarColor}">${s.icon} ${s.name}</span>${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`,
+              fn: `Combat.useSkill('${sk}')`,
+              cls: itColor,
+              disabled: !hasMp,
+              tooltip: tooltip
+            };
+          });
 
         const effStrObj = condenseStat(effectiveStat('str'));
         const basicDmg = Math.floor(effStrObj * 1.7) + 3; // +3 avg variance
@@ -4686,6 +4758,9 @@
 
       attack() {
         if (!G.canAct) return;
+        if (G.partyCode && G.partyState && G.partyState.currentTurn !== G.player.name) {
+          Log.add("It is not your turn!", "system"); return;
+        }
         G.playerDefending = false;
         const enemy = G.enemies[G.targetIndex];
         if (!enemy || enemy.hp <= 0) {
@@ -4708,6 +4783,9 @@
 
       useSkill(skillKey) {
         if (!G.canAct) return;
+        if (G.partyCode && G.partyState && G.partyState.currentTurn !== G.player.name) {
+          Log.add("It is not your turn!", "system"); return;
+        }
         G.playerDefending = false;
         const p = G.player, enemy = G.enemies[G.targetIndex], skill = SKILLS[skillKey];
         if (!enemy || enemy.hp <= 0) {
@@ -4740,6 +4818,56 @@
           if (crit && !skill.alwaysCrit) dmg = Math.floor(dmg * 1.8);
 
           // Apply Status Effects from Skills
+          if (skill.hitCount) {
+            let totalDmg = 0;
+            for (let i = 0; i < skill.hitCount; i++) {
+              const hDmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
+              totalDmg += hDmg;
+            }
+            enemy.hp -= totalDmg;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! A flurry of ${skill.hitCount} hits deals <strong>${totalDmg}</strong> damage!`, 'player');
+            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${totalDmg}`);
+          } else if (skill.doubleHit) {
+            const dmg2 = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
+            enemy.hp -= dmg + dmg2;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! You strike twice for <strong>${dmg}</strong> and <strong>${dmg2}</strong>!`, 'player');
+            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg + dmg2}`);
+          } else {
+            enemy.hp -= dmg;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
+            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+          }
+
+          // Apply Status Effects from Skills (Expanded)
+          if (skill.stunChance && Math.random() < skill.stunChance) {
+            enemy.status.stun = 1;
+            Log.add(`✨ <strong>${skill.name}!</strong> The ${enemy.name} is stunned!`, 'success');
+          }
+          if (skill.dot) {
+            enemy.status[skill.dot.type] = (enemy.status[skill.dot.type] || 0) + skill.dot.duration;
+            Log.add(`🧪 <strong>${skill.name}!</strong> The ${enemy.name} is afflicted with ${skill.dot.type}!`, 'success');
+          }
+
+          if (skill.hitCount) {
+            let totalDmg = 0;
+            for (let i = 0; i < skill.hitCount; i++) {
+              const hDmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
+              totalDmg += hDmg;
+            }
+            enemy.hp -= totalDmg;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! A flurry of ${skill.hitCount} hits deals <strong>${totalDmg}</strong> damage!`, 'player');
+            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${totalDmg}`);
+          } else if (skill.doubleHit) {
+            const dmg2 = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
+            enemy.hp -= dmg + dmg2;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! You strike twice for <strong>${dmg}</strong> and <strong>${dmg2}</strong>!`, 'player');
+            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg + dmg2}`);
+          } else {
+            enemy.hp -= dmg;
+            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
+            if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+          }
+
           if (skillKey === 'lightBind') {
             enemy.status.stun = 1;
             Log.add(`✨ <strong>Light Bind!</strong> The ${enemy.name} is blinded and will skip their next turn.`, 'success');
@@ -4747,18 +4875,6 @@
           if (skillKey === 'venomBlade') {
             enemy.status.poison = 3;
             Log.add(`🐍 <strong>Venom Blade!</strong> The ${enemy.name} is poisoned!`, 'success');
-          }
-
-          if (skill.doubleHit) {
-            const dmg2 = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
-            enemy.hp -= dmg + dmg2;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! You strike twice for <strong>${dmg}</strong> and <strong>${dmg2}</strong>!`, 'player');
-          } else {
-            enemy.hp -= dmg;
-            Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
-          }
-          if (G.partyCode) {
-            GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${skill.doubleHit ? (dmg + dmg2) : dmg}`);
           }
         } else if (skill.type === 'magic') {
           let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult * lvMult * typeMult) - Math.floor(enemy.def / 2));
@@ -4779,9 +4895,17 @@
             GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
           }
         } else if (skill.type === 'heal') {
+          if (G.partyCode && !skill.isSelfOnly) {
+            const members = Object.keys(G.partyMembers);
+            if (members.length > 1) {
+              this.showAllyTargeting(skillKey);
+              return;
+            }
+          }
           const amt = Math.floor((effectiveStat('int') + p.vit) * skill.healMult * lvMult);
           p.hp = Math.min(effectiveMaxHp(), p.hp + amt);
           Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! Restored <strong>${amt}</strong> HP.`, 'heal');
+          if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_heal ${G.player.name} ${amt}`);
         } else if (skill.type === 'defend') {
           G.combatBuffs.defenseBonus = skill.defense; G.playerDefending = true;
           Log.add(`${skill.icon} <strong>${skill.name}</strong>! Defensive stance taken.`, 'player');
@@ -4887,27 +5011,52 @@
               return;
             }
 
-            // Pick a Target: Player or a living Companion
-            const targets = [{ type: 'player', name: G.player.name, ref: G.player }];
+            // Pick a Target: Player, living Companion, or living Party Member
+            const targets = [];
+            if (G.player.hp > 0) targets.push({ type: 'player', name: G.player.name, ref: G.player, icon: G.player.icon });
+
             if (G.companions) {
               G.companions.forEach(c => {
                 if (c.hp > 0) targets.push({ type: 'companion', name: c.name, ref: c, icon: c.icon });
               });
             }
+
+            if (G.partyCode) {
+              for (const name in G.partyMembers) {
+                const m = G.partyMembers[name];
+                if (m.hp > 0 && name !== G.player.name) {
+                  targets.push({ type: 'party', name: name, ref: m, icon: m.icon });
+                }
+              }
+            }
+
+            if (targets.length === 0) {
+              // Entire party wiped
+              if (G.isPartyLeader) {
+                GlobalChat._broadcastPartyCmd(`/party_wipe`);
+                this.endCombat(false, false, true);
+              }
+              return;
+            }
+
             const target = targets[Math.floor(Math.random() * targets.length)];
 
             const atk = enemy.attacks[Math.floor(Math.random() * enemy.attacks.length)];
-            const targetAgi = target.type === 'player' ? effectiveStat('agi') : 10;
+            const targetAgi = (target.type === 'player' || target.type === 'party') ? (target.ref.agi || 10) : 10;
             const dodge = Math.min(.25, (targetAgi - enemy.agi) * .015 + .04);
 
             if (Math.random() < dodge) {
-              Log.add(`The ${enemy.name} ${atk} ${target.name} — ${target.type === 'player' ? 'you barely dodge' : 'they dodge'}!`, 'player');
+              const dodgeMsg = (target.type === 'player') ? 'you barely dodge' : 'they dodge';
+              Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${target.name} — ${dodgeMsg}!`, 'player');
+              if (G.partyCode && G.isPartyLeader) {
+                GlobalChat._broadcastPartyCmd(`/party_enemy_miss ${target.name} ${enemyIdx}`);
+              }
             } else {
               let dmg = Math.max(1, enemy.str + Math.floor(Math.random() * Math.ceil(enemy.str * 0.2)));
-              if (target.type === 'player') {
-                // Nerf: Each point of DEF only blocks 0.4 damage
-                dmg = Math.max(1, dmg - Math.floor(effectiveDef() * 0.4));
-                if (G.playerDefending) dmg = Math.floor(dmg * 0.5);
+              if (target.type === 'player' || target.type === 'party') {
+                const def = (target.ref.def || 0);
+                dmg = Math.max(1, dmg - Math.floor(def * 0.4));
+                if (target.type === 'player' && G.playerDefending) dmg = Math.floor(dmg * 0.5);
               } else {
                 dmg = Math.max(1, dmg - 5); // Base def for companions
               }
@@ -4916,16 +5065,29 @@
               if (crit) dmg = Math.floor(dmg * 2.0);
 
               target.ref.hp -= dmg;
+              if (target.ref.hp <= 0 && target.type === 'player' && G.combatBuffs.immortal) {
+                target.ref.hp = 1;
+                Log.add(`👼 <strong>Guardian Angel!</strong> You were saved from death!`, 'success');
+              }
               if (enemy.isBoss) UI.veilFlash();
 
               const targetTitle = target.type === 'player' ? 'you' : `<strong>${target.icon} ${target.name}</strong>`;
               Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${targetTitle} for <strong>${dmg}</strong>${crit ? ' 💥 (CRITICAL!)' : ''}!`, 'combat');
 
+              if (G.partyCode && G.isPartyLeader) {
+                GlobalChat._broadcastPartyCmd(`/party_enemy_atk ${target.type} ${target.name} ${dmg} ${crit} ${idx} ${atk}`);
+              }
+
               if (target.type === 'player' && G.player.hp <= 0) {
-                G.player.hp = 0; UI.refresh(); this.endCombat(false, false, true);
+                G.player.hp = 0; UI.refresh();
+                Log.add(`💀 <strong>You</strong> have been incapacitated!`, 'death');
+                if (!G.partyCode) this.endCombat(false, false, true);
               } else if (target.type === 'companion' && target.ref.hp <= 0) {
                 Log.add(`💀 <strong>${target.name}</strong> has been slain!`, 'death');
                 target.ref.hp = 0;
+              } else if (target.type === 'party' && target.ref.hp <= 0) {
+                target.ref.hp = 0;
+                Log.add(`💀 <strong>${target.name}</strong> has been incapacitated!`, 'death');
               }
             }
             UI.refresh();
@@ -4956,6 +5118,7 @@
           const dmg = Math.max(1, c.str + Math.floor(Math.random() * 4) - Math.floor(enemy.def / 2));
           enemy.hp -= dmg;
           Log.add(`${c.icon} <strong>${c.name}</strong> strikes the ${enemy.name} for <strong>${dmg}</strong>!`, 'player');
+          if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
         });
       },
 
@@ -4982,23 +5145,79 @@
         return scaled;
       },
 
+      showAllyTargeting(skillKey) {
+        const p = G.player;
+        const skill = SKILLS[skillKey];
+        const buttons = [];
+
+        // Add self
+        buttons.push({
+          label: `You (${p.hp}/${effectiveMaxHp()} HP)`,
+          fn: `Combat.executeHeal('${skillKey}', '${p.name}')`,
+          cls: 'btn-violet'
+        });
+
+        // Add party members
+        if (G.partyCode) {
+          for (const name in G.partyMembers) {
+            if (name === p.name) continue;
+            const m = G.partyMembers[name];
+            const hpLabel = m.hp > 0 ? `${m.hp}/${m.maxHp} HP` : 'DEAD';
+            buttons.push({
+              label: `${m.icon} ${name} (${hpLabel})`,
+              fn: `Combat.executeHeal('${skillKey}', '${name}')`,
+              cls: m.hp > 0 ? 'btn-blue' : 'btn-red'
+            });
+          }
+        }
+
+        buttons.push({ label: '← Cancel', fn: 'Combat.showCombatActions()', cls: 'btn-sm' });
+        UI.setActions(buttons);
+        Log.add(`Select an ally to target with ${skill.icon} <strong>${skill.name}</strong>...`, 'system');
+      },
+
+      executeHeal(skillKey, targetName) {
+        const p = G.player;
+        const skill = SKILLS[skillKey];
+        const skLevel = (p.skills && p.skills[skillKey]) || 1;
+        const lvMult = 1 + (skLevel - 1) * 0.15;
+        const amt = Math.floor((effectiveStat('int') + G.player.vit) * skill.healMult * lvMult);
+
+        if (targetName === p.name) {
+          p.hp = Math.min(effectiveMaxHp(), p.hp + amt);
+          Log.add(`${skill.icon} <strong>${skill.name}</strong>! Restored <strong>${amt}</strong> HP to yourself.`, 'heal');
+        } else {
+          const m = G.partyMembers[targetName];
+          if (m) {
+            const wasDead = m.hp <= 0;
+            m.hp = Math.min(m.maxHp, m.hp + amt);
+            Log.add(`${skill.icon} <strong>${skill.name}</strong>! Restored <strong>${amt}</strong> HP to <strong>${targetName}</strong>${wasDead ? ' (REVIVED!)' : ''}.`, 'heal');
+            if (wasDead) Log.add(`✨ <strong>${targetName}</strong> is back in the fight!`, 'success');
+          }
+        }
+
+        if (G.partyCode) GlobalChat._broadcastPartyCmd(`/party_heal ${targetName} ${amt}`);
+        this.afterPlayerTurn();
+      },
+
       afterPlayerTurn(skipEnemy = false) {
         G.turnCount++;
         if (G.combatBuffs.turns > 0) G.combatBuffs.turns--;
 
-        // Summons persist until they die in combat or combat ends
-        if (G.companions) {
-          // No turn-based expiration for summons anymore, they stay until killed
+        if (G.partyCode) {
+          G.canAct = false;
+          GlobalChat._broadcastPartyCmd(`/party_end_turn ${G.player.name}`);
+          UI.refresh();
+          return;
         }
 
-        // Companion attacks after player each turn
+        // Single player/offline logic continues below...
         this.companionAttack();
         UI.refresh(); UI.showEnemyPanel(G.enemies);
 
         const allDead = G.enemies.every(e => e.hp <= 0);
         if (allDead) { this.endCombat(true); return; }
 
-        // Auto-select next target if current is dead
         if (G.enemies[G.targetIndex].hp <= 0) {
           G.targetIndex = G.enemies.findIndex(e => e.hp > 0);
           UI.showEnemyPanel(G.enemies);
@@ -5010,7 +5229,7 @@
           setTimeout(() => {
             this.enemyTurn();
             setTimeout(() => {
-              if (!G.inCombat) return; // Stop if combat ended (death/fled)
+              if (!G.inCombat) return;
               G.playerDefending = false; G.canAct = true;
               G.companions = G.companions.filter(c => c.hp > 0);
               UI.refresh(); this.showCombatActions();
@@ -5031,7 +5250,6 @@
             UI.openModal('modal-permadeath');
           } else {
             // Normal death logic
-            G.location = 'solmara';
             G.inCombat = false;
             G.player.hp = Math.floor(effectiveMaxHp() * 0.25); // Restore 25% hp
             G.player.mp = Math.floor(effectiveMaxMp() * 0.15);    // Restore 15% mp
@@ -5039,7 +5257,9 @@
             G.companions.forEach(c => { c.hp = Math.floor(c.maxHp * 0.1); }); // Mercs at low hp
             UI.refresh();
             Game.autosave();
-            Explore.showTownActions();
+
+            // Fix: Call Explore.travel to ensure map UI updates
+            Explore.travel('solmara', false);
           }
           return;
         }
@@ -6037,15 +6257,126 @@
           if (G.inCombat && G.enemies[idx]) {
             G.enemies[idx].hp -= dmg;
             Log.add(`🛡️ <strong>${m.author}</strong> strikes enemy ${idx + 1} for <strong>${dmg}</strong>!`, 'combat');
+            UI.showEnemyPanel(G.enemies);
             if (G.enemies.every(e => e.hp <= 0)) Combat.endCombat(true);
             UI.refresh();
           }
+        } else if (m.text.startsWith('/party_enemy_atk')) {
+          const parts = m.text.split(' ');
+          const type = parts[1];
+          const targetName = parts[2];
+          const dmg = parseInt(parts[3]);
+          const crit = parts[4] === 'true';
+          const enemyIdx = parseInt(parts[5]);
+          const atk = parts.slice(6).join(' '); // Remaining parts of the message
+
+          const enemy = G.enemies[enemyIdx];
+          if (enemy) {
+            const targetTitle = (type === 'player' && targetName === G.player.name) ? 'you' : `<strong>${targetName}</strong>`;
+            Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${targetTitle} for <strong>${dmg}</strong>${crit ? ' 💥 (CRITICAL!)' : ''}!`, 'combat');
+
+            if (type === 'player' && targetName === G.player.name) {
+              G.player.hp -= dmg;
+              if (G.player.hp <= 0) {
+                G.player.hp = 0;
+                Log.add(`💀 <strong>You</strong> have been incapacitated!`, 'death');
+                if (!G.partyCode) Combat.endCombat(false, false, true);
+              }
+              UI.refresh();
+            } else if (type === 'companion') {
+              const comp = G.companions.find(c => c.name === targetName);
+              if (comp) {
+                comp.hp -= dmg;
+                if (comp.hp <= 0) { Log.add(`💀 <strong>${comp.name}</strong> has been slain!`, 'death'); comp.hp = 0; }
+                UI.refresh();
+              }
+            } else {
+              // Other party member hit
+              const member = G.partyMembers[targetName];
+              if (member) {
+                member.hp -= dmg; // Just local visual update till next pulse
+                UI.refresh();
+              }
+            }
+          }
+        } else if (m.text.startsWith('/party_heal')) {
+          const parts = m.text.split(' ');
+          const targetName = parts[1];
+          const amt = parseInt(parts[2]);
+
+          if (targetName === G.player.name) {
+            const wasDead = G.player.hp <= 0;
+            G.player.hp = Math.min(effectiveMaxHp(), G.player.hp + amt);
+            Log.add(`💖 <strong>${m.author}</strong> heals you for <strong>${amt}</strong> HP${wasDead ? ' (REVIVED!)' : ''}!`, 'heal');
+            if (wasDead) {
+              Log.add(`✨ You have been revived and can act on your next turn!`, 'success');
+            }
+            UI.refresh();
+          } else {
+            const member = G.partyMembers[targetName];
+            if (member) {
+              const wasDead = member.hp <= 0;
+              member.hp = Math.min(member.maxHp, member.hp + amt);
+              Log.add(`💖 <strong>${m.author}</strong> heals <strong>${targetName}</strong> for <strong>${amt}</strong> HP${wasDead ? ' (REVIVED!)' : ''}!`, 'heal');
+              UI.refresh();
+              if (wasDead) Combat.showCombatActions(); // If I was dead and got revived, show my actions
+            }
+          }
+        } else if (m.text.startsWith('/party_enemy_miss')) {
+          const parts = m.text.split(' ');
+          const targetName = parts[1];
+          const enemyIdx = parseInt(parts[2]);
+          const enemy = G.enemies[enemyIdx];
+          if (enemy) {
+            const dodgeMsg = (targetName === G.player.name) ? 'you barely dodge' : 'they dodge';
+            Log.add(`The ${enemy.icon} ${enemy.name} strikes ${targetName} — ${dodgeMsg}!`, 'player');
+          }
+        } else if (m.text.startsWith('/party_wipe')) {
+          Log.add(`💀 <strong>PARTY WIPE!</strong> Everyone has fallen.`, 'death');
+          Combat.endCombat(false, false, true);
         } else if (m.text.startsWith('/party_travel')) {
           const key = m.text.replace('/party_travel ', '');
           if (G.location !== key && LOCATIONS[key]) {
             Log.add(`🚀 <strong>Party Sync:</strong> Moving to ${LOCATIONS[key].name}...`, 'system');
             Explore.travel(key, true);
           }
+        } else if (m.text.startsWith('/party_end_turn')) {
+          if (!G.isPartyLeader) return;
+          // Leader coordinates the next turn
+          const members = Object.keys(G.partyMembers).sort();
+          const pData = G.partyState;
+          if (!pData || pData.turnPhase !== 'players') return;
+
+          const currentIndex = members.indexOf(m.author);
+          if (currentIndex < members.length - 1) {
+            // Next player's turn
+            WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase()).update({
+              currentTurn: members[currentIndex + 1]
+            });
+          } else {
+            // All players done, Leader processes non-player turns
+            this._processAITurns();
+          }
+        }
+      },
+
+      async _processAITurns() {
+        if (!G.isPartyLeader || !G.inCombat) return;
+        const ref = WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase());
+
+        // 1. Summons Phase
+        await ref.update({ currentTurn: 'SUMMONS', turnPhase: 'summons' });
+        await new Promise(r => setTimeout(r, 1000));
+        Combat.companionAttack(); // This handles summons/mercs locally on leader, who broadcasts results
+
+        // 2. Enemies Phase
+        await ref.update({ currentTurn: 'ENEMIES', turnPhase: 'enemies' });
+        await new Promise(r => setTimeout(r, 1000));
+        Combat.enemyTurn();
+
+        // 3. Back to Leader for next round
+        if (G.inCombat) {
+          await ref.update({ currentTurn: G.player.name, turnPhase: 'players' });
         }
       },
 
@@ -6058,6 +6389,8 @@
           icon: CLASSES[p.classKey]?.icon || '❓',
           isLeader: G.isPartyLeader,
           isCombat: G.inCombat,
+          canAct: G.canAct,
+          hp: p.hp, maxHp: effectiveMaxHp(),
           mp: p.mp, maxMp: effectiveMaxMp(),
           xp: p.xp, xpToNext: p.xpToNext,
           ts: Date.now()
