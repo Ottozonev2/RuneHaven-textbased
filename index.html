@@ -1760,41 +1760,31 @@
       z-index: 100 !important;
     }
 
-    /* Environmental Decor */
+    /* Environmental Decor - Stylized Pixel Art Feel */
     .decor-object {
       position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       pointer-events: none;
       z-index: 5;
-      font-size: 24px;
       user-select: none;
-      opacity: 0.85;
-      transition: opacity 0.5s ease;
+      opacity: 0.95;
     }
 
-    .decor-tree {
-      font-size: 32px;
-      filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+    .decor-shadow {
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 65%;
+      height: 8px;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.85) 0%, transparent 75%);
+      z-index: -1;
     }
 
-    .decor-rock {
-      font-size: 22px;
-      filter: grayscale(0.5);
-    }
-
-    .decor-building {
-      font-size: 40px;
-      z-index: 6;
-    }
-
-    .decor-bush {
-      font-size: 20px;
-    }
-
-    .decor-crate {
-      font-size: 18px;
+    .decor-icon {
+      position: relative;
+      text-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+      /* Subtle anti-aliasing via contrast to mimic pixel art */
+      filter: contrast(1.1);
     }
   </style>
 </head>
@@ -4156,26 +4146,41 @@
 
         const loc = G.location;
         const config = {
-          solmara: { count: 35, types: ['🏘️', '🛖', '📦', '🪜', '⛲'], decorClass: 'decor-building' },
-          ashfall: { count: 45, types: ['🪵', '🪨', '🕳️'], decorClass: 'decor-rock' },
-          frostvein: { count: 50, types: ['🌲', '🏔️', '🪨', '🧊'], decorClass: 'decor-tree' },
-          blackMarsh: { count: 60, types: ['🌿', '🥀', '🪨', '🍄'], decorClass: 'decor-bush' },
-          emberfallWastes: { count: 40, types: ['🌵', '🪨', '🦴', '🦂'], decorClass: 'decor-rock' },
-          hollowWilds: { count: 80, types: ['🌳', '🌲', '🍄', '🌿'], decorClass: 'decor-tree' },
-          bloodspire: { count: 55, types: ['🏰', '🚩', '⛓️', '🩸'], decorClass: 'decor-building' },
-          catacombs: { count: 40, types: ['⚰️', '🕯️', '💀', '🕸️', '🏺'], decorClass: 'decor-rock' },
-          garrison: { count: 45, types: ['🛡️', '⚔️', '⛓️', '🚩'], decorClass: 'decor-building' },
-          voidrift: { count: 30, types: ['🌌', '✨', '🌀', '☄️'], decorClass: 'decor-rock' },
-          throne: { count: 35, types: ['👑', '🔥', '⛓️', '🩸'], decorClass: 'decor-building' },
-          velkaris: { count: 50, types: ['🏚️', '🌀', '🪵', '🪨'], decorClass: 'decor-building' }
+          solmara: { count: 60, types: ['🏘️', '🛖', '📦', '🪜', '⛲'] },
+          ashfall: { count: 120, types: ['🪵', '🪨', '🕳️'] },
+          frostvein: { count: 180, types: ['🌲', '🏔️', '🪨', '🧊'] },
+          blackMarsh: { count: 200, types: ['🌿', '🥀', '🪨', '🍄'] },
+          emberfallWastes: { count: 120, types: ['🌵', '🪨', '🦴', '🦂'] },
+          hollowWilds: { count: 280, types: ['🌳', '🌲', '🍄', '🌿'] },
+          bloodspire: { count: 90, types: ['🏰', '🚩', '⛓️', '🩸'] },
+          catacombs: { count: 120, types: ['⚰️', '🕯️', '💀', '🕸️', '🏺'] },
+          garrison: { count: 90, types: ['🛡️', '⚔️', '⛓️', '🚩'] },
+          voidrift: { count: 70, types: ['🌌', '✨', '🌀', '☄️'] },
+          throne: { count: 70, types: ['👑', '🔥', '⛓️', '🩸'] },
+          velkaris: { count: 120, types: ['🏚️', '🌀', '🪵', '🪨'] }
         };
-        const conf = config[loc] || { count: 30, types: ['🌲', '🪨', '🌿'], decorClass: 'decor-rock' };
+        const conf = config[loc] || { count: 150, types: ['🌲', '🪨', '🌿'] };
         this.decor = [];
         for (let i = 0; i < conf.count; i++) {
-          const x = rng() * 1900 + 50;
-          const y = rng() * 1900 + 50;
+          let x, y;
+          // Cluster to the edges, leaving a clearing/path in the X center
+          do {
+            if (rng() > 0.35) {
+              // Focus on sides heavily
+              x = rng() > 0.5 ? (rng() * 750 + 50) : (rng() * 750 + 1200);
+            } else {
+              // Scattered everywhere else
+              x = rng() * 1900 + 50;
+            }
+            y = rng() * 1900 + 50;
+          } while (x > 880 && x < 1120 && loc !== 'solmara');
+
           const type = conf.types[Math.floor(rng() * conf.types.length)];
-          this.decor.push({ x, y, type, cls: conf.decorClass });
+          const scale = 0.7 + rng() * 0.8; // 0.7x to 1.5x scaling
+          const flip = rng() > 0.5 ? -1 : 1;
+          const s = Math.floor(scale * 36); // Base size 36px
+
+          this.decor.push({ x, y, type, size: s, flip });
         }
       },
 
@@ -4190,17 +4195,30 @@
           dc.innerHTML = '';
           this.decor.forEach(d => {
             const el = document.createElement('div');
-            el.className = 'decor-object ' + d.cls;
+            el.className = 'decor-object';
             el.style.left = d.x + 'px';
             el.style.top = d.y + 'px';
 
-            // Add slight drop shadow and hue adjustments to make emojis blend better
-            el.style.textShadow = '0 8px 10px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.6)';
+            const shadow = document.createElement('div');
+            shadow.className = 'decor-shadow';
+            el.appendChild(shadow);
+
+            const icon = document.createElement('div');
+            icon.className = 'decor-icon';
+            icon.innerText = d.type;
+            icon.style.fontSize = d.size + 'px';
+            icon.style.transform = `scaleX(${d.flip})`;
+
+            // Hue and brightness adjustments to blend into a moody 2D world
             if (d.type === '🌲' || d.type === '🌳' || d.type === '🌿') {
-              el.style.filter = 'brightness(0.65) contrast(1.1) saturate(0.8)';
+              icon.style.filter = 'brightness(0.35) sepia(0.6) hue-rotate(60deg) saturate(1.8) contrast(1.4)';
+            } else if (d.type === '🪨' || d.type === '🪵' || d.type === '🏚️') {
+              icon.style.filter = 'brightness(0.4) contrast(1.3) sepia(0.3)';
+            } else if (d.type !== '🌌' && d.type !== '✨' && d.type !== '🌀') {
+              icon.style.filter = 'brightness(0.7) contrast(1.1)';
             }
 
-            el.innerText = d.type;
+            el.appendChild(icon);
             dc.appendChild(el);
           });
         }
@@ -4230,12 +4248,16 @@
 
       handleKey(e) {
         if (G.inCombat || UI.isModalOpen() || !G.player) return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
         const speed = 12;
         let dx = 0, dy = 0;
-        if (e.key === 'w' || e.key === 'ArrowUp') dy = -speed;
-        if (e.key === 's' || e.key === 'ArrowDown') dy = speed;
-        if (e.key === 'a' || e.key === 'ArrowLeft') dx = -speed;
-        if (e.key === 'd' || e.key === 'ArrowRight') dx = speed;
+        const k = e.key.toLowerCase();
+
+        if (k === 'w' || k === 'arrowup') dy = -speed;
+        if (k === 's' || k === 'arrowdown') dy = speed;
+        if (k === 'a' || k === 'arrowleft') dx = -speed;
+        if (k === 'd' || k === 'arrowright') dx = speed;
 
         if (dx !== 0 || dy !== 0) {
           this.move(dx, dy);
@@ -4329,22 +4351,6 @@
         }
       },
 
-      renderDecor(layer) {
-        // Only re-generate DOM if count mismatch or empty
-        const decorElements = layer.querySelectorAll('.decor-object');
-        if (decorElements.length !== this.decor.length) {
-          decorElements.forEach(e => e.remove());
-          this.decor.forEach(d => {
-            const dEl = document.createElement('div');
-            dEl.className = `decor-object ${d.cls}`;
-            dEl.style.left = `${d.x}px`;
-            dEl.style.top = `${d.y}px`;
-            dEl.textContent = d.type;
-            layer.appendChild(dEl);
-          });
-        }
-      },
-
       throttledSync() {
         const now = Date.now();
         if (now - this._lastSync > 200) {
@@ -4354,15 +4360,17 @@
       },
 
       async sync() {
-        if (!WorldServer._db || !G.player?.uid) return;
-        const ref = WorldServer._db.ref(`world_state/players/${G.player.uid}`);
-        await ref.update({
-          x: G.world.x,
-          y: G.world.y,
-          name: G.player.name,
-          icon: CLASSES[G.player.classKey]?.icon || G.player.icon || '👤',
-          lastSeen: Date.now()
-        });
+        if (typeof WorldServer === 'undefined' || !WorldServer._db || !G.player?.uid) return;
+        try {
+          const ref = WorldServer._db.ref(`world_state/players/${G.player.uid}`);
+          await ref.update({
+            x: G.world.x,
+            y: G.world.y,
+            name: G.player.name,
+            icon: G.player.icon || '👤',
+            lastSeen: Date.now()
+          });
+        } catch (e) { }
       },
 
       startSync() {
