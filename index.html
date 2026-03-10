@@ -5304,6 +5304,22 @@
         while (G.player.xp >= G.player.xpToNext) { G.player.xp -= G.player.xpToNext; this.levelUp(); }
       },
 
+      syncSkills(p) {
+        if (!p || !p.classKey) return;
+        if (!p.skills) p.skills = {};
+        let added = false;
+        Object.entries(SKILLS).forEach(([id, s]) => {
+          if (s.class === p.classKey && (s.levelReq || 0) <= p.level) {
+            if (!p.skills[id]) {
+              p.skills[id] = 1;
+              Log.add(`✨ <strong>Skill Unlocked:</strong> ${s.icon} ${s.name}!`, 'gold');
+              added = true;
+            }
+          }
+        });
+        if (added) UI.refresh();
+      },
+
       levelUp() {
         const p = G.player;
         if (p.level >= MAX_LEVEL) { Log.add('You have reached the maximum level of 100!', 'levelup'); return; }
@@ -5316,6 +5332,10 @@
         Log.add(`🌀 <strong>LEVEL ${p.level}${p.level === MAX_LEVEL ? ' — MAX!' : ''}!</strong> The Veil responds to your growing power.`, 'levelup');
         Log.add(`All stats increased. +3 Stat Points granted. HP/MP restored.`, 'levelup');
         UI.showLevelUpBanner(p.level);
+
+        // Retroactively unlock skills for the new level
+        this.syncSkills(p);
+
         // Submit updated score to world leaderboard (async)
         WorldServer.submitScore();
       },
@@ -5565,6 +5585,7 @@
         const classKey = this._selectedClass || 'paladin';
         const isHardcore = document.getElementById('permadeath-toggle')?.checked || false;
         G.player = createPlayer(name, classKey, isHardcore);
+        Combat.syncSkills(G.player); // Ensure all initial skills are matched
         G.location = 'solmara'; G.inCombat = false; G.canAct = true;
         G.companions = []; // Reset companions for new character
         G.partyCode = ''; // Reset party for new character
@@ -5625,6 +5646,10 @@
           const data = JSON.parse(raw);
           G.activeSaveSlot = key;
           G.player = data.player; G.location = data.location || 'solmara';
+
+          // Retroactive skill check for existing characters
+          Combat.syncSkills(G.player);
+
           G.inCombat = false; G.currentEnemy = null;
           G.turnCount = data.turnCount || 0;
           G.companions = data.companions || (data.companion ? [data.companion] : []);
