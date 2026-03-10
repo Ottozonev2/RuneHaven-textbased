@@ -4649,25 +4649,30 @@
 
         overlay.innerHTML = activeMembers.map(name => {
           const m = G.partyMembers[name];
-          const hpPct = Math.round((m.hp / m.maxHp) * 100);
-          const mpPct = Math.round((m.mp / m.maxMp) * 100);
-          const xpPct = Math.round((m.xp / m.xpToNext) * 100);
+          const hasStats = m.hp !== undefined && m.maxHp !== undefined;
+
+          const hpPct = hasStats ? Math.max(0, Math.min(100, Math.round((m.hp / m.maxHp) * 100))) : 0;
+          const mpPct = m.mp !== undefined ? Math.max(0, Math.min(100, Math.round((m.mp / m.maxMp) * 100))) : 0;
+          const xpPct = m.xp !== undefined ? Math.max(0, Math.min(100, Math.round((m.xp / m.xpToNext) * 100))) : 0;
+
           const isYou = name === G.player.name;
-          const isTurn = G.partyState && G.partyState.currentTurn === name;
+          const isTurn = G.partyState && (G.partyState.currentTurn === name);
 
           return `
-            <div class="party-member-card" style="${isYou ? 'border-color:var(--gold);' : ''} ${isTurn ? 'box-shadow: 0 0 10px var(--violet-lt);' : ''}">
+            <div class="party-member-card" style="${isYou ? 'border-color:var(--gold);' : ''} ${isTurn ? 'box-shadow: 0 0 10px var(--violet-lt); border-color:var(--violet-lt);' : ''}">
               <div class="party-member-header">
-                <span class="party-member-name">${m.icon} ${name} ${isYou ? '<span style="color:var(--gold); font-size:8px;">[YOU]</span>' : ''} ${isTurn ? '⚡' : ''}</span>
-                <span class="party-member-level">Lv.${m.level}</span>
+                <span class="party-member-name">${m.icon || '👤'} ${name} ${isYou ? '<span style="color:var(--gold); font-size:8px;">[YOU]</span>' : ''} ${isTurn ? '⚡' : ''}</span>
+                <span class="party-member-level">Lv.${m.level || '?'}</span>
               </div>
-              <div class="party-bar-container">
+              <div class="party-bar-container" title="HP: ${m.hp}/${m.maxHp}">
                 <div class="party-bar-bg"><div class="party-bar-fill party-hp-fill" style="width:${hpPct}%"></div></div>
+                <div class="party-bar-text">${m.hp || 0}/${m.maxHp || 0}</div>
               </div>
-              <div class="party-bar-container">
+              <div class="party-bar-container" title="MP: ${m.mp}/${m.maxMp}">
                 <div class="party-bar-bg"><div class="party-bar-fill party-mp-fill" style="width:${mpPct}%"></div></div>
+                <div class="party-bar-text">${m.mp || 0}/${m.maxMp || 0}</div>
               </div>
-              <div class="party-bar-container" style="margin-bottom:0;">
+              <div class="party-bar-container" style="margin-bottom:0;" title="XP: ${m.xp}/${m.xpToNext}">
                 <div class="party-bar-bg"><div class="party-bar-fill party-xp-fill" style="width:${xpPct}%"></div></div>
               </div>
             </div>
@@ -6175,7 +6180,16 @@
             G.partyMembers = {};
             return;
           }
+          const prevTurn = (G.partyState && G.partyState.currentTurn) || '';
           G.partyState = partyData;
+          const currentTurn = (partyData && partyData.currentTurn) || '';
+
+          // Turn Transition Logic: If it JUST became my turn, enable action
+          if (currentTurn === G.player.name && prevTurn !== G.player.name && G.inCombat) {
+            G.canAct = true;
+            Combat.showCombatActions();
+            Log.add("⚡ <strong>It is your turn!</strong>", "success");
+          }
 
           const now = Date.now();
           const newMembers = {};
