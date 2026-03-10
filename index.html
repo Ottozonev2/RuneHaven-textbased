@@ -7220,34 +7220,57 @@
       },
 
       async refresh() {
-        try {
-          const data = await WorldServer._get(WORLD_CONFIG.guildId);
-          this._guilds = data.guilds || [];
-        } catch (e) {
-          this._guilds = [];
-          this._status('Failed to load guild data.');
-        }
-        const pname = G.player?.name;
-        this._mine = this._guilds.find(g => g.members && g.members.some(m => m.name === pname)) || null;
-        this._myMem = this._mine ? (this._mine.members.find(m => m.name === pname) || null) : null;
+        if (this._initialized) return;
+        this._init(); // Ensure listener is attached
+        // Wait a bit for the first value
+        await new Promise(r => setTimeout(r, 1000));
+      },
 
-        // Sync player details in the guild registry if they changed
-        if (this._myMem && G.player) {
-          let coreChanged = false;
-          if (this._myMem.level !== G.player.level) { this._myMem.level = G.player.level; coreChanged = true; }
-          const curCls = CLASSES[G.player.classKey]?.name || '';
-          if (this._myMem.cls !== curCls) { this._myMem.cls = curCls; coreChanged = true; }
-          if (coreChanged) {
-            this._save(); // Fire and forget update to JSONBin
+      _init() {
+        if (this._initialized) return;
+        if (typeof firebase === 'undefined') return;
+
+        firebase.database().ref('world/' + WORLD_CONFIG.guildId).on('value', snap => {
+          const data = snap.val() || {};
+          this._guilds = Array.isArray(data.guilds) ? data.guilds : (data.guilds ? Object.values(data.guilds) : []);
+          this._syncMyGuild();
+          if (document.getElementById('modal-guild')?.classList.contains('active')) {
+            this.showTab(this._tab);
           }
+        });
+        this._initialized = true;
+      },
+
+      _syncMyGuild() {
+        const p = G.player;
+        if (!p) { this._mine = null; this._myMem = null; return; }
+
+        const uid = AuthSystem.user?.uid;
+        // Try to find by UID first (new), fallback to name (old)
+        this._mine = this._guilds.find(g =>
+          g.members && g.members.some(m => (m.uid && m.uid === uid) || (!m.uid && m.name === p.name))
+        ) || null;
+
+        this._myMem = this._mine ? (this._mine.members.find(m => (m.uid && m.uid === uid) || (!m.uid && m.name === p.name)) || null) : null;
+
+        // Upgrade record to include UID if missing
+        if (this._myMem && !this._myMem.uid && uid) {
+          this._myMem.uid = uid;
+          this._save();
         }
 
-        // Sync guild name on player for display
-        if (G.player) {
-          G.player.guildName = this._mine?.name || '';
-          // Mirror to G.guildName for legacy compatibility if any
-          G.guildName = G.player.guildName;
+        // Sync player details
+        if (this._myMem && p) {
+          let changed = false;
+          if (this._myMem.level !== p.level) { this._myMem.level = p.level; changed = true; }
+          const curCls = CLASSES[p.classKey]?.name || '';
+          if (this._myMem.cls !== curCls) { this._myMem.cls = curCls; changed = true; }
+          if (this._myMem.name !== p.name) { this._myMem.name = p.name; changed = true; }
+          if (changed) this._save();
         }
+
+        p.guildName = this._mine?.name || '';
+        G.guildName = p.guildName;
         this._status(this._mine ? `Guild: ${this._mine.name} · ${this._myMem?.role || 'Member'}` : 'Not in a guild.');
       },
 
@@ -7480,19 +7503,20 @@
           id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
           name, faction: p.faction, leader: p.name,
           description: desc, focus: focuses,
-          members: [{ name: p.name, role: 'leader', level: p.level, cls: CLASSES[p.classKey]?.name || '', joinedAt: Date.now() }],
+          members: [{
+            name: p.name,
+            uid: AuthSystem.user?.uid,
+            role: 'leader',
+            level: p.level,
+            cls: CLASSES[p.classKey]?.name || '',
+            joinedAt: Date.now()
+          }],
           requests: [], invites: [], createdAt: Date.now()
         };
         this._guilds.push(guild);
         p.gold -= 500;
         await this._save();
-
-        // Sync G.guildName immediately for GlobalChat
-        G.guildName = name;
-
-        await this.refresh();
-        Log.add(`\uD83C\uDFF0 Guild <strong>${name}</strong> founded! You are the Guild Leader.`, 'success');
-        UI.refresh();
+        Log.add(`🏰 Guild <strong>${name}</strong> founded! You are the Guild Leader.`, 'success');
         this.showTab('mine');
       },
 
@@ -7501,12 +7525,18 @@
         const g = this._guilds.find(x => x.id === guildId);
         if (!g) return;
         g.requests = g.requests || [];
-        if (g.requests.some(r => r.name === p.name)) { this._status('Already requested.'); return; }
-        g.requests.push({ name: p.name, level: p.level, cls: CLASSES[p.classKey]?.name || '', faction: p.faction, ts: Date.now() });
+        if (g.requests.some(r => r.uid === AuthSystem.user?.uid || r.name === p.name)) { this._status('Already requested.'); return; }
+        g.requests.push({
+          name: p.name,
+          uid: AuthSystem.user?.uid,
+          level: p.level,
+          cls: CLASSES[p.classKey]?.name || '',
+          faction: p.faction,
+          ts: Date.now()
+        });
         await this._save();
-        Log.add(`\uD83D\uDCE8 Join request sent to <strong>${g.name}</strong>.`, 'system');
+        Log.add(`📧 Join request sent to <strong>${g.name}</strong>.`, 'system');
         this._status('Request sent!');
-        this._renderBrowse();
       },
 
       async approveRequest(guildId, playerName) {
@@ -7515,10 +7545,16 @@
         const req = g.requests.find(r => r.name === playerName);
         if (!req) return;
         g.requests = g.requests.filter(r => r.name !== playerName);
-        g.members.push({ name: playerName, role: 'member', level: req.level || 1, cls: req.cls || '', joinedAt: Date.now() });
+        g.members.push({
+          name: playerName,
+          uid: req.uid,
+          role: 'member',
+          level: req.level || 1,
+          cls: req.cls || '',
+          joinedAt: Date.now()
+        });
         await this._save();
         this._status(`${playerName} approved!`);
-        await this.refresh(); this.showTab('mine');
       },
 
       async denyRequest(guildId, playerName) {
