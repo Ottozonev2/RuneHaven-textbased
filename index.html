@@ -781,6 +781,23 @@
         flex-direction: column;
       }
 
+      #world-viewport {
+        flex: 0 1 45%;
+        background: transparent;
+      }
+
+      #dashboard {
+        display: flex !important;
+        flex-direction: column;
+        flex: 1 1 55%;
+        min-height: 0;
+      }
+
+      #dash-col-log {
+        flex: 1 1 auto;
+        border-right: none;
+      }
+
       /* Stack items side by side in mobile landscape */
       @media (max-height: 500px) and (orientation: landscape) {
         .game-body {
@@ -789,19 +806,14 @@
 
         #world-viewport {
           flex: 1;
+          height: 100%;
           border-bottom: none;
           border-right: 2px solid var(--border);
         }
 
         #dashboard {
-          width: 340px;
-          display: flex !important;
-          flex-direction: column;
-          min-height: 0;
-        }
-
-        #dash-col-log {
-          border-right: none;
+          flex: 0 0 340px;
+          height: 100%;
         }
       }
 
