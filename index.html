@@ -2892,8 +2892,9 @@
        ITEMS (Eryndor-flavoured)
        ============================================================ */
     const ITEMS = {
-      healthPotion: { id: 'healthPotion', name: 'Veil Salve', icon: '🧪', type: 'consumable', subtype: 'heal', healAmount: 100, buyPrice: 50, sellPrice: 20, desc: 'Veil-infused salve restoring 100 HP. Smells of violet lightning.' },
-      manaPotion: { id: 'manaPotion', name: 'Arcane Draught', icon: '💜', type: 'consumable', subtype: 'mana', manaAmount: 80, buyPrice: 50, sellPrice: 20, desc: 'Restores 80 MP. Contains trace amounts of the Veil.' },
+      healthPotion: { id: 'healthPotion', name: 'Health Potion', icon: '🧪', type: 'consumable', healAmount: 50, buyPrice: 15, sellPrice: 5, desc: 'Restores 50 HP. Essential for any adventurer.' },
+      manaPotion: { id: 'manaPotion', name: 'Mana Potion', icon: '🧪', type: 'consumable', manaAmount: 40, buyPrice: 15, sellPrice: 5, desc: 'Restores 40 MP. Smells like ozone.' },
+      elixirOfRebirth: { id: 'elixirOfRebirth', name: 'Elixir of Rebirth', icon: '🧪', type: 'consumable', effect: 'stat_reset', buyPrice: 500, sellPrice: 100, desc: 'A shimmering liquid that resets all your spent stat points.' },
       elixir: { id: 'elixir', name: 'Outworlders Elixir', icon: '✨', type: 'consumable', subtype: 'both', healAmount: 80, manaAmount: 60, buyPrice: 85, sellPrice: 35, desc: 'A rare elixir restoring both HP and MP.' },
       holyRelic: { id: 'holyRelic', name: 'Holy Relic Shard', icon: '✝️', type: 'consumable', subtype: 'heal', healAmount: 200, buyPrice: 150, sellPrice: 60, desc: 'A fragment of the divine relics that power Solmara. Restores 200 HP.' },
       bloodVial: { id: 'bloodVial', name: 'Blood Vial', icon: '🩸', type: 'consumable', subtype: 'mana', manaAmount: 150, buyPrice: 100, sellPrice: 40, desc: 'Dark blood magic potion restoring 150 MP. Forbidden by the Saints.' },
@@ -3398,6 +3399,7 @@
         },
         skills: cls.skills.reduce((acc, sk) => { acc[sk] = 1; return acc; }, {}),
         statPoints: 0,
+        skillPoints: 5,
         permadeath,
         kills: 0,
         stash: [],
@@ -3664,8 +3666,13 @@
       },
       _setStats(pfx, p) {
         const sh = (id, t) => { const e = document.getElementById(pfx + id); if (e) e.textContent = t; };
-        sh('s-str', condenseStat(effectiveStat('str'))); sh('s-int', condenseStat(effectiveStat('int'))); sh('s-wis', condenseStat(p.wis)); sh('s-agi', condenseStat(effectiveStat('agi')));
-        sh('s-vit', condenseStat(p.vit)); sh('s-def', condenseStat(effectiveDef())); sh('s-crit', condenseStat(p.crit) + '%');
+        sh('s-str', condenseStat(effectiveStat('str')));
+        sh('s-int', condenseStat(effectiveStat('int')));
+        sh('s-wis', condenseStat(effectiveStat('wis')));
+        sh('s-agi', condenseStat(effectiveStat('agi')));
+        sh('s-vit', condenseStat(effectiveStat('vit')));
+        sh('s-def', condenseStat(effectiveDef()));
+        sh('s-crit', condenseStat(effectiveStat('crit')) + '%');
       },
 
       refreshDrawerStats() {
@@ -4253,22 +4260,34 @@
       openTrainer() {
         const p = G.player;
         QuestSystem.updateProgress('visit', 'trainer');
-        document.getElementById('trainer-gold-display').textContent = p.gold;
-        document.getElementById('trainer-class-display').textContent = CLASSES[p.classKey].name;
+        // Retroactive skill point grant if missing (e.g. from old save)
+        if (p.skillPoints === undefined) {
+          p.skillPoints = (p.level * 5);
+          // Subtract already spent points (approximate)
+          Object.values(p.skills).forEach(lv => p.skillPoints -= (lv - 1));
+          p.skillPoints = Math.max(0, p.skillPoints);
+        }
+
         const container = document.getElementById('trainer-skills-list');
+        const trainerSp = document.getElementById('trainer-gold-display');
+        if (trainerSp) {
+          trainerSp.innerHTML = `<span style="color:var(--violet-lt);">${p.skillPoints} Skill Points available</span>`;
+        }
+        document.getElementById('trainer-class-display').textContent = CLASSES[p.classKey].name;
+
         const pSkills = p.skills || {};
         container.innerHTML = Object.keys(pSkills).map(sk => {
           const skill = SKILLS[sk];
           const lv = pSkills[sk];
-          const cost = lv * 100;
+          const cost = 1; // 1 Skill Point per level
           const isMaxed = lv >= p.level;
           return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
             <div style="flex:1;">
               <div style="font-size:12px;font-weight:600;color:var(--text-lt);">${skill.icon} ${skill.name} <span style="color:var(--violet-lt);font-size:10px;">(Lv.${lv})</span></div>
               <div style="font-size:10px;color:var(--text-dim);">${skill.desc}</div>
             </div>
-            <button class="btn btn-sm ${isMaxed ? 'btn-dim' : 'btn-gold'}" onclick="Explore.upgradeSkill('${sk}')" ${(p.gold < cost || isMaxed) ? 'disabled' : ''}>
-              ${isMaxed ? `MAX (Lv.${p.level})` : `Upgrade (${cost}g)`}
+            <button class="btn btn-sm ${isMaxed ? 'btn-dim' : 'btn-gold'}" onclick="Explore.upgradeSkill('${sk}')" ${(p.skillPoints < cost || isMaxed) ? 'disabled' : ''}>
+              ${isMaxed ? `MAX (Lv.${p.level})` : `Upgrade (${cost} SP)`}
             </button>
           </div>`;
         }).join('');
@@ -4278,9 +4297,9 @@
       upgradeSkill(sk) {
         const p = G.player;
         const lv = p.skills[sk];
-        const cost = lv * 100;
-        if (p.gold < cost || lv >= p.level) return;
-        p.gold -= cost;
+        const cost = 1;
+        if (p.skillPoints < cost || lv >= p.level) return;
+        p.skillPoints -= cost;
         p.skills[sk]++;
         Log.add(`🔥 <strong>${SKILLS[sk].name}</strong> upgraded to level ${p.skills[sk]}!`, 'success');
         this.openTrainer();
@@ -4290,7 +4309,7 @@
       openShop() {
         const p = G.player;
         document.getElementById('shop-gold').textContent = p.gold;
-        const shopItems = SHOP_ITEMS.concat(['leatherVest', 'copperRing', 'ironPlate', 'sagePendant', 'battleAxe', 'willowStaff', 'boneScepter']).filter((v, i, a) => a.indexOf(v) === i);
+        const shopItems = ['healthPotion', 'manaPotion', 'elixirOfRebirth', 'woodenShield', 'leatherVest', 'ironPlate', 'copperRing', 'sagePendant', 'battleAxe', 'willowStaff', 'boneScepter'].filter((v, i, a) => a.indexOf(v) === i);
         document.getElementById('shop-items').innerHTML = shopItems.map(id => {
           const item = getScaledItem(id, p.level);
           // Shops only sell Common or Uncommon gear
@@ -4971,11 +4990,33 @@
         if (!invEntry) return;
         const item = getScaledItem(id, invEntry.level, invEntry.rarity || 'common');
         if (!item || item.type !== 'consumable') return;
+
         const maxHp = effectiveMaxHp();
-        if (item.subtype === 'heal' || item.subtype === 'both') { const prev = p.hp; p.hp = Math.min(maxHp, p.hp + item.healAmount); Log.add(`Used ${item.icon} <strong>${item.name}</strong>. +${p.hp - prev} HP.`, 'heal'); }
-        if (item.subtype === 'mana' || item.subtype === 'both') { const prev = p.mp; p.mp = Math.min(effectiveMaxMp(), p.mp + item.manaAmount); Log.add(`Used ${item.icon} <strong>${item.name}</strong>. +${p.mp - prev} MP.`, 'heal'); }
-        const useQty = 1;
-        this.removeFromInventory(id, useQty, invEntry.level, invEntry.rarity || 'common'); UI.refresh();
+        const maxMp = effectiveMaxMp();
+
+        if (item.healAmount) {
+          const prev = p.hp;
+          p.hp = Math.min(maxHp, p.hp + item.healAmount);
+          Log.add(`🧪 Used <strong>${item.name}</strong>. +${p.hp - prev} HP.`, 'heal');
+        }
+        if (item.manaAmount) {
+          const prev = p.mp;
+          p.mp = Math.min(maxMp, p.mp + item.manaAmount);
+          Log.add(`🧪 Used <strong>${item.name}</strong>. +${p.mp - prev} MP.`, 'heal');
+        }
+        if (item.effect === 'stat_reset') {
+          const cls = CLASSES[p.classKey].base;
+          // Calculate total points spent
+          const spent = (p.str - cls.str) + (p.int - cls.int) + (p.wis - cls.wis) + (p.agi - cls.agi) + (p.vit - cls.vit);
+          p.statPoints += spent;
+          // Reset to base
+          p.str = cls.str; p.int = cls.int; p.wis = cls.wis; p.agi = cls.agi; p.vit = cls.vit;
+          Log.add(`✨ Drank <strong>${item.name}</strong>. Your essence is renewed! All spent stat points returned (${spent}).`, 'gold');
+        }
+
+        this.removeFromInventory(id, 1, invEntry.level, invEntry.rarity || 'common');
+        UI.closeModal('modal-item');
+        UI.refresh();
       },
 
       defend() {
@@ -5358,6 +5399,7 @@
         p.level++; p.maxHp += g.hp; p.maxMp += g.mp; p.hp = effectiveMaxHp(); p.mp = effectiveMaxMp();
         p.str += g.str; p.int += g.int; p.wis += g.wis; p.agi += g.agi; p.vit += g.vit; p.def += g.def; p.crit += g.crit;
         p.statPoints = (p.statPoints || 0) + 3;
+        p.skillPoints = (p.skillPoints || 0) + 5;
         p.xpToNext = Math.floor(p.xpToNext * 1.45);
         Log.divider();
         Log.add(`🌀 <strong>LEVEL ${p.level}${p.level === MAX_LEVEL ? ' — MAX!' : ''}!</strong> The Veil responds to your growing power.`, 'levelup');
