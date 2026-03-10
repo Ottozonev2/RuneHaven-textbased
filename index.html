@@ -3725,6 +3725,14 @@
           }
         }
         G.location = key;
+
+        // Force player spawn perfectly in the center of the new viewport
+        const vp = document.getElementById('world-viewport');
+        const vpw = vp ? (vp.clientWidth || vp.offsetWidth || 800) : 800;
+        const vph = vp ? (vp.clientHeight || vp.offsetHeight || 400) : 400;
+        G.world.x = vpw / 2;
+        G.world.y = vph / 2;
+
         QuestSystem.updateProgress('visit', key);
         Log.divider();
         Log.add(`You travel to <strong>${loc.name}</strong>.`, 'story');
@@ -4365,6 +4373,12 @@
         // Fix: Use offsetWidth/Height as fallback if clientWidth/Height are 0 on init
         const vpw = vp.clientWidth || vp.offsetWidth || 800;
         const vph = vp.clientHeight || vp.offsetHeight || 400;
+
+        // Ensure player is centered if coordinates are uninitialized (e.g., initial load)
+        if (!G.world.x || !G.world.y) {
+          G.world.x = vpw / 2;
+          G.world.y = vph / 2;
+        }
 
         // Camera stays static exactly matching the width/height of the viewport
         layer.style.transform = `translate(0px, 0px)`;
