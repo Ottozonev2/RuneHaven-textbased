@@ -1785,10 +1785,58 @@
     }
 
     .decor-icon {
-      position: relative;
-      text-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
-      /* Subtle anti-aliasing via contrast to mimic pixel art */
-      filter: contrast(1.1);
+      padding: 6px 10px;
+      min-width: 140px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .party-member-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+    }
+
+    .party-member-name {
+      color: #fff;
+      font-weight: bold;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .party-member-level {
+      color: var(--violet-lt);
+      font-size: 9px;
+    }
+
+    .party-bar-container {
+      margin-bottom: 2px;
+    }
+
+    .party-bar-bg {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .party-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .party-hp-fill {
+      background: #e08088;
+    }
+
+    .party-mp-fill {
+      background: #88a0e0;
+    }
+
+    .party-xp-fill {
+      background: #b890ff;
     }
   </style>
 </head>
@@ -1940,6 +1988,7 @@
         <!-- The visual map and players will be rendered here -->
         <div id="world-grid"></div>
         <div id="world-entities-layer"></div>
+        <div id="party-overlay"></div>
 
         <!-- Inline Enemy UI Overlay -->
         <div id="viewport-enemy-ui"
@@ -4499,7 +4548,7 @@
             G.enemies.push(e);
           }
           if (G.partyCode && G.isPartyLeader) {
-            const simplifiedEnemies = G.enemies.map(e => ({ name: e.name, hp: e.hp, maxHp: e.maxHp, level: e.level }));
+            const simplifiedEnemies = G.enemies.map(e => ({ name: e.name, hp: e.hp, maxHp: e.maxHp, level: e.level, def: e.def, icon: e.icon }));
             GlobalChat._broadcastPartyCmd(`/party_battle ${enemyKey} ${JSON.stringify(simplifiedEnemies)}`);
           }
         }
@@ -4522,6 +4571,42 @@
         if (!G.inCombat || !G.enemies[idx] || G.enemies[idx].hp <= 0) return;
         G.targetIndex = idx;
         UI.showEnemyPanel(G.enemies);
+      },
+
+      updatePartyOverlay() {
+        const overlay = document.getElementById('party-overlay');
+        if (!overlay) return;
+        const activeMembers = Object.keys(G.partyMembers);
+        if (activeMembers.length === 0) {
+          overlay.innerHTML = '';
+          return;
+        }
+
+        overlay.innerHTML = activeMembers.map(name => {
+          const m = G.partyMembers[name];
+          const hpPct = Math.round((m.hp / m.maxHp) * 100);
+          const mpPct = Math.round((m.mp / m.maxMp) * 100);
+          const xpPct = Math.round((m.xp / m.xpToNext) * 100);
+          const isYou = name === G.player.name;
+
+          return `
+            <div class="party-member-card" style="${isYou ? 'border-color:var(--gold);' : ''}">
+              <div class="party-member-header">
+                <span class="party-member-name">${m.icon} ${name} ${isYou ? '<span style="color:var(--gold); font-size:8px;">[YOU]</span>' : ''}</span>
+                <span class="party-member-level">Lv.${m.level}</span>
+              </div>
+              <div class="party-bar-container">
+                <div class="party-bar-bg"><div class="party-bar-fill party-hp-fill" style="width:${hpPct}%"></div></div>
+              </div>
+              <div class="party-bar-container">
+                <div class="party-bar-bg"><div class="party-bar-fill party-mp-fill" style="width:${mpPct}%"></div></div>
+              </div>
+              <div class="party-bar-container" style="margin-bottom:0;">
+                <div class="party-bar-bg"><div class="party-bar-fill party-xp-fill" style="width:${xpPct}%"></div></div>
+              </div>
+            </div>
+          `;
+        }).join('');
       },
 
       showCombatActions() {
@@ -4672,18 +4757,27 @@
             enemy.hp -= dmg;
             Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong>${crit ? ' (CRIT!)' : ''} damage.`, 'player');
           }
+          if (G.partyCode) {
+            GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${skill.doubleHit ? (dmg + dmg2) : dmg}`);
+          }
         } else if (skill.type === 'magic') {
           let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult * lvMult * typeMult) - Math.floor(enemy.def / 2));
           const crit = Math.random() * 100 < p.crit;
           if (crit) dmg = Math.floor(dmg * 1.6);
           enemy.hp -= dmg;
           Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! <strong>${dmg}</strong> arcane damage${crit ? ' (CRIT!)' : ''}!`, 'player');
+          if (G.partyCode) {
+            GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+          }
           if (enemy.isBoss) UI.veilFlash();
         } else if (skill.type === 'drain') {
           let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult * lvMult * typeMult) - Math.floor(enemy.def / 2));
           const heal = Math.floor(dmg * 0.5);
           enemy.hp -= dmg; p.hp = Math.min(effectiveMaxHp(), p.hp + heal);
           Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! Drained <strong>${dmg}</strong> HP, restored <strong>${heal}</strong>.`, 'heal');
+          if (G.partyCode) {
+            GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
+          }
         } else if (skill.type === 'heal') {
           const amt = Math.floor((effectiveStat('int') + p.vit) * skill.healMult * lvMult);
           p.hp = Math.min(effectiveMaxHp(), p.hp + amt);
@@ -5881,6 +5975,7 @@
 
           this.refreshPartyMenu();
           UI.refreshCompanions();
+          Combat.updatePartyOverlay();
         });
       },
 
@@ -5963,6 +6058,8 @@
           icon: CLASSES[p.classKey]?.icon || '❓',
           isLeader: G.isPartyLeader,
           isCombat: G.inCombat,
+          mp: p.mp, maxMp: effectiveMaxMp(),
+          xp: p.xp, xpToNext: p.xpToNext,
           ts: Date.now()
         };
         WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/party/' + G.partyCode.toUpperCase() + '/members/' + p.name).set(msg);
