@@ -1618,8 +1618,8 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 2000px;
-      height: 2000px;
+      width: 100%;
+      height: 100%;
       background-color: var(--bg);
       background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
       background-size: 40px 40px;
@@ -1638,20 +1638,7 @@
       z-index: 2;
     }
 
-    /* Simulate a winding dirt path vertically down the center of the world (X around 1000) */
-    #world-entities-layer::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 970px;
-      /* roughly center */
-      width: 60px;
-      background: linear-gradient(90deg, transparent 0%, rgba(90, 60, 30, 0.15) 20%, rgba(90, 60, 30, 0.25) 50%, rgba(90, 60, 30, 0.15) 80%, transparent 100%);
-      z-index: 0;
-      opacity: 0.8;
-      pointer-events: none;
-    }
+    /* Programmatic dirt path removed to let the 2D art shine */
 
     /* Terrain Types (Replacing gridlines with static user-provided 2D art) */
     #world-grid.terrain-solmara {
@@ -4305,9 +4292,13 @@
         G.world.x += dx;
         G.world.y += dy;
 
-        // Boundaries
-        G.world.x = Math.max(20, Math.min(2000, G.world.x));
-        G.world.y = Math.max(20, Math.min(2000, G.world.y));
+        const vp = document.getElementById('world-viewport');
+        const vpw = vp ? (vp.clientWidth || vp.offsetWidth || 800) : 800;
+        const vph = vp ? (vp.clientHeight || vp.offsetHeight || 400) : 400;
+
+        // Boundaries map to the visible screen limits
+        G.world.x = Math.max(20, Math.min(vpw - 20, G.world.x));
+        G.world.y = Math.max(20, Math.min(vph - 20, G.world.y));
 
         this.render();
         this.checkEncounters(dx, dy);
@@ -4344,11 +4335,10 @@
         // Fix: Use offsetWidth/Height as fallback if clientWidth/Height are 0 on init
         const vpw = vp.clientWidth || vp.offsetWidth || 800;
         const vph = vp.clientHeight || vp.offsetHeight || 400;
-        const camX = G.world.x - vpw / 2;
-        const camY = G.world.y - vph / 2;
 
-        layer.style.transform = `translate(${-camX}px, ${-camY}px)`;
-        if (grid) grid.style.transform = `translate(${-camX}px, ${-camY}px)`;
+        // Camera stays static exactly matching the width/height of the viewport
+        layer.style.transform = `translate(0px, 0px)`;
+        if (grid) grid.style.transform = `translate(0px, 0px)`;
 
         // Update Decor
         this.renderDecor(layer);
