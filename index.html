@@ -775,14 +775,60 @@
     }
 
     /* Mobile layout */
-    @media (max-width: 767px) {
+    @media (max-width: 850px),
+    (max-height: 500px) and (orientation: landscape) {
       .game-body {
         flex-direction: column;
       }
 
+      /* Stack items side by side in mobile landscape */
+      @media (max-height: 500px) and (orientation: landscape) {
+        .game-body {
+          flex-direction: row;
+        }
+
+        #world-viewport {
+          flex: 1;
+          border-bottom: none;
+          border-right: 2px solid var(--border);
+        }
+
+        #dashboard {
+          width: 340px;
+          display: flex !important;
+          flex-direction: column;
+          min-height: 0;
+        }
+
+        #dash-col-log {
+          border-right: none;
+        }
+      }
+
       #panel-stats,
-      #panel-right {
+      #panel-right,
+      #dash-col-stats,
+      #dash-col-items {
         display: none;
+      }
+
+      #dash-col-chat {
+        position: fixed;
+        inset: 0;
+        background: var(--bg-panel);
+        z-index: 500;
+        display: none !important;
+        flex-direction: column;
+        padding-top: var(--safe-top);
+        padding-bottom: var(--safe-bottom);
+      }
+
+      #dash-col-chat.open {
+        display: flex !important;
+      }
+
+      #chat-panel-header-mobile {
+        display: flex !important;
       }
 
       #panel-centre {
@@ -2274,6 +2320,10 @@
         <!-- Col 3: INTEGRATED CHAT -->
         <div class="dash-col" id="dash-col-chat">
           <div id="chat-panel" style="height:100%; display:flex; flex-direction:column; background:none; border:none;">
+            <div class="drawer-header" id="chat-panel-header-mobile" style="display:none;">
+              <span class="drawer-header-title">💬 World Chat</span>
+              <button class="drawer-close" onclick="MobileNav.closeDrawer('dash-col-chat')">✕</button>
+            </div>
             <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
               <div>World Chat</div>
               <button class="btn btn-sm btn-violet" style="min-height:20px; padding:2px 6px; font-size:9px;"
@@ -2322,6 +2372,9 @@
     <nav id="mobile-nav">
       <button class="mob-nav-btn active" id="nav-log" onclick="MobileNav.show('log')">
         <span class="nav-icon">📜</span>LOG
+      </button>
+      <button class="mob-nav-btn" id="nav-chat" onclick="MobileNav.show('chat')">
+        <span class="nav-icon">💬</span>CHAT
       </button>
       <button class="mob-nav-btn" id="nav-stats" onclick="MobileNav.show('stats')">
         <span class="nav-icon">⚔️</span>STATS
@@ -3803,18 +3856,29 @@
        ============================================================ */
     const MobileNav = {
       show(panel) {
-        ['log', 'stats', 'bag', 'map'].forEach(id => document.getElementById('nav-' + id).classList.toggle('active', id === panel));
-        document.querySelectorAll('.mobile-drawer').forEach(d => d.classList.remove('open'));
+        ['log', 'chat', 'stats', 'bag', 'map'].forEach(id => {
+          const btn = document.getElementById('nav-' + id);
+          if (btn) btn.classList.toggle('active', id === panel);
+        });
+        document.querySelectorAll('.mobile-drawer, #dash-col-chat').forEach(d => d.classList.remove('open'));
         if (panel === 'stats') { UI.refreshDrawerStats(); document.getElementById('drawer-stats').classList.add('open'); }
         else if (panel === 'bag' || panel === 'map') {
           if (panel === 'map') UI.switchMobileTab('location'); else UI.switchMobileTab('inventory');
           document.getElementById('drawer-bag').classList.add('open');
         }
+        else if (panel === 'chat') {
+          document.getElementById('dash-col-chat').classList.add('open');
+        }
       },
       closeDrawer(id) {
-        document.getElementById(id).classList.remove('open');
-        ['log', 'stats', 'bag', 'map'].forEach(b => document.getElementById('nav-' + b).classList.remove('active'));
-        document.getElementById('nav-log').classList.add('active');
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('open');
+        ['log', 'chat', 'stats', 'bag', 'map'].forEach(b => {
+          const btn = document.getElementById('nav-' + b);
+          if (btn) btn.classList.remove('active');
+        });
+        const nLog = document.getElementById('nav-log');
+        if (nLog) nLog.classList.add('active');
       }
     };
 
