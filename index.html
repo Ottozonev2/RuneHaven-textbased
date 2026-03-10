@@ -6151,10 +6151,14 @@
 
           // HUD Synchronization: Always sync enemy HP from party state if available
           if (partyData.enemySync && G.inCombat) {
-            partyData.enemySync.forEach((hp, idx) => {
-              if (G.enemies[idx]) G.enemies[idx].hp = hp;
-            });
-            UI.showEnemyPanel(G.enemies);
+            // THE LEADER IS THE SOURCE OF TRUTH. They should never sync HP FROM the database, 
+            // as it would overwrite their local damage processing (race condition).
+            if (!G.isPartyLeader) {
+              partyData.enemySync.forEach((hp, idx) => {
+                if (G.enemies[idx]) G.enemies[idx].hp = hp;
+              });
+              UI.showEnemyPanel(G.enemies);
+            }
           }
 
           // Turn Transition Logic: Act if it's my turn, even if just joining/refreshing
@@ -6409,10 +6413,17 @@
 
         // 3. Back to Leader for next round
         if (G.inCombat) {
+          // New round: Refresh members in case someone joined/left during AI turns
+          const members = Object.keys(G.partyMembers);
+          if (!members.includes(G.player.name)) members.push(G.player.name);
+          members.sort();
+
           await ref.update({
-            currentTurn: G.player.name,
+            currentTurn: members[0],
             turnPhase: 'players',
-            enemySync: hpArray
+            turnStartTs: Date.now(),
+            enemySync: hpArray,
+            turnOrder: members
           });
         }
       },
