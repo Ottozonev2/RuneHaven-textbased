@@ -2814,7 +2814,7 @@
       notesId: '69ae1081ae596e708f6e591d',
       // factionWarId: '69ae108fd0ea881f40fdfcdd',
       chatId: '69ae1161d0ea881f40fe0037',
-      guildId: '69ae1674ae596e708f6e6eeb',
+      guildId: 'guilds',
       clerkPublishableKey: 'pk_test_ZnVuLXRyZWVmcm9nLTk2LmNsZXJrLmFjY291bnRzLmRldiQ',
       enabled: true
     };
@@ -3503,8 +3503,11 @@
           ring: null,
           earrings: null
         },
-        skills: cls.skills.reduce((acc, sk) => { acc[sk] = 1; return acc; }, {}),
-        statPoints: 0,
+        skills: (cls.skills || []).reduce((acc, sk) => {
+          if ((SKILLS[sk]?.levelReq || 1) <= 1) acc[sk] = 1;
+          return acc;
+        }, {}),
+        statPoints: 3,
         skillPoints: 5,
         permadeath,
         kills: 0,
@@ -4402,12 +4405,14 @@
         document.getElementById('trainer-class-display').textContent = CLASSES[p.classKey].name;
 
         const pSkills = p.skills || {};
-        container.innerHTML = Object.keys(pSkills).map(sk => {
-          const skill = SKILLS[sk];
-          const lv = pSkills[sk];
-          const cost = 1; // 1 Skill Point per level
-          const isMaxed = lv >= p.level;
-          return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
+        container.innerHTML = Object.keys(pSkills)
+          .filter(sk => SKILLS[sk] && (SKILLS[sk].levelReq || 1) <= p.level)
+          .map(sk => {
+            const skill = SKILLS[sk];
+            const lv = pSkills[sk];
+            const cost = 1; // 1 Skill Point per level
+            const isMaxed = lv >= p.level;
+            return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
             <div style="flex:1;">
               <div style="font-size:12px;font-weight:600;color:var(--text-lt);">${skill.icon} ${skill.name} <span style="color:var(--violet-lt);font-size:10px;">(Lv.${lv})</span></div>
               <div style="font-size:10px;color:var(--text-dim);">${skill.desc}</div>
@@ -4416,7 +4421,7 @@
               ${isMaxed ? `MAX (Lv.${p.level})` : `Upgrade (${cost} SP)`}
             </button>
           </div>`;
-        }).join('');
+          }).join('');
         UI.openModal('modal-trainer');
       },
 
@@ -5131,13 +5136,24 @@
           Log.add(`🧪 Used <strong>${item.name}</strong>. +${p.mp - prev} MP.`, 'heal');
         }
         if (item.effect === 'stat_reset') {
-          const cls = CLASSES[p.classKey].base;
-          // Calculate total points spent
-          const spent = (p.str - cls.str) + (p.int - cls.int) + (p.wis - cls.wis) + (p.agi - cls.agi) + (p.vit - cls.vit);
-          p.statPoints += spent;
-          // Reset to base
-          p.str = cls.str; p.int = cls.int; p.wis = cls.wis; p.agi = cls.agi; p.vit = cls.vit;
-          Log.add(`✨ Drank <strong>${item.name}</strong>. Your essence is renewed! All spent stat points returned (${spent}).`, 'gold');
+          const cls = CLASSES[p.classKey];
+          const b = cls.base;
+          const g = cls.growth;
+          const lvBonus = p.level - 1;
+
+          // Ensure statPoints are flat for level: Level * 3
+          p.statPoints = p.level * 3;
+
+          // Reset stats to base + growth
+          p.str = b.str + (g.str * lvBonus);
+          p.int = b.int + (g.int * lvBonus);
+          p.wis = b.wis + (g.wis * lvBonus);
+          p.agi = b.agi + (g.agi * lvBonus);
+          p.vit = b.vit + (g.vit * lvBonus);
+          p.def = b.def + (g.def * lvBonus);
+          p.crit = b.crit + (g.crit * lvBonus);
+
+          Log.add(`🧪 Drank <strong>${item.name}</strong>. Your essence is renewed! You now have <strong>${p.statPoints}</strong> stat points to spend.`, 'gold');
         }
 
         this.removeFromInventory(id, 1, invEntry.level, invEntry.rarity || 'common');
@@ -5496,8 +5512,10 @@
         if (!p || !p.classKey) return;
         if (!p.skills) p.skills = {};
         let added = false;
-        Object.entries(SKILLS).forEach(([id, s]) => {
-          if (s.class === p.classKey && (s.levelReq || 0) <= p.level) {
+        const classSkills = CLASSES[p.classKey]?.skills || [];
+        classSkills.forEach(id => {
+          const s = SKILLS[id];
+          if (s && (s.levelReq || 0) <= p.level) {
             if (!p.skills[id]) {
               p.skills[id] = 1;
               Log.add(`✨ <strong>Skill Unlocked:</strong> ${s.icon} ${s.name}!`, 'gold');
@@ -5871,6 +5889,7 @@
           UI.refresh(); UI.showEnemyPanel(null);
           World.updateTerrain();
           World.render();
+          if (typeof GuildSystem !== 'undefined') GuildSystem.refresh();
           LOCATIONS[G.location].isTown ? Explore.showTownActions() : Explore.showExploreActions();
         } catch (e) { Log.add('Failed to restore chronicle.', 'system'); }
       },
@@ -6137,6 +6156,7 @@
             CharSelect.render();
           }
           AdminSystem.init();
+          if (typeof GuildSystem !== 'undefined') GuildSystem.refresh();
         } else {
           this.slots = {};
         }
@@ -6193,6 +6213,7 @@
           const msg = snap.val();
           if (msg && msg.ts > Date.now() - 60000) { // Only if recent
             this.showAnnouncement(msg.text);
+            Log.add(`📣 <strong style="color:var(--violet-lt);">SERVER:</strong> ${msg.text}`, 'system');
           }
         });
 
