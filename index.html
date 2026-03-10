@@ -4917,6 +4917,7 @@
       bgm: new Audio(),
       currentTrack: null,
       enabled: true,
+      masterVolume: 1.0,
       ctx: null,
 
       init() {
@@ -4924,6 +4925,29 @@
         // Attempt to pre-warm the AudioContext securely
         document.addEventListener('click', () => this._getContext(), { once: true });
         document.addEventListener('keydown', () => this._getContext(), { once: true });
+
+        const savedVol = localStorage.getItem('runehaven_volume');
+        if (savedVol !== null) {
+          this.setVolume(parseInt(savedVol), false);
+          const slider = document.getElementById('volume-slider');
+          if (slider) slider.value = savedVol;
+        }
+      },
+
+      setVolume(val, updateReadout = true) {
+        this.masterVolume = parseInt(val) / 100;
+        localStorage.setItem('runehaven_volume', val);
+        if (this.masterVolume === 0) {
+          this.enabled = false;
+          this.bgm.volume = 0;
+        } else {
+          this.enabled = true;
+          this.bgm.volume = this.masterVolume;
+        }
+        if (updateReadout) {
+          const out = document.getElementById('volume-readout');
+          if (out) out.textContent = `${val}%`;
+        }
       },
 
       _getContext() {
@@ -4946,8 +4970,8 @@
           this.bgm.volume = 0;
           this.bgm.play().catch(e => console.warn("BGM play blocked:", e));
           const fadeIn = setInterval(() => {
-            if (this.bgm.volume < 0.9) this.bgm.volume += 0.1;
-            else { clearInterval(fadeIn); this.bgm.volume = 1; }
+            if (this.bgm.volume < this.masterVolume * 0.9) this.bgm.volume += (this.masterVolume * 0.1);
+            else { clearInterval(fadeIn); this.bgm.volume = this.masterVolume; }
           }, fadeTime / 10);
         };
 
