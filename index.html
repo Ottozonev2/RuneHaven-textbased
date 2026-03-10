@@ -16,10 +16,9 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Courier+Prime:wght@400;700&display=swap"
     rel="stylesheet">
-  <!-- Clerk Authentication — handles login/signup/JWT (Cloudflare Compatible) -->
-  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
   <!-- Firebase SDK — handles real-time multiplayer (Database) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="firebase-config.js"></script>
 
@@ -1869,22 +1868,63 @@
      TITLE SCREEN
      ============================================================ -->
   <div id="screen-title" class="screen active">
-    <!-- Clerk Auth Header -->
+    <!-- Cloud Auth Header -->
     <div id="auth-header"
       style="position:absolute; top:12px; right:12px; z-index:100; display:flex; align-items:center; gap:10px;">
       <div id="user-info"
         style="color:var(--text-dim); font-size:11px; font-family:'Cinzel',serif; text-align:right; display:none;">
         <div style="color:var(--violet-lt); font-weight:bold;" id="user-email"></div>
-        <div style="font-size:9px;">Cloud Sync Active</div>
+        <div style="font-size:9px;">Eryndor Identity Bound</div>
       </div>
       <div id="user-button-container"></div>
-      <button id="login-btn" class="btn btn-sm" onclick="CloudSave.login()" style="min-width: 80px;">Login</button>
     </div>
 
+    <!-- Login Screen -->
+    <div id="screen-login" class="screen full-screen active"
+      style="background:var(--bg); display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px; z-index:9000;">
+      <div
+        style="font-family:'Cinzel',serif; font-size:42px; color:var(--violet-lt); text-shadow:0 0 15px var(--violet); margin-bottom:10px;">
+        RUNE HAVEN</div>
+      <div
+        style="font-size:13px; color:var(--text-dim); margin-bottom:30px; letter-spacing:3px; text-transform:uppercase;">
+        Outworlder Authentication</div>
+
+      <div id="auth-box"
+        style="width:100%; max-width:320px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+        <div id="auth-title"
+          style="font-family:'Cinzel',serif; color:var(--gold); font-size:18px; margin-bottom:20px; text-align:center;">
+          Sign In</div>
+
+        <div style="margin-bottom:16px;">
+          <label
+            style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Email
+            Address</label>
+          <input type="email" id="auth-email"
+            style="width:100%; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); outline:none; font-family:'Courier Prime',monospace;">
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <label
+            style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Secret
+            Key (Password)</label>
+          <input type="password" id="auth-pass"
+            style="width:100%; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); outline:none; font-family:'Courier Prime',monospace;">
+        </div>
+
+        <button id="auth-btn-primary" class="btn btn-violet" style="width:100%; margin-bottom:12px;"
+          onclick="AuthSystem.primaryAction()">Authenticate</button>
+        <div id="auth-toggle" style="text-align:center; font-size:12px; color:var(--text-dim); cursor:pointer;"
+          onclick="AuthSystem.toggleMode()">New Outworlder? <span style="color:var(--gold);">Register here</span></div>
+      </div>
+
+      <div id="auth-error"
+        style="margin-top:20px; color:var(--red); font-size:12px; display:none; text-align:center; max-width:300px;">
+      </div>
+    </div>
     <div class="title-world" style="margin-top: min(45vh, 400px); text-shadow: 0 0 10px #000;">World of Eryndor</div>
     <div class="title-story">
       The Veil between worlds is broken. Violet lightning tears the sky.
-      The dead walk freely and entire kingdoms have warped into unnatural wastelands.
+      The dead walk freely and entire kingdoms have warped into unnatural waste-lands.
       You are an <em>Outworlder</em> — a soul dragged through the Veil during the
       failed Shattered Summoning — cast into the dying world of <strong>Eryndor</strong>
       with no memory of how or why.
@@ -2031,10 +2071,12 @@
         <!-- Col 1: CHARACTER STATS -->
         <div class="dash-col" id="dash-col-stats">
           <div id="panel-stats">
-            <div class="panel-header">Outworlder</div>
+            <div class="panel-header" id="dash-panel-header"
+              onclick="this._clicks=(this._clicks||0)+1; if(this._clicks>=5){AdminSystem.open();this._clicks=0;}">
+              Outworlder</div>
             <div class="stat-section char-portrait">
               <span class="portrait-icon" id="stat-portrait">🌀</span>
-              <div class="char-name-dsp" id="stat-name">Hero</div>
+              <div class="char-name-dsp" id="stat-name" style="cursor:pointer;" onclick="AdminSystem.open()">Hero</div>
               <div class="char-cls-dsp" id="stat-class">Paladin · Lv.1</div>
               <div class="char-faction-dsp" id="stat-faction-dsp">—</div>
             </div>
@@ -2161,7 +2203,9 @@
   <!-- Stats drawer -->
   <div class="mobile-drawer" id="drawer-stats">
     <div class="drawer-header">
-      <span class="drawer-header-title" id="drawer-stats-title">⚔️ Outworlder</span>
+      <span class="drawer-header-title" id="drawer-stats-title"
+        onclick="this._clicks=(this._clicks||0)+1; if(this._clicks>=5){AdminSystem.open();this._clicks=0;}">⚔️
+        Outworlder</span>
       <button class="drawer-close" onclick="MobileNav.closeDrawer('drawer-stats')">✕</button>
     </div>
     <div style="padding:14px 16px;overflow-y:auto;flex:1;">
@@ -2233,16 +2277,67 @@
   <!-- ============================================================
      MODALS
      ============================================================ -->
-  <!-- Stat Points Modal -->
-  <div class="modal-overlay" id="modal-stats">
-    <div class="modal">
-      <div class="modal-title">📊 Player Stats</div>
-      <div id="stat-points-remaining"
-        style="color:var(--violet-lt);font-size:11px;text-align:center;margin-bottom:15px;letter-spacing:1px;font-weight:600;">
+  <!-- Admin Modal -->
+  <div class="modal-overlay" id="modal-admin">
+    <div class="modal"
+      style="max-width:500px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+      <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
+        <div class="modal-title">👑 ARCANE DOMINION</div>
+        <div
+          style="color:var(--violet-lt); font-size:10px; font-family:'Cinzel',serif; letter-spacing:1px; margin-top:4px;">
+          DEVELOPER CONSOLE</div>
       </div>
-      <div id="stats-list-container" style="display:flex;flex-direction:column;gap:8px;"></div>
-      <div style="margin-top:20px;text-align:center;">
-        <button class="btn btn-sm" onclick="UI.closeModal('modal-stats')">Close</button>
+
+      <div class="tab-bar" style="flex-shrink:0;">
+        <button class="tab-btn active" id="atab-self"
+          onclick="UI.switchTab('admin-self', 'atab-', 'atc-')">Self</button>
+        <button class="tab-btn" id="atab-players"
+          onclick="UI.switchTab('admin-players', 'atab-', 'atc-')">Players</button>
+        <button class="tab-btn" id="atab-world" onclick="UI.switchTab('admin-world', 'atab-', 'atc-')">World</button>
+      </div>
+
+      <div style="flex:1; overflow-y:auto; padding:20px;">
+        <!-- Self Tab -->
+        <div class="tab-content active" id="atc-admin-self">
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <button class="btn btn-violet" onclick="AdminSystem.grantGold(10000)">Give 10,000 Gold</button>
+            <button class="btn btn-violet" onclick="AdminSystem.grantLevel(5)">Give 5 Levels</button>
+            <div style="display:flex; gap:8px;">
+              <input id="admin-item-input" type="text" placeholder="Item ID..."
+                style="flex:1; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); font-family:monospace;">
+              <button class="btn btn-gold"
+                onclick="AdminSystem.grantItem(document.getElementById('admin-item-input').value)">Give Item</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Players Tab -->
+        <div class="tab-content" id="atc-admin-players">
+          <div id="admin-player-list" style="display:flex; flex-direction:column; gap:4px;">
+            <div class="chat-empty">Seeking Outworlders...</div>
+          </div>
+        </div>
+
+        <!-- World Tab -->
+        <div class="tab-content" id="atc-admin-world">
+          <div style="margin-bottom:16px;">
+            <label
+              style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Global
+              Announcement</label>
+            <textarea id="admin-broadcast-input"
+              style="width:100%; height:80px; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); font-family:serif; resize:none;"></textarea>
+            <button class="btn btn-violet" style="width:100%; margin-top:8px;" onclick="AdminSystem.broadcast()">Blast
+              Decree</button>
+          </div>
+          <div style="border-top:1px dashed var(--border); padding-top:16px;">
+            <button class="btn btn-red" style="width:100%;" onclick="AuthSystem.logout()">Forced System Purge
+              (Logout)</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:12px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
+        <button class="btn btn-sm" style="width:100%;" onclick="UI.closeModal('modal-admin')">Return to Veil</button>
       </div>
     </div>
   </div>
@@ -5893,69 +5988,112 @@
     };
 
     /* ============================================================
-       CLOUD SAVE MODULE — Clerk + Cloudflare KV
+       AUTH SYSTEM — Firebase Auth
+       ============================================================ */
+    const AuthSystem = {
+      mode: 'login',
+      user: null,
+
+      init() {
+        firebase.auth().onAuthStateChanged(async user => {
+          this.user = user;
+          if (user) {
+            // Check blacklist
+            const snap = await firebase.database().ref(`world/blacklist/${user.uid}`).once('value');
+            const ban = snap.val();
+            if (ban && ban.expiry > Date.now()) {
+              const date = new Date(ban.expiry).toLocaleString();
+              alert(`Your soul is bound in the Void until ${date}. You cannot enter Eryndor.`);
+              this.logout();
+              return;
+            }
+
+            document.getElementById('screen-login').classList.remove('active');
+            CloudSave.handleAuth(user);
+          } else {
+            document.getElementById('screen-login').classList.add('active');
+            this.toggleMode('login');
+          }
+        });
+      },
+
+      toggleMode(force) {
+        this.mode = force || (this.mode === 'login' ? 'register' : 'login');
+        const title = document.getElementById('auth-title');
+        const btn = document.getElementById('auth-btn-primary');
+        const toggle = document.getElementById('auth-toggle');
+
+        if (this.mode === 'login') {
+          title.textContent = 'Sign In';
+          btn.textContent = 'Authenticate';
+          toggle.innerHTML = `New Outworlder? <span style="color:var(--gold);">Register here</span>`;
+        } else {
+          title.textContent = 'New Chronicle';
+          btn.textContent = 'Bind Soul';
+          toggle.innerHTML = `Already bound? <span style="color:var(--gold);">Sign in here</span>`;
+        }
+      },
+
+      async primaryAction() {
+        const email = document.getElementById('auth-email').value.trim();
+        const pass = document.getElementById('auth-pass').value.trim();
+        const err = document.getElementById('auth-error');
+        err.style.display = 'none';
+
+        if (!email || !pass) {
+          err.textContent = "Provide both email and secret key.";
+          err.style.display = 'block';
+          return;
+        }
+
+        try {
+          if (this.mode === 'login') {
+            await firebase.auth().signInWithEmailAndPassword(email, pass);
+          } else {
+            await firebase.auth().createUserWithEmailAndPassword(email, pass);
+          }
+        } catch (e) {
+          err.textContent = e.message;
+          err.style.display = 'block';
+        }
+      },
+
+      logout() {
+        firebase.auth().signOut();
+        location.reload();
+      }
+    };
+
+    /* ============================================================
+       CLOUD SAVE MODULE — Firebase Realtime DB
        ============================================================ */
     const CloudSave = {
       user: null,
       slots: {},
       loading: false,
 
-      async init() {
-        if (typeof Clerk === 'undefined') return;
-
-        try {
-          await Clerk.load({ publishableKey: WORLD_CONFIG.clerkPublishableKey });
-
-          if (Clerk.user) {
-            this.handleAuth(Clerk.user);
-          } else {
-            this.handleAuth(null);
-          }
-
-          Clerk.addListener(({ user }) => {
-            this.handleAuth(user);
-          });
-        } catch (e) { console.error('Clerk init error', e); }
-      },
-
-      login() {
-        if (typeof Clerk !== 'undefined') Clerk.openSignIn();
-      },
-
       async handleAuth(user) {
         this.user = user;
-        this.updateUI();
+        const info = document.getElementById('user-info');
+        const email = document.getElementById('user-email');
+        const userBtnContainer = document.getElementById('user-button-container');
+
         if (user) {
-          Log.add(`☁ Cloud Sync active: ${user.primaryEmailAddress.emailAddress}`, 'system');
+          if (info) info.style.display = 'block';
+          if (email) email.textContent = user.email;
+          if (userBtnContainer) {
+            userBtnContainer.style.display = 'block';
+            userBtnContainer.innerHTML = `<button class="btn btn-sm btn-red" onclick="AuthSystem.logout()">Logout</button>`;
+          }
+          Log.add(`☁ Chronicle linked to: ${user.email}`, 'system');
           await this.loadAll();
           if (document.getElementById('screen-charselect').classList.contains('active')) {
             CharSelect.render();
           }
+          // Admin check
+          // AdminSystem.init(); // Assuming AdminSystem is defined elsewhere
         } else {
           this.slots = {};
-          if (G.player) Log.add('☁ Cloud Sync disabled (logged out).', 'system');
-          if (typeof GlobalChat !== 'undefined') GlobalChat.clear();
-        }
-      },
-
-      updateUI() {
-        const info = document.getElementById('user-info');
-        const email = document.getElementById('user-email');
-        const loginBtn = document.getElementById('login-btn');
-        const userBtnContainer = document.getElementById('user-button-container');
-
-        if (this.user) {
-          if (info) info.style.display = 'block';
-          if (email) email.textContent = this.user.primaryEmailAddress.emailAddress;
-          if (loginBtn) loginBtn.style.display = 'none';
-          if (userBtnContainer) {
-            userBtnContainer.style.display = 'block';
-            Clerk.mountUserButton(userBtnContainer);
-          }
-        } else {
-          if (info) info.style.display = 'none';
-          if (loginBtn) loginBtn.style.display = 'block';
-          if (userBtnContainer) userBtnContainer.style.display = 'none';
         }
       },
 
@@ -5963,14 +6101,9 @@
         if (!this.user) return;
         this.loading = true;
         try {
-          const token = await Clerk.session.getToken();
-          const resp = await fetch('/api/saves', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (resp.ok) {
-            const data = await resp.json();
-            this.slots = data.slots || {};
-          }
+          const snapshot = await firebase.database().ref(`saves/${this.user.uid}`).once('value');
+          const data = snapshot.val();
+          this.slots = data?.slots || {};
         } catch (e) { console.error('Cloud load failed', e); }
         finally { this.loading = false; }
       },
@@ -5979,16 +6112,8 @@
         if (!this.user) return false;
         this.slots[slotKey] = data;
         try {
-          const token = await Clerk.session.getToken();
-          const resp = await fetch('/api/saves', {
-            method: 'POST',
-            body: JSON.stringify({ slots: this.slots }),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          return resp.ok;
+          await firebase.database().ref(`saves/${this.user.uid}/slots`).set(this.slots);
+          return true;
         } catch (e) {
           console.error('Cloud save failed', e);
           return false;
@@ -5998,22 +6123,171 @@
       deleteSlot(slotKey) {
         if (!this.user) return;
         delete this.slots[slotKey];
-        this.saveRemaining();
+        firebase.database().ref(`saves/${this.user.uid}/slots/${slotKey}`).remove();
+      }
+    };
+
+    /* ============================================================
+       ADMIN SYSTEM — Management tools for Outworlders
+       ============================================================ */
+    const AdminSystem = {
+      _admins: ['rllofquist@gmail.com'], // Placeholder: replace with actual admin emails
+      isAdmin: false,
+
+      init() {
+        const user = AuthSystem.user;
+        if (!user) return;
+        // Check both email and fallback to a local variable if needed
+        if (this._admins.includes(user.email)) {
+          this.isAdmin = true;
+          Log.add('👑 <strong style="color:var(--gold);">Admin privileges active.</strong> Use wisely.', 'system');
+        }
+
+        // Listen for global announcements
+        firebase.database().ref('world/announcement').on('value', snap => {
+          const msg = snap.val();
+          if (msg && msg.ts > Date.now() - 60000) { // Only if recent
+            this.showAnnouncement(msg.text);
+          }
+        });
+
+        // Listen for kicks/bans
+        firebase.database().ref(`world/commands/${user.uid}`).on('value', snap => {
+          const cmd = snap.val();
+          if (cmd) {
+            this.handleRemoteCommand(cmd);
+            firebase.database().ref(`world/commands/${user.uid}`).remove();
+          }
+        });
       },
 
-      async saveRemaining() {
-        if (!this.user) return;
-        try {
-          const token = await Clerk.session.getToken();
-          await fetch('/api/saves', {
-            method: 'POST',
-            body: JSON.stringify({ slots: this.slots }),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          });
-        } catch (e) { }
+      open() {
+        if (!this.isAdmin) return;
+        UI.openModal('modal-admin');
+        this.refreshPlayerList();
+      },
+
+      // Local Cheats
+      grantGold(amt, targetUid = null) {
+        if (targetUid) {
+          this.sendRemoteCommand(targetUid, { type: 'GOLD', amount: amt });
+        } else {
+          G.player.gold += amt;
+          Log.add(`💰 Admin granted <strong>${amt}g</strong>.`, 'gold');
+          UI.refresh();
+        }
+      },
+
+      grantLevel(amt, targetUid = null) {
+        if (targetUid) {
+          this.sendRemoteCommand(targetUid, { type: 'LEVEL', amount: amt });
+        } else {
+          for (let i = 0; i < amt; i++) Combat.levelUp();
+          UI.refresh();
+        }
+      },
+
+      grantItem(itemId, targetUid = null) {
+        if (targetUid) {
+          this.sendRemoteCommand(targetUid, { type: 'ITEM', itemId: itemId });
+        } else {
+          Combat.addToInventory(itemId, 1);
+          UI.refresh();
+        }
+      },
+
+      // Global Moderation
+      async broadcast() {
+        const text = document.getElementById('admin-broadcast-input').value.trim();
+        if (!text) return;
+        await firebase.database().ref('world/announcement').set({ text, ts: Date.now() });
+        Log.add('📣 Server-wide announcement sent.', 'system');
+      },
+
+      showAnnouncement(text) {
+        // Build a simple pop-up or use an existing modal
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay active';
+        modal.style.zIndex = '10000';
+        modal.innerHTML = `
+          <div class="modal" style="border:2px solid var(--violet); text-align:center;">
+            <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:18px; margin-bottom:12px;">📣 DIVINE DECREE</div>
+            <div style="font-size:16px; margin-bottom:20px; line-height:1.6;">${text}</div>
+            <button class="btn btn-violet" onclick="this.parentElement.parentElement.remove()">I Hear the Veil</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      },
+
+      async kick(targetUid) {
+        await this.sendRemoteCommand(targetUid, { type: 'KICK' });
+        Log.add(`🦵 Kicked player.`, 'system');
+      },
+
+      async ban(targetUid, hours = 24) {
+        const expiry = Date.now() + (hours * 3600000);
+        await firebase.database().ref(`world/blacklist/${targetUid}`).set({ expiry });
+        await this.kick(targetUid);
+      },
+
+      // Command Bridge
+      async sendRemoteCommand(targetUid, cmd) {
+        await firebase.database().ref(`world/commands/${targetUid}`).set({ ...cmd, ts: Date.now() });
+      },
+
+      handleRemoteCommand(cmd) {
+        const p = G.player;
+        switch (cmd.type) {
+          case 'GOLD':
+            p.gold += cmd.amount;
+            Log.add(`🎁 <strong>Admin Gift:</strong> Received ${cmd.amount} gold!`, 'gold');
+            break;
+          case 'LEVEL':
+            for (let i = 0; i < cmd.amount; i++) Combat.levelUp();
+            Log.add(`🌀 <strong>Admin Gift:</strong> You have been granted ${cmd.amount} levels!`, 'levelup');
+            break;
+          case 'ITEM':
+            Combat.addToInventory(cmd.itemId, 1);
+            Log.add(`📦 <strong>Admin Gift:</strong> Received a new item!`, 'violet');
+            break;
+          case 'KICK':
+            AuthSystem.logout();
+            break;
+        }
+        UI.refresh();
+        Game.saveGame();
+      },
+
+      async refreshPlayerList() {
+        const snap = await firebase.database().ref('leaderboard').once('value');
+        const data = snap.val() || {};
+        const container = document.getElementById('admin-player-list');
+        container.innerHTML = Object.entries(data).map(([name, p]) => {
+          return `<div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:12px; color:var(--text-lt);">${p.icon} ${p.name} (Lv.${p.level})</div>
+              <div style="font-size:10px; color:var(--text-dim);">UID: ${p.uid || 'Unknown'}</div>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <button class="btn btn-sm btn-gold" onclick="AdminSystem.promptGive('${p.uid}', '${p.name}')">Give</button>
+              <button class="btn btn-sm btn-red" onclick="AdminSystem.ban('${p.uid}')">Ban</button>
+            </div>
+          </div>`;
+        }).join('');
+      },
+
+      promptGive(uid, name) {
+        const type = prompt(`Give to ${name}:\n1: Gold\n2: Level\n3: Item (ID)`);
+        if (type === '1') {
+          const amt = parseInt(prompt("Amount:"));
+          if (amt) this.grantGold(amt, uid);
+        } else if (type === '2') {
+          const amt = parseInt(prompt("Levels:"));
+          if (amt) this.grantLevel(amt, uid);
+        } else if (type === '3') {
+          const id = prompt("Item ID (e.g. veilblade):");
+          if (id) this.grantItem(id, uid);
+        }
       }
     };
 
@@ -6051,6 +6325,7 @@
         try {
           await this._db.ref('leaderboard/' + p.name).set({
             name: p.name,
+            uid: AuthSystem.user.uid,
             level: p.level,
             class: CLASSES[p.classKey]?.name || '',
             faction: p.faction,
@@ -7240,7 +7515,7 @@
        INIT
        ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
-      CloudSave.init();
+      AuthSystem.init();
       Game.showTitle();
       GlobalChat.init();
       World.init();
