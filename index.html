@@ -4264,6 +4264,7 @@
       const totalMult = (1 + (level - 1) * 0.15) * rare.mult * qualityMult; // For prices
 
       const s = { ...b, level, rarity };
+      if (b.type === 'loot') return s;
 
       if (b.type === 'consumable') {
         if (b.healAmount) s.healAmount = Math.max(1, Math.round(b.healAmount * totalMult));
