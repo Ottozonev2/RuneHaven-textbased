@@ -2592,7 +2592,7 @@
       magic: { name: 'Magic', color: '#4a70cf', mult: 1.5, rolls: 3 },
       rare: { name: 'Rare', color: '#2a3a8a', mult: 1.8, rolls: 4 },
       epic: { name: 'Epic', color: '#9060d8', mult: 2.2, rolls: 5 },
-      legendary: { name: 'Legendary', color: '#c9a84c', mult: 3.0, rolls: 6 }
+      legendary: { name: 'Legendary', color: '#c9a84c', mult: 2.7, rolls: 6 }
     };
 
     /* ============================================================
@@ -3136,7 +3136,7 @@
       
       // Calculate item stat budget based ONLY on level, rarity, and drop status
       // Level 1 yields a baseline, gaining solid bounds every level up
-      let statBudget = (6 + level * 2.5) * rare.mult * qualityMult;
+      let statBudget = (6 + level * 1.8) * rare.mult * qualityMult;
       if (b.slot === 'armor') statBudget *= 1.2;
       if (b.slot === 'weapon') statBudget *= 1.1;
 
@@ -4061,7 +4061,7 @@
           }
         }
         G.targetIndex = 0;
-        G.inCombat = true; G.playerDefending = false; G.combatBuffs = {}; G.turnCount = 0; G.canAct = true;
+        G.inCombat = true; G.playerDefending = false; G.combatBuffs = {}; G.cooldowns = {}; G.turnCount = 0; G.canAct = true;
 
         Log.divider();
         if (G.enemies[0].isBoss) {
@@ -4133,14 +4133,17 @@
             tooltip += ` | ${effectStr}`;
           }
 
+          const isOnCd = G.cooldowns && G.cooldowns[sk] > 0;
+          if (isOnCd) tooltip += ` | Cooldown: ${G.cooldowns[sk]}T`;
+
           const itColor = hasMp ? 'btn-violet' : '';
           const rarColor = s.color || '#fff';
 
           return {
-            label: `<span style="color:${rarColor}">${s.icon} ${s.name}</span>${s.type !== 'pact' ? ` (${s.cost}mp)` : ''}`,
+            label: `<span style="color:${rarColor}">${s.icon} ${s.name}</span> ${(isOnCd) ? `[CD: ${G.cooldowns[sk]}]` : (s.type !== 'pact' ? `(${s.cost}mp)` : '')}`,
             fn: `Combat.useSkill('${sk}')`,
-            cls: itColor,
-            disabled: !hasMp,
+            cls: isOnCd ? '' : itColor,
+            disabled: !hasMp || isOnCd,
             tooltip: tooltip
           };
         });
@@ -4192,12 +4195,21 @@
           Log.add(`😈 <strong>Demonic Pact!</strong> You sacrifice 15 HP for 20 MP.`, 'demons');
           this.afterPlayerTurn(); return;
         }
+        if (G.cooldowns && G.cooldowns[skillKey] > 0) {
+          Log.add(`${skill.name} is on cooldown for ${G.cooldowns[skillKey]} more turn(s)!`, 'system'); return;
+        }
+        
         if (p.mp < skill.cost) { Log.add('Not enough mana!', 'system'); return; }
         p.mp -= skill.cost;
 
-        // Apply skill level modifier (15% per level above 1)
+        // Apply skill cooldown dynamically based on mana cost
+        if (!G.cooldowns) G.cooldowns = {};
+        const cdValue = skill.cd !== undefined ? skill.cd : (skill.cost >= 80 ? 5 : (skill.cost >= 45 ? 4 : (skill.cost >= 20 ? 3 : (skill.cost > 0 ? 2 : 0))));
+        if (cdValue > 0) G.cooldowns[skillKey] = cdValue;
+
+        // Apply skill level modifier (3% per level above 1 instead of 15%)
         const skLevel = (p.skills && p.skills[skillKey]) || 1;
-        const lvMult = 1 + (skLevel - 1) * 0.15;
+        const lvMult = 1 + (skLevel - 1) * 0.03;
 
         // Type bonuses (e.g. Holy vs Undead)
         let typeMult = 1.0;
@@ -4433,7 +4445,7 @@
         const ratio = clampedTarget / Math.max(1, baseLevel);
         const scaled = Object.assign({}, base);
         scaled.level = clampedTarget;
-        scaled.hp = Math.floor((base.hp || 10) * ratio * 4.2 + (clampedTarget * 25));  // Massive HP buff
+        scaled.hp = Math.floor((base.hp || 10) * ratio * 7.5 + (clampedTarget * 50));  // Even larger HP buff to match high damage
         scaled.maxHp = scaled.hp;
         scaled.str = Math.floor((base.str || 5) * ratio * 2.0);  // +100% more damage
         scaled.def = Math.floor((base.def || 1) * ratio * 1.5);  // +50% more defense
@@ -4446,6 +4458,11 @@
       afterPlayerTurn(skipEnemy = false) {
         G.turnCount++;
         if (G.combatBuffs.turns > 0) G.combatBuffs.turns--;
+        if (G.cooldowns) {
+          for (let k in G.cooldowns) {
+            if (G.cooldowns[k] > 0) G.cooldowns[k]--;
+          }
+        }
 
         // Summons persist until they die in combat or combat ends
         if (G.companions) {
@@ -4481,7 +4498,7 @@
       },
 
       endCombat(victory, fled = false, died = false) {
-        G.inCombat = false; G.playerDefending = false; G.combatBuffs = {};
+        G.inCombat = false; G.playerDefending = false; G.combatBuffs = {}; G.cooldowns = {};
         UI.showEnemyPanel(null);
         if (died) {
           const p = G.player;
