@@ -5525,8 +5525,8 @@
 
           for (let i = 0; i < requestedCount; i++) {
             // Enhanced scaling: HP and STR based on player level + primary stats
-            const sHp = Math.floor((ct.hp + p.level * 60 + effectiveStat('vit') * 10) * lvMult);
-            const sStr = Math.floor((ct.str + p.level * 2.5 + effectiveStat('int') * 0.75) * lvMult);
+            const sHp = Math.floor((ct.hp + p.level * 20 + effectiveStat('vit') * 2) * lvMult);
+            const sStr = Math.floor((ct.str + p.level * 1.5 + effectiveStat('int') * 0.20) * lvMult);
 
             G.companions.push({
               type: sTypeKey, name: ct.name, icon: ct.icon,
@@ -5763,10 +5763,10 @@
         const ratio = clampedTarget / Math.max(1, baseLevel);
         const scaled = Object.assign({}, base);
         scaled.level = clampedTarget;
-        scaled.hp = Math.floor((base.hp || 10) * ratio * 2.2);  // +120% more HP (up from 50%)
+        scaled.hp = Math.floor((base.hp || 10) * ratio * 4.2 + (clampedTarget * 25));  // Massive HP buff
         scaled.maxHp = scaled.hp;
-        scaled.str = Math.floor((base.str || 5) * ratio * 1.5);  // +50% more damage (up from 30%)
-        scaled.def = Math.floor((base.def || 1) * ratio * 1.25);  // +25% more defense
+        scaled.str = Math.floor((base.str || 5) * ratio * 2.0);  // +100% more damage
+        scaled.def = Math.floor((base.def || 1) * ratio * 1.5);  // +50% more defense
         scaled.crit = Math.min(45, (base.crit || 0) + Math.floor(ratio * 3.5)); // crits scale up
         scaled.xp = Math.floor((base.xp || 10) * ratio * 1.5);
         scaled.gold = [Math.floor(base.gold[0] * ratio), Math.floor(base.gold[1] * ratio)];
