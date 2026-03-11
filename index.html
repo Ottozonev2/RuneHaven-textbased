@@ -6516,11 +6516,19 @@
         const ratio = clampedTarget / Math.max(1, baseLevel);
         const scaled = Object.assign({}, base);
         scaled.level = clampedTarget;
-        scaled.hp = Math.floor((base.hp || 10) * ratio * 8.5 + (clampedTarget * 60));  // Even larger HP buff to match high damage
+        
+        // Dynamic Scaling Weights:
+        // New players (lv 1-15) need a smoother entry.
+        // End-game players (lv 60+) need massive HP to challenge summons/legendaries.
+        const hpMult = clampedTarget < 15 ? 2.5 : 8.5;
+        const hpFlatBonus = clampedTarget < 15 ? 12 : 60;
+        const strMult = clampedTarget < 15 ? 1.1 : 1.5;
+
+        scaled.hp = Math.floor((base.hp || 10) * ratio * hpMult + (clampedTarget * hpFlatBonus));
         scaled.maxHp = scaled.hp;
-        scaled.str = Math.floor((base.str || 5) * ratio * 1.5);  // Softened: +50% more damage (was 100%)
-        scaled.def = Math.floor((base.def || 1) * ratio * 1.5);  // +50% more defense
-        scaled.crit = Math.min(45, (base.crit || 0) + Math.floor(ratio * 3.5)); // crits scale up
+        scaled.str = Math.floor((base.str || 5) * ratio * strMult);
+        scaled.def = Math.floor((base.def || 1) * ratio * 1.5);
+        scaled.crit = Math.min(45, (base.crit || 0) + Math.floor(ratio * 3.5));
         scaled.xp = Math.floor((base.xp || 10) * ratio * 1.5);
         scaled.gold = [Math.floor(base.gold[0] * ratio), Math.floor(base.gold[1] * ratio)];
         return scaled;
@@ -7460,7 +7468,7 @@
           if (document.getElementById('screen-charselect').classList.contains('active')) {
             CharSelect.render();
           }
-          AdminSystem.init();
+          await AdminSystem.init();
           if (typeof GuildSystem !== 'undefined') GuildSystem.refresh();
         } else {
           this.slots = {};
@@ -7529,16 +7537,22 @@
        ADMIN SYSTEM — Management tools for Outworlders
        ============================================================ */
     const AdminSystem = {
-      _admins: ['rllofquist@gmail.com'], // Placeholder: replace with actual admin emails
       isAdmin: false,
 
-      init() {
+      async init() {
         const user = AuthSystem.user;
         if (!user) return;
-        // Check both email and fallback to a local variable if needed
-        if (this._admins.includes(user.email)) {
-          this.isAdmin = true;
-          Log.add('👑 <strong style="color:var(--gold);">Admin privileges active.</strong> Use wisely.', 'system');
+
+        // Securely check for Admin status from Firebase DB
+        // You'll need to manually set "world/admins/[UID]: true" in your Firebase Console
+        try {
+          const snap = await firebase.database().ref(`world/admins/${user.uid}`).once('value');
+          if (snap.exists() && snap.val() === true) {
+            this.isAdmin = true;
+            Log.add('👑 <strong style="color:var(--gold);">Admin privileges active.</strong> Use wisely.', 'system');
+          }
+        } catch (err) {
+          console.warn("Admin verify error:", err);
         }
 
         // Listen for global announcements
