@@ -3962,7 +3962,7 @@
         attacks: ['consumes the soul of', 'tears reality beside', 'unleashes the Veil\'s fury on']
       },
       mimic: {
-        name: 'Mimic', icon: '🧰', level: 1, hp: 50, maxHp: 50, str: 10, def: 5, agi: 15, crit: 20, xp: 120, gold: [50, 150], isBoss: false,
+        name: 'Mimic', icon: '🧰', level: 1, hp: 50, maxHp: 50, str: 4, def: 5, agi: 15, crit: 10, xp: 120, gold: [50, 150], isBoss: false,
         enemyType: 'aberration',
         loot: [{ item: 'arcaneLoop', chance: .15 }, { item: 'shadowRing', chance: .15 }],
         desc: 'A predatory creature disguised as a treasure chest. It smells of old wood and human blood.',
@@ -4227,8 +4227,8 @@
         gold: 60,
         // Inventory entries: { id, qty, level }
         inventory: [
-          { id: 'healthPotion', qty: 10, level: 1 },
-          { id: 'manaPotion', qty: 10, level: 1 }
+          { id: 'healthPotion', qty: 10, level: 1, rarity: 'common' },
+          { id: 'manaPotion', qty: 10, level: 1, rarity: 'common' }
         ],
         // Equipment slots: { id, level, rarity }
         equipment: {
@@ -5926,6 +5926,8 @@
         const groupSize = Math.min(4, 1 + Math.floor(Math.random() * partySize));
 
         G.enemies = [];
+        let hasMimic = false;
+
         if (forceData && forceData.enemies) {
           // Sync with Leader's enemies
           G.enemies = forceData.enemies;
@@ -5933,8 +5935,17 @@
           for (let i = 0; i < groupSize; i++) {
             let currentKey = enemyKey;
             if (i > 0 && loc.enemies && loc.enemies.includes(enemyKey)) {
-              currentKey = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+              let randKey = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+              // Ensure only one mimic per encounter
+              if (randKey === 'mimic' && hasMimic) {
+                const others = loc.enemies.filter(k => k !== 'mimic');
+                if (others.length) randKey = others[Math.floor(Math.random() * others.length)];
+                else randKey = enemyKey;
+              }
+              currentKey = randKey;
             }
+            if (currentKey === 'mimic') hasMimic = true;
+            
             const base = ENEMIES[currentKey];
             const e = this.scaleEnemy(base);
             e.id = currentKey; // Added: Fix quest tracking
@@ -6507,7 +6518,7 @@
         scaled.level = clampedTarget;
         scaled.hp = Math.floor((base.hp || 10) * ratio * 8.5 + (clampedTarget * 60));  // Even larger HP buff to match high damage
         scaled.maxHp = scaled.hp;
-        scaled.str = Math.floor((base.str || 5) * ratio * 2.0);  // +100% more damage
+        scaled.str = Math.floor((base.str || 5) * ratio * 1.5);  // Softened: +50% more damage (was 100%)
         scaled.def = Math.floor((base.def || 1) * ratio * 1.5);  // +50% more defense
         scaled.crit = Math.min(45, (base.crit || 0) + Math.floor(ratio * 3.5)); // crits scale up
         scaled.xp = Math.floor((base.xp || 10) * ratio * 1.5);
@@ -6829,9 +6840,14 @@
         }
         UI.refreshInventory();
       },
-      removeFromInventory(id, qty, level = null, rarity = 'common') {
+      removeFromInventory(id, qty, level = null, rarity = null) {
         const p = G.player;
-        const idx = p.inventory.findIndex(e => e.id === id && (level === null || e.level === level) && (rarity === null || e.rarity === rarity));
+        const targetRar = rarity || 'common';
+        const idx = p.inventory.findIndex(e => 
+          e.id === id && 
+          (level === null || e.level === level) && 
+          ((e.rarity || 'common') === targetRar)
+        );
         if (idx === -1) return;
         p.inventory[idx].qty -= qty;
         if (p.inventory[idx].qty <= 0) p.inventory.splice(idx, 1);
