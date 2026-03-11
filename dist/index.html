@@ -3118,8 +3118,8 @@
       const b = ITEMS[id]; if (!b) return null;
       const rare = RARITIES[rarity] || RARITIES.common;
 
-      // Base scaling factor
-      const factor = level / 10;
+      // Base scaling factor: Starts at 1.0 for Level 1, increases by 35% per level
+      const factor = 1 + (level - 1) * 0.35;
       // Dropped items are 20% stronger than shop items
       const qualityMult = isDropped ? 1.2 : 1.0;
       // Rarity multiplier stacks

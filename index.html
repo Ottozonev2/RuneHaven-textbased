@@ -3756,8 +3756,8 @@
       const b = ITEMS[id]; if (!b) return null;
       const rare = RARITIES[rarity] || RARITIES.common;
 
-      // Base scaling factor: Starts at 1.0 for Level 1, increases by 15% per level
-      const factor = 1 + (level - 1) * 0.15;
+      // Base scaling factor: Starts at 1.0 for Level 1, increases by 35% per level
+      const factor = 1 + (level - 1) * 0.35;
       // Dropped items are 20% stronger than shop items
       const qualityMult = isDropped ? 1.2 : 1.0;
       // Rarity multiplier stacks
@@ -5401,7 +5401,7 @@
           let totalHits = skill.hitCount || (skill.doubleHit ? 2 : 1);
 
           for (let i = 0; i < totalHits; i++) {
-            let hDmg = Math.max(1, Math.floor(effectiveStat('str') * skill.mult * lvMult * typeMult) - enemy.def);
+            let hDmg = Math.max(1, Math.floor(effectiveStat('str') * (skill.mult || 0) * lvMult * typeMult) - enemy.def);
             const crit = skill.alwaysCrit || Math.random() * 100 < p.crit;
             if (crit && !skill.alwaysCrit) hDmg = Math.floor(hDmg * 1.8);
             totalDmg += hDmg;
@@ -5418,28 +5418,8 @@
             GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${totalDmg}`);
             if (G.isPartyLeader) GlobalChat._broadcastEnemyHealth();
           }
-
-          // Apply Status Effects (Stun, DOT, etc.)
-          if (skill.stunChance && Math.random() < skill.stunChance) {
-            enemy.status.stun = 1;
-            Log.add(`✨ <strong>${skill.name}!</strong> The ${enemy.name} is stunned!`, 'success');
-          }
-          if (skill.dot) {
-            enemy.status[skill.dot.type] = (enemy.status[skill.dot.type] || 0) + skill.dot.duration;
-            Log.add(`🧪 <strong>${skill.name}!</strong> The ${enemy.name} is afflicted with ${skill.dot.type}!`, 'success');
-          }
-
-          // Legacy hardcoded skill checks
-          if (skillKey === 'lightBind') {
-            enemy.status.stun = 1;
-            Log.add(`✨ <strong>Light Bind!</strong> The ${enemy.name} is blinded and will skip their next turn.`, 'success');
-          }
-          if (skillKey === 'venomBlade') {
-            enemy.status.poison = 3;
-            Log.add(`🐍 <strong>Venom Blade!</strong> The ${enemy.name} is poisoned!`, 'success');
-          }
         } else if (skill.type === 'magic') {
-          let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult * lvMult * typeMult) - Math.floor(enemy.def / 2));
+          let dmg = Math.max(1, Math.floor(effectiveStat('int') * (skill.mult || 0) * lvMult * typeMult) - Math.floor(enemy.def / 2));
           const crit = Math.random() * 100 < p.crit;
           if (crit) dmg = Math.floor(dmg * 1.6);
           enemy.hp -= dmg;
@@ -5450,7 +5430,7 @@
           }
           if (enemy.isBoss) UI.veilFlash();
         } else if (skill.type === 'drain') {
-          let dmg = Math.max(1, Math.floor(effectiveStat('int') * skill.mult * lvMult * typeMult) - Math.floor(enemy.def / 2));
+          let dmg = Math.max(1, Math.floor(effectiveStat('int') * (skill.mult || 0) * lvMult * typeMult) - Math.floor(enemy.def / 2));
           const heal = Math.floor(dmg * 0.5);
           enemy.hp -= dmg; p.hp = Math.min(effectiveMaxHp(), p.hp + heal);
           Log.add(`${skill.icon} <strong>${skill.name}</strong> (Lv.${skLevel})! Drained <strong>${dmg}</strong> HP, restored <strong>${heal}</strong>.`, 'heal');
@@ -5458,6 +5438,26 @@
             GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
             if (G.isPartyLeader) GlobalChat._broadcastEnemyHealth();
           }
+        }
+
+        // Apply Status Effects (Stun, DOT, etc.) - Moved outside so all spell types can apply CC & DoT!
+        if (skill.stunChance && Math.random() < skill.stunChance) {
+          enemy.status.stun = 1;
+          Log.add(`✨ <strong>${skill.name}!</strong> The ${enemy.name} is stunned!`, 'success');
+        }
+        if (skill.dot) {
+          enemy.status[skill.dot.type] = (enemy.status[skill.dot.type] || 0) + skill.dot.duration;
+          Log.add(`🧪 <strong>${skill.name}!</strong> The ${enemy.name} is afflicted with ${skill.dot.type}!`, 'success');
+        }
+
+        // Legacy hardcoded skill checks
+        if (skillKey === 'lightBind') {
+          enemy.status.stun = 1;
+          Log.add(`✨ <strong>Light Bind!</strong> The ${enemy.name} is blinded and will skip their next turn.`, 'success');
+        }
+        if (skillKey === 'venomBlade') {
+          enemy.status.poison = 3;
+          Log.add(`🐍 <strong>Venom Blade!</strong> The ${enemy.name} is poisoned!`, 'success');
         } else if (skill.type === 'heal') {
           if (G.partyCode && !skill.isSelfOnly) {
             const members = Object.keys(G.partyMembers);
@@ -5602,6 +5602,22 @@
                 enemy.hp -= poiDmg;
                 enemy.status.poison--;
                 Log.add(`🤢 The ${enemy.name} takes <strong>${poiDmg}</strong> poison damage!`, 'combat');
+                if (enemy.hp <= 0) { UI.showEnemyPanel(G.enemies); finished++; if (finished === livingEnemies.length) resolve(); return; }
+              }
+
+              if (enemy.status.burn > 0) {
+                const burnDmg = Math.floor(enemy.maxHp * 0.08);
+                enemy.hp -= burnDmg;
+                enemy.status.burn--;
+                Log.add(`🔥 The ${enemy.name} takes <strong>${burnDmg}</strong> burn damage!`, 'combat');
+                if (enemy.hp <= 0) { UI.showEnemyPanel(G.enemies); finished++; if (finished === livingEnemies.length) resolve(); return; }
+              }
+
+              if (enemy.status.curse > 0) {
+                const curseDmg = Math.floor(enemy.maxHp * 0.05);
+                enemy.hp -= curseDmg;
+                enemy.status.curse--;
+                Log.add(`🧿 The ${enemy.name} takes <strong>${curseDmg}</strong> curse damage!`, 'combat');
                 if (enemy.hp <= 0) { UI.showEnemyPanel(G.enemies); finished++; if (finished === livingEnemies.length) resolve(); return; }
               }
 
