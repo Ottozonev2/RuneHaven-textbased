@@ -3118,13 +3118,9 @@
       const b = ITEMS[id]; if (!b) return null;
       const rare = RARITIES[rarity] || RARITIES.common;
 
-      // Base scaling factor: Starts at 1.0 for Level 1, increases by 35% per level
-      const factor = 1 + (level - 1) * 0.35;
-      // Dropped items are 20% stronger than shop items
       const qualityMult = isDropped ? 1.2 : 1.0;
-      // Rarity multiplier stacks
-      const totalMult = factor * rare.mult * qualityMult;
-
+      const totalMult = (1 + (level - 1) * 0.15) * rare.mult * qualityMult; // For prices
+      
       const s = { ...b, level, rarity };
 
       if (b.type === 'consumable') {
@@ -3136,35 +3132,73 @@
         return s;
       }
 
-      ['strBonus', 'intBonus', 'wisBonus', 'agiBonus', 'vitBonus', 'defBonus', 'buyPrice', 'sellPrice'].forEach(stat => {
-        if (b[stat]) {
-          s[stat] = Math.max(1, Math.round(b[stat] * totalMult));
-        }
+      const combatStats = ['strBonus', 'intBonus', 'wisBonus', 'agiBonus', 'vitBonus', 'defBonus'];
+      
+      // Calculate item stat budget based ONLY on level, rarity, and drop status
+      // Level 1 yields a baseline, gaining solid bounds every level up
+      let statBudget = (6 + level * 2.5) * rare.mult * qualityMult;
+      if (b.slot === 'armor') statBudget *= 1.2;
+      if (b.slot === 'weapon') statBudget *= 1.1;
+
+      // Find original total stats to use as relative weights
+      let originalTotal = 0;
+      combatStats.forEach(stat => {
+        if (b[stat]) originalTotal += b[stat];
       });
 
-      // Randomized stat variance for dropped items
+      // Distribute core budget proportionally based on item base identity
+      if (originalTotal > 0) {
+        combatStats.forEach(stat => {
+          if (b[stat]) {
+            s[stat] = Math.max(1, Math.floor(statBudget * (b[stat] / originalTotal)));
+          }
+        });
+      } else {
+        s.defBonus = Math.floor(statBudget);
+      }
+
+      // Add Random Variations for dropped items based on rarity
       if (isDropped) {
-        ['strBonus', 'intBonus', 'wisBonus', 'agiBonus', 'vitBonus', 'defBonus'].forEach(stat => {
+        combatStats.forEach(stat => {
           if (s[stat]) {
-            const variance = 0.9 + (Math.random() * 0.3); // 90% to 120%
+            const variance = 0.85 + (Math.random() * 0.3); // 85% to 115%
             s[stat] = Math.max(1, Math.round(s[stat] * variance));
           }
         });
+
+        // Higher rarities randomly roll bonus stat dimensions to feel unique
+        let extraStatsCount = 0;
+        if (rarity === 'uncommon' && Math.random() < 0.5) extraStatsCount = 1;
+        else if (rarity === 'magic') extraStatsCount = 1;
+        else if (rarity === 'rare') extraStatsCount = 1 + Math.floor(Math.random() * 2);
+        else if (rarity === 'epic') extraStatsCount = 2 + Math.floor(Math.random() * 2);
+        else if (rarity === 'legendary') extraStatsCount = 3 + Math.floor(Math.random() * 2);
+
+        const availableStats = combatStats.filter(stat => !s[stat]);
+        for(let i = 0; i < extraStatsCount && availableStats.length > 0; i++) {
+          const randIdx = Math.floor(Math.random() * availableStats.length);
+          const chosenStat = availableStats.splice(randIdx, 1)[0];
+          const extraBudget = Math.max(1, Math.floor(statBudget * (0.10 + Math.random() * 0.15)));
+          s[chosenStat] = extraBudget;
+        }
       }
+
+      s.buyPrice = Math.max(1, Math.round(b.buyPrice * totalMult));
+      s.sellPrice = Math.max(1, Math.round(b.sellPrice * totalMult));
 
       s.name = `${b.name} (Lv.${level})`;
       if (rarity !== 'common') s.name = `${rare.name} ${s.name}`;
 
-      // Update desc with scaled stats
-      let newDesc = b.desc;
+      // Re-generate the description based entirely on its new stats
+      let newDesc = b.desc.replace(/\+\d+\s+(STR|INT|WIS|AGI|VIT|DEF)[,\.]?\s*/gi, '').trim();      
+      let statStrings = [];
       ['str', 'int', 'wis', 'def', 'vit', 'agi'].forEach(key => {
         const bonusKey = key + 'Bonus';
         if (s[bonusKey]) {
-          const regex = new RegExp(`\\+\\d+ ${key.toUpperCase()}`);
-          newDesc = newDesc.replace(regex, `+${s[bonusKey]} ${key.toUpperCase()}`);
+          statStrings.push(`+${s[bonusKey]} ${key.toUpperCase()}`);
         }
       });
-      s.desc = newDesc;
+      s.desc = newDesc + (newDesc.endsWith('.') ? ' ' : '. ') + statStrings.join(', ');
       s.color = rare.color;
       return s;
     }
