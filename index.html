@@ -1184,6 +1184,73 @@
       color: #e08088;
     }
 
+    /* Legal Agreement Styling */
+    .legal-container {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-dim);
+    }
+
+    .legal-container h2 {
+      font-family: 'Cinzel', serif;
+      color: var(--violet-lt);
+      font-size: 16px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+    }
+
+    .legal-container h3 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold-lt);
+      font-size: 13px;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    .legal-container p {
+      margin-bottom: 12px;
+    }
+
+    .legal-container ul {
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+
+    .legal-container li {
+      margin-bottom: 6px;
+    }
+
+    .legal-tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--bg-mid);
+      border: 1px solid var(--border);
+      padding: 2px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .legal-tab {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: none;
+      color: var(--text-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .legal-tab.active {
+      background: var(--violet);
+      color: white;
+    }
+
     /* Actions panel */
     .location-bar {
       padding: 5px 12px;
@@ -2144,6 +2211,9 @@
     <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
       v3.9 &middot; Rune Haven &middot; Mobile &amp; Desktop
     </div>
+    <div style="margin-top:10px; color:var(--text-dim); font-size:9px; max-width:440px; margin-left:auto; margin-right:auto; opacity:0.6; line-height:1.4; font-family:serif; font-style:italic;">
+      This project utilizes AI-assisted development. All core systems, game balance, and content are human-refined to ensure a handcrafted, premium experience.
+    </div>
   </div>
 
   <!-- ============================================================
@@ -3035,6 +3105,140 @@
       onclick="document.getElementById('chat-context-menu').style.display='none'">Close</button>
   </div>
 
+  <!-- Legal Agreements Modal -->
+  <div class="modal-overlay" id="modal-legal" style="z-index: 2000; background:rgba(0,0,0,0.95);">
+    <div class="modal"
+      style="max-width:600px; height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden; border-color:var(--violet);">
+      <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
+        <div class="modal-title" style="text-align:center;">📜 Legal Agreements</div>
+        <div style="color:var(--text-dim); font-size:11px; text-align:center; margin-top:4px; font-family:'Cinzel',serif; letter-spacing:1px;">
+          HAVEN STUDIOS &middot; THE CHRONICLES OF RUNE HAVEN
+        </div>
+      </div>
+
+      <div style="padding:16px 20px 0; flex-shrink:0;">
+        <div class="legal-tabs">
+          <button class="legal-tab active" id="tab-btn-terms" onclick="UI.switchLegalTab('terms')">Terms & Conditions</button>
+          <button class="legal-tab" id="tab-btn-privacy" onclick="UI.switchLegalTab('privacy')">Privacy Policy</button>
+        </div>
+      </div>
+
+      <div style="flex:1; overflow-y:auto; padding:0 20px 20px; scroll-behavior:smooth;" id="legal-content-scroll">
+        <!-- Terms and Conditions Content -->
+        <div id="legal-content-terms" class="legal-container">
+          <h2>Terms and Conditions</h2>
+          <p><strong>The Chronicles of Rune Haven</strong><br>Operated by Haven Studios<br>Last Updated: March 2026</p>
+
+          <h3>1. Acceptance of Terms</h3>
+          <p>By accessing or playing The Chronicles of Rune Haven, you agree to follow these Terms and Conditions. If you do not agree with these terms, you should not use the game.</p>
+          <p>These terms apply to all players, visitors, and users of the game and related services.</p>
+
+          <h3>2. About the Game</h3>
+          <p>The Chronicles of Rune Haven is a browser-based text RPG created and operated by Haven Studios. The game may be updated, changed, or temporarily unavailable at any time without notice.</p>
+          <p>We reserve the right to modify game systems, mechanics, content, and balance whenever necessary.</p>
+
+          <h3>3. Player Accounts and Data</h3>
+          <p>Players may create characters and game progress while using the service. By playing the game you understand that:</p>
+          <ul>
+            <li>Your progress may be stored in browser storage, cloud storage, or external databases.</li>
+            <li>Loss of saved data may occur due to updates, browser changes, or technical issues.</li>
+            <li>Haven Studios cannot guarantee permanent preservation of game progress.</li>
+            <li>Players are responsible for maintaining their own devices and browser environments.</li>
+          </ul>
+
+          <h3>4. Acceptable Use</h3>
+          <p>Players agree not to:</p>
+          <ul>
+            <li>Exploit bugs or unintended mechanics</li>
+            <li>Attempt to hack, reverse engineer, or disrupt the game</li>
+            <li>Use automated bots or scripts to gain unfair advantages</li>
+            <li>Harass other players or abuse any community features</li>
+            <li>Attempt to access restricted systems or server infrastructure</li>
+          </ul>
+          <p>Violation of these rules may result in account resets, suspensions, or bans.</p>
+
+          <h3>5. Intellectual Property</h3>
+          <p>All content within The Chronicles of Rune Haven, including but not limited to: Game systems, Artwork, Writing and lore, Music and audio, UI design, Code and scripts, are the intellectual property of Haven Studios unless otherwise credited.</p>
+          <p>You may not copy, redistribute, sell, or reuse game assets without permission.</p>
+
+          <h3>6. AI-Generated and AI-Assisted Content</h3>
+          <p>Parts of The Chronicles of Rune Haven may be created or assisted by artificial intelligence tools. This may include but is not limited to: Story content and lore, Dialogue or quest writing, Code assistance, Design concepts, Art or visual elements.</p>
+          <p>All AI-assisted content is reviewed, edited, and curated by Haven Studios before being used in the game.</p>
+          <p>Players may not use the game or its assets to train AI systems, scrape data, or generate derivative AI datasets without written permission.</p>
+
+          <h3>7. Game Balance and Updates</h3>
+          <p>Game mechanics, items, enemies, quests, and systems may change at any time to maintain balance or improve gameplay. This may include: Stat changes, Item adjustments, Skill reworks, Quest modifications, Character resets if required for stability.</p>
+          <p>Haven Studios is not obligated to compensate players for these changes.</p>
+
+          <h3>8. Availability</h3>
+          <p>While we strive to keep the game accessible, The Chronicles of Rune Haven is provided as-is. We cannot guarantee: Continuous uptime, No bugs or errors, Permanent access to the service.</p>
+          <p>The game may be modified, paused, or shut down at any time.</p>
+
+          <h3>9. Limitation of Liability</h3>
+          <p>Haven Studios is not liable for: Data loss, Account loss, Technical issues, Damages resulting from use of the game. Use of the game is entirely at your own risk.</p>
+
+          <h3>10. Third-Party Services</h3>
+          <p>The game may be hosted or distributed using third-party services including but not limited to: website hosting platforms, browser technologies, game distribution platforms. Haven Studios is not responsible for the policies or outages of these external services.</p>
+
+          <h3>11. Changes to These Terms</h3>
+          <p>Haven Studios may update these Terms and Conditions at any time. Continued use of the game after updates means you accept the revised terms.</p>
+
+          <h3>12. Contact</h3>
+          <p>If you have questions about these Terms and Conditions, you may contact Haven Studios regarding The Chronicles of Rune Haven.</p>
+        </div>
+
+        <!-- Privacy Policy Content -->
+        <div id="legal-content-privacy" class="legal-container" style="display:none;">
+          <h2>Privacy Policy</h2>
+          <p><strong>The Chronicles of Rune Haven</strong><br>Operated by Haven Studios<br>Last Updated: March 2026</p>
+
+          <h3>1. Introduction</h3>
+          <p>This Privacy Policy explains how Haven Studios collects, uses, and protects information when you play The Chronicles of Rune Haven, a browser-based text RPG.</p>
+          <p>By using the game, you agree to the practices described in this policy.</p>
+
+          <h3>2. Information We Collect</h3>
+          <p><strong>Game Data:</strong> When you play the game, the following information may be stored: Character names, Player progression, Inventory and items, Game choices and quest progress, Gameplay statistics. This data is used strictly to allow the game to function and save progress.</p>
+          <p><strong>Technical Data:</strong> Some basic technical information may be automatically collected, including: Browser type, Device type, Operating system, IP address, Session information. This helps maintain game performance and troubleshoot issues.</p>
+
+          <h3>3. Local Storage and Cookies</h3>
+          <p>The Chronicles of Rune Haven may store data using: Browser local storage, Cookies, Cloud storage services (if enabled). This allows the game to remember player progress and settings. Disabling cookies or clearing browser storage may result in loss of saved progress.</p>
+
+          <h3>4. How We Use Information</h3>
+          <p>Information collected may be used to: Save player progress, Improve gameplay systems, Fix bugs and technical problems, Balance game mechanics, Improve performance and stability. Haven Studios does not sell personal data to third parties.</p>
+
+          <h3>5. AI-Assisted Systems</h3>
+          <p>Some parts of The Chronicles of Rune Haven may involve AI-assisted tools for development or content creation. Player data is not intentionally used to train AI models.</p>
+
+          <h3>6. Third-Party Services</h3>
+          <p>The game may rely on third-party services such as hosting platforms, cloud infrastructure providers, and game distribution platforms. These services may collect limited technical data according to their own privacy policies.</p>
+
+          <h3>7. Data Security</h3>
+          <p>Haven Studios takes reasonable steps to protect game data. However, no online service can guarantee complete security. Players should understand that using online services always involves some level of risk.</p>
+
+          <h3>8. Children's Privacy</h3>
+          <p>The Chronicles of Rune Haven is not specifically directed toward children under 13. If you believe a child has submitted personal information, please contact Haven Studios and the data will be removed when possible.</p>
+
+          <h3>9. Player Rights</h3>
+          <p>Players may request: deletion of stored data (when technically possible), clarification about what data is stored. Requests can be made by contacting Haven Studios.</p>
+
+          <h3>10. Changes to This Policy</h3>
+          <p>This Privacy Policy may be updated occasionally as the game evolves. Continued use of The Chronicles of Rune Haven means you accept any updated policies.</p>
+
+          <h3>11. Contact</h3>
+          <p>For privacy-related questions, contact Haven Studios regarding The Chronicles of Rune Haven.</p>
+        </div>
+      </div>
+
+      <div style="padding:16px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
+        <div style="margin-bottom:12px; font-size:12px; color:var(--text-lt); display:flex; align-items:center; justify-content:center; gap:8px;">
+          <input type="checkbox" id="legal-agree-check" style="width:16px; height:16px; cursor:pointer;">
+          <label for="legal-agree-check" style="cursor:pointer; user-select:none; font-family:'Cinzel',serif;">I agree to the Terms and Privacy Policy</label>
+        </div>
+        <button id="legal-accept-btn" class="btn btn-violet btn-lg" style="width:100%;" onclick="CloudSave.acceptLegal()">Accept & Enter Eryndor</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* PWA manifest is loaded via <link rel="manifest" href="manifest.json"> in <head> */
 
@@ -3702,7 +3906,8 @@
       partyInvites: [],
       partyMembers: {},
       lastPulse: 0,
-      lastPartyCmdTs: 0
+      lastPartyCmdTs: 0,
+      dungeonState: { inProgress: false, wave: 0, maxWaves: 5, locKey: "" }
     };
 
     /* ============================================================
@@ -3746,6 +3951,7 @@
         kills: 0,
         stash: [],
         stashGold: 0,
+        dungeonCooldowns: {},
         activeQuests: { awakening: { progress: 0 } }, // Give initial quest
         completedQuests: []
       };
@@ -3758,7 +3964,7 @@
 
       const qualityMult = isDropped ? 1.2 : 1.0;
       const totalMult = (1 + (level - 1) * 0.15) * rare.mult * qualityMult; // For prices
-      
+
       const s = { ...b, level, rarity };
 
       if (b.type === 'consumable') {
@@ -3771,7 +3977,7 @@
       }
 
       const combatStats = ['strBonus', 'intBonus', 'wisBonus', 'agiBonus', 'vitBonus', 'defBonus'];
-      
+
       // Calculate item stat budget based ONLY on level, rarity, and drop status
       // Level 1 yields a baseline, gaining solid bounds every level up
       let statBudget = (6 + level * 1.8) * rare.mult * qualityMult;
@@ -3813,7 +4019,7 @@
         else if (rarity === 'legendary') extraStatsCount = 3 + Math.floor(Math.random() * 2);
 
         const availableStats = combatStats.filter(stat => !s[stat]);
-        for(let i = 0; i < extraStatsCount && availableStats.length > 0; i++) {
+        for (let i = 0; i < extraStatsCount && availableStats.length > 0; i++) {
           const randIdx = Math.floor(Math.random() * availableStats.length);
           const chosenStat = availableStats.splice(randIdx, 1)[0];
           const extraBudget = Math.max(1, Math.floor(statBudget * (0.10 + Math.random() * 0.15)));
@@ -3828,7 +4034,7 @@
       if (rarity !== 'common') s.name = `${rare.name} ${s.name}`;
 
       // Re-generate the description based entirely on its new stats
-      let newDesc = b.desc.replace(/\+\d+\s+(STR|INT|WIS|AGI|VIT|DEF)[,\.]?\s*/gi, '').trim();      
+      let newDesc = b.desc.replace(/\+\d+\s+(STR|INT|WIS|AGI|VIT|DEF)[,\.]?\s*/gi, '').trim();
       let statStrings = [];
       ['str', 'int', 'wis', 'def', 'vit', 'agi'].forEach(key => {
         const bonusKey = key + 'Bonus';
@@ -4183,8 +4389,16 @@
         this.openModal('modal-item');
       },
 
-      openModal(id) { document.getElementById(id).classList.add('open'); },
+      openModal(id) { document.getElementById(id).classList.add('open'); if (id === 'modal-legal') document.getElementById('legal-content-scroll').scrollTop = 0; },
       closeModal(id) { document.getElementById(id).classList.remove('open'); },
+      switchLegalTab(tab) {
+        const isTerms = tab === 'terms';
+        document.getElementById('legal-content-terms').style.display = isTerms ? 'block' : 'none';
+        document.getElementById('legal-content-privacy').style.display = isTerms ? 'none' : 'block';
+        document.getElementById('tab-btn-terms').classList.toggle('active', isTerms);
+        document.getElementById('tab-btn-privacy').classList.toggle('active', !isTerms);
+        document.getElementById('legal-content-scroll').scrollTop = 0;
+      },
       isModalOpen() { return !!document.querySelector('.modal.open'); },
 
       showLevelUpBanner(level) {
@@ -4241,7 +4455,7 @@
         }).join('');
       },
       updateEnemyBar(enemy) {
-        // Redundant now with showEnemyPanel handling full list, but keeping for compatibility if called
+
         this.showEnemyPanel(G.enemies);
       }
     };
@@ -4274,8 +4488,7 @@
             Log.add(`⚠️ <strong>Sync Warning:</strong> ${loc.name} requires level ${loc.minLevel}, but you're following your leader! Prepare for a struggle.`, 'death');
           } else {
             Log.add(`⚠️ <strong>Danger!</strong> ${loc.name} requires Level ${loc.minLevel}+. You are Level ${G.player.level} — this place will crush you!`, 'death');
-            // If NOT synced, we actually stop them from entering or let them enter but discourage?
-            // Currently the code sets location anyway. Let's make it actually move them since it sets G.location.
+
           }
         }
         G.location = key;
@@ -4359,6 +4572,35 @@
 
       showExploreActions() {
         const loc = LOCATIONS[G.location];
+
+        // Dungeon Wave Handling
+        if (G.dungeonState && G.dungeonState.inProgress) {
+          UI.setActions([
+            { label: `🌊 Proceed (Wave ${G.dungeonState.wave})`, fn: "DungeonSystem.nextWave()", cls: 'btn-violet btn-lg', tooltip: 'Face the next group of enemies.' },
+            { label: '🏃 Abandon Run', fn: "DungeonSystem.abandon()", cls: 'btn-red btn-sm' }
+          ]);
+          return;
+        }
+
+        if (loc.isDungeon) {
+          const cd = DungeonSystem.getRemainingCooldown(G.location);
+          if (cd > 0) {
+            const mins = Math.ceil(cd / 60000);
+            UI.setActions([
+              { label: `⏳ Sealed (${mins}m)`, fn: "", cls: 'btn-dim', tooltip: 'This dungeon is recovering from your previous assault.' },
+              { label: '🏛️ Solmara', fn: "Explore.travel('solmara')", cls: '' },
+              { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' }
+            ]);
+          } else {
+            UI.setActions([
+              { label: '🏰 Start Dungeon', fn: "DungeonSystem.start(G.location)", cls: 'btn-green btn-lg', tooltip: 'Begin a 5-wave dungeon run for elite loot.' },
+              { label: '🏛️ Solmara', fn: "Explore.travel('solmara')", cls: '' },
+              { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' }
+            ]);
+          }
+          return;
+        }
+
         UI.setActions([
           { label: '🧭 Explore', fn: "Explore.triggerExplore()", cls: 'btn-green btn-lg', tooltip: 'Search the area for enemies or loot.' },
           { label: '📝 Zone Notes', fn: "WorldServer.openZoneNotes()", cls: 'btn-gold btn-sm' },
@@ -4369,10 +4611,10 @@
       },
 
       triggerExplore() {
-        // Simulates walking around to trigger encounters or discoveries
+
         const dx = (Math.random() - 0.5) * 360; // -180 to 180
         const dy = (Math.random() - 0.5) * 360;
-        // Make sure distance is at least 180 to guarantee an encounter check
+
         const dist = Math.sqrt(dx * dx + dy * dy);
         const scale = dist < 180 ? 180 / dist : 1;
         World.move(dx * scale, dy * scale);
@@ -4498,7 +4740,7 @@
             if (Math.random() < 0.25) {
               Log.add('⚠️ <strong>SURPRISE!</strong> The chest sprouts teeth and a massive tongue! It\'s a <strong>MIMIC!</strong>', 'death');
               setTimeout(() => Combat.start('mimic'), 800);
-              // Combat search automatically handles broadcast inside Combat.start
+
             } else {
               const lootId = ['leatherVest', 'copperRing', 'ironPlate', 'sagePendant', 'arcaneLoop'][Math.floor(Math.random() * 5)];
               const gold = 50 + Math.floor(Math.random() * 100);
@@ -4590,8 +4832,7 @@
         const cost = costs[type];
         if (!G.companions) G.companions = [];
 
-        // Party size limit: Player + up to 3 companions total (including mercenaries and summons)
-        // If hiring a mercenary and already have companions, limit to 2 remaining slots
+
         const hasMercenary = G.companions.some(c => !c.isSummon);
         const maxAllowed = hasMercenary ? 3 : 3; // Always max 3 companions
 
@@ -4609,7 +4850,7 @@
           type, name: ct.name, icon: ct.icon,
           hp: hp, maxHp: hp,
           str: ct.str + Math.floor(p.level / 5),
-          isSummon: false  // Mercenaries are not summons
+          isSummon: false
         });
         Log.add(`⚔️ <strong>${ct.icon} ${ct.name}</strong> joins your party!`, 'success');
         UI.closeModal('modal-tavern');
@@ -4621,8 +4862,8 @@
         const c = G.companions[idx];
         Log.add(`${c.icon} ${c.name} parts ways with you.`, 'system');
         G.companions.splice(idx, 1);
-        this.openTavern(); // Refresh tavern view
-        this.showTownActions(); // Update main button label
+        this.openTavern();
+        this.showTownActions();
         UI.refresh();
       },
 
@@ -4667,10 +4908,10 @@
       openTrainer() {
         const p = G.player;
         QuestSystem.updateProgress('visit', 'trainer');
-        // Retroactive skill point grant if missing (e.g. from old save)
+
         if (p.skillPoints === undefined) {
           p.skillPoints = (p.level * 5);
-          // Subtract already spent points (approximate)
+
           Object.values(p.skills).forEach(lv => p.skillPoints -= (lv - 1));
           p.skillPoints = Math.max(0, p.skillPoints);
         }
@@ -4688,7 +4929,7 @@
           .map(sk => {
             const skill = SKILLS[sk];
             const lv = pSkills[sk];
-            const cost = 1; // 1 Skill Point per level
+            const cost = 1;
             const isMaxed = lv >= p.level;
             return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
             <div style="flex:1;">
@@ -4765,7 +5006,7 @@
         this.updateTerrain();
         this.generateDecor();
         Log.add('🗺️ World View initialized. Use <strong>WASD</strong> or <strong>Arrows</strong> to move.', 'system');
-        // Initial render with a slight delay to ensure viewport dimensions are ready
+
         setTimeout(() => this.render(), 100);
       },
 
@@ -4799,29 +5040,29 @@
         this.decor = [];
         for (let i = 0; i < conf.count; i++) {
           let x, y;
-          // Cluster to the edges, leaving a clearing/path in the X center
+
           do {
             if (rng() > 0.35) {
-              // Focus on sides heavily
+
               x = rng() * 750 + 50;
             } else {
-              // Scattered everywhere else
+
               x = rng() * 1900 + 50;
             }
             y = rng() * 1900 + 50;
           } while (x > 880 && x < 1120 && loc !== 'solmara');
 
           const type = conf.types[Math.floor(rng() * conf.types.length)];
-          const scale = 0.7 + rng() * 0.8; // 0.7x to 1.5x scaling
+          const scale = 0.7 + rng() * 0.8;
           const flip = rng() > 0.5 ? -1 : 1;
-          const s = Math.floor(scale * 100); // Base pixel size for image width
+          const s = Math.floor(scale * 100);
 
-          // Map legacy emojis to pixel-art assets
+
           let assetType = 'rock';
           if (['🌲', '🌳', '🌿', '🌵', '🍄', '🥀'].includes(type)) assetType = 'tree';
           if (['🏘️', '🛖', '🏚️', '🏰', '⛲', '🛡️'].includes(type)) assetType = 'building';
 
-          // Override for catacombs/voidrift anomalies to just use rocks for now, tinted later
+
           if (['⚰️', '💀', '🏺', '🌌', '✨', '🌀', '☄️', '🔥', '🩸'].includes(type)) assetType = 'rock';
 
           this.decor.push({ x, y, assetType, type, size: s, flip });
@@ -4829,7 +5070,7 @@
       },
 
       renderDecor(layer) {
-        return; // Disabled per user request - keeps map clean and avoids broken image icons
+        return;
         let dc = document.getElementById('world-decor-container');
         if (!dc) {
           dc = document.createElement('div');
@@ -4856,7 +5097,7 @@
             icon.style.transform = `scaleX(${d.flip})`;
             icon.style.pointerEvents = 'none';
 
-            // Hue and brightness adjustments to blend into a moody 2D world
+
             if (d.assetType === 'tree') {
               icon.style.filter = 'brightness(0.5) contrast(1.2)';
             } else if (d.assetType === 'building') {
@@ -4886,16 +5127,16 @@
           catacombs: 'dungeon',
           velkaris: 'velkaris'
         };
-        // Remove all terrain classes
+
         Object.values(terrainMap).forEach(t => grid.classList.remove('terrain-' + t));
-        // Add current one
+
         const terrain = terrainMap[loc] || 'dungeon';
         grid.classList.add('terrain-' + terrain);
-        // User provided custom graphic backgrounds, so we no longer generate random pixel decor.
+
       },
 
       handleKey(e) {
-        return; // Disabled WASD movement as per user request (Explore button only)
+        return;
       },
 
       move(dx, dy) {
@@ -4906,7 +5147,7 @@
         const vpw = vp ? (vp.clientWidth || vp.offsetWidth || 800) : 800;
         const vph = vp ? (vp.clientHeight || vp.offsetHeight || 400) : 400;
 
-        // Boundaries map to the visible screen limits
+
         G.world.x = Math.max(20, Math.min(vpw - 20, G.world.x));
         G.world.y = Math.max(20, Math.min(vph - 20, G.world.y));
 
@@ -4921,13 +5162,13 @@
         if (G.world.steps >= threshold) {
           G.world.steps = 0;
           const loc = LOCATIONS[G.location];
-          if (!loc.isTown && Math.random() < (loc.encounterChance || 0.4)) {
+          if (!loc.isTown && !loc.isDungeon && Math.random() < (loc.encounterChance || 0.4)) {
             const key = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
             Log.add('⚠️ <strong>Ambush!</strong> Something emerges from the shadows...', 'death');
-            // Trigger the encounter
+
             setTimeout(() => Combat.start(key), 300);
 
-            // Also occasionally trigger a non-combat event (20% of the time)
+
             if (Math.random() < 0.2) {
               setTimeout(() => Explore.explore(), 600);
             }
@@ -4941,12 +5182,11 @@
         const vp = document.getElementById('world-viewport');
         if (!layer || !vp || !G.player) return;
 
-        // Camera follow (center on player)
-        // Fix: Use offsetWidth/Height as fallback if clientWidth/Height are 0 on init
+
         const vpw = vp.clientWidth || vp.offsetWidth || 800;
         const vph = vp.clientHeight || vp.offsetHeight || 400;
 
-        // Ensure player is centered if coordinates are uninitialized (e.g., initial load)
+
         if (!G.world.x || !G.world.y) {
           G.world.x = vpw / 2;
           G.world.y = vph / 2;
@@ -4956,7 +5196,7 @@
         layer.style.transform = `translate(0px, 0px)`;
         if (grid) grid.style.transform = `translate(0px, 0px)`;
 
-        // Update Decor
+
         this.renderDecor(layer);
 
         // Local Player
@@ -5212,6 +5452,7 @@
             }
             const base = ENEMIES[currentKey];
             const e = this.scaleEnemy(base);
+            e.id = currentKey; // Added: Fix quest tracking
             e.status = {};
             G.enemies.push(e);
           }
@@ -5973,6 +6214,17 @@
           G.player.kills = (G.player.kills || 0) + G.enemies.length;
           Log.add(`⚔ <strong>Group Defeated!</strong> 🪙 +${totalGold} gold. ⭐ +${totalXp} XP.`, 'success');
           this.grantXP(totalXp);
+
+          // Added: Dungeon Wave Handling
+          if (G.dungeonState && G.dungeonState.inProgress) {
+            if (G.dungeonState.wave < G.dungeonState.maxWaves) {
+              G.dungeonState.wave++;
+              Log.add(`Breathless, you prepare for the next encounter...`, 'system');
+            } else {
+              DungeonSystem.complete();
+              return;
+            }
+          }
         } else if (fled) {
           Log.add('You slip away into the darkness of Eryndor.', 'system');
         }
@@ -6216,6 +6468,70 @@
       }
     };
 
+    /* ============================================================
+       DUNGEON SYSTEM
+       ============================================================ */
+    const DungeonSystem = {
+      COOLDOWN_MS: 10 * 60 * 1000,
+
+      canEnter(locKey) {
+        if (!G.player) return false;
+        if (!G.player.dungeonCooldowns) G.player.dungeonCooldowns = {};
+        const lastDone = G.player.dungeonCooldowns[locKey] || 0;
+        return (Date.now() - lastDone) >= this.COOLDOWN_MS;
+      },
+
+      getRemainingCooldown(locKey) {
+        if (!G.player || !G.player.dungeonCooldowns) return 0;
+        const lastDone = G.player.dungeonCooldowns[locKey] || 0;
+        return Math.max(0, this.COOLDOWN_MS - (Date.now() - lastDone));
+      },
+
+      start(locKey) {
+        if (!this.canEnter(locKey)) return;
+        G.dungeonState = { inProgress: true, wave: 1, maxWaves: 5, locKey: locKey };
+        Log.divider();
+        Log.add(`🏰 <strong>Entering Dungeon:</strong> ${LOCATIONS[locKey].name}`, 'veil');
+        this.nextWave();
+      },
+
+      nextWave() {
+        if (!G.dungeonState.inProgress) return;
+        const { wave, maxWaves, locKey } = G.dungeonState;
+        const loc = LOCATIONS[locKey];
+        Log.divider();
+        Log.add(`⚔️ <strong>Wave ${wave} of ${maxWaves}</strong>`, 'combat');
+
+        let enemyKey;
+        if (wave < maxWaves) {
+          const regularEnemies = loc.enemies.filter(ek => !ENEMIES[ek].isBoss);
+          enemyKey = regularEnemies[Math.floor(Math.random() * regularEnemies.length)] || loc.enemies[0];
+        } else {
+          enemyKey = loc.boss || loc.enemies[loc.enemies.length - 1];
+          Log.add(`🔥 <strong>THE BOSS APPROACHES!</strong>`, 'death');
+        }
+        Combat.start(enemyKey);
+      },
+
+      complete() {
+        const locKey = G.dungeonState.locKey;
+        if (!G.player.dungeonCooldowns) G.player.dungeonCooldowns = {};
+        G.player.dungeonCooldowns[locKey] = Date.now();
+        G.dungeonState.inProgress = false;
+        Log.divider();
+        Log.add(`🏆 <strong>DUNGEON CONQUERED!</strong>`, 'gold');
+        Log.add(`The way behind you seals... This dungeon is on cooldown for 10 minutes.`, 'system');
+        UI.refresh();
+        Explore.showExploreActions();
+      },
+
+      abandon() {
+        G.dungeonState.inProgress = false;
+        Log.add('You abandoned the dungeon run.', 'system');
+        Explore.showExploreActions();
+      }
+    };
+
     const Game = {
       _show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
 
@@ -6307,6 +6623,7 @@
         Log.add('════════════════════════════════════', 'divider');
         Log.add(`You stand at <strong>Solmara Outpost</strong>. Rest, trade, then explore Eryndor.`, 'system');
         Log.add(`Use the buttons below to act. On mobile, use the bottom nav.`, 'system');
+        QuestSystem.updateProgress('visit', G.location);
         UI.refresh(); Explore.showTownActions();
         World.updateTerrain();
         World.render();
@@ -6318,7 +6635,7 @@
         const data = {
           player: G.player, location: G.location,
           turnCount: G.turnCount, companions: G.companions || [],
-          world: G.world
+          world: G.world, dungeonState: G.dungeonState
         };
         // Always backup to local
         localStorage.setItem(key, JSON.stringify(data));
@@ -6359,6 +6676,7 @@
             wData = { x: 1000, y: 1000, steps: 0, entities: {} };
           }
           G.world = wData;
+          G.dungeonState = data.dungeonState || { inProgress: false, wave: 0, maxWaves: 5, locKey: "" };
 
           this._show('screen-game');
           GlobalChat.init(); // start persistent chat polling
@@ -6366,6 +6684,7 @@
           Log.add(`📂 Chronicle restored. Welcome back, <strong>${G.player.name}</strong>.`, 'system');
           Log.add(`${factionLabel(G.player.faction)} · Level ${G.player.level} · ${LOCATIONS[G.location].name}.`, 'story');
           UI.refresh(); UI.showEnemyPanel(null);
+          QuestSystem.updateProgress('visit', G.location);
           World.updateTerrain();
           World.render();
           if (typeof GuildSystem !== 'undefined') GuildSystem.refresh();
@@ -6615,6 +6934,7 @@
     const CloudSave = {
       user: null,
       slots: {},
+      legalAgreed: false,
       loading: false,
 
       async handleAuth(user) {
@@ -6649,6 +6969,12 @@
           const snapshot = await firebase.database().ref(`saves/${this.user.uid}`).once('value');
           const data = snapshot.val();
           this.slots = data?.slots || {};
+          this.legalAgreed = data?.legalAgreed || false;
+
+          // Block screen if legal not agreed
+          if (!this.legalAgreed) {
+            UI.openModal('modal-legal');
+          }
         } catch (e) { console.error('Cloud load failed', e); }
         finally { this.loading = false; }
       },
@@ -6669,6 +6995,28 @@
         if (!this.user) return;
         delete this.slots[slotKey];
         firebase.database().ref(`saves/${this.user.uid}/slots/${slotKey}`).remove();
+      },
+
+      async acceptLegal() {
+        if (!this.user) return;
+        const check = document.getElementById('legal-agree-check');
+        if (!check || !check.checked) {
+          alert("You must check the box to agree before entering Eryndor.");
+          return;
+        }
+
+        try {
+          await firebase.database().ref(`saves/${this.user.uid}/legalAgreed`).set(true);
+          this.legalAgreed = true;
+          UI.closeModal('modal-legal');
+          Log.add('📜 Legal agreements signed and accepted.', 'system');
+          if (document.getElementById('screen-charselect').classList.contains('active')) {
+            CharSelect.render();
+          }
+        } catch (e) {
+          console.error('Accept legal failed', e);
+          alert("Could not save agreement. Please try again.");
+        }
       }
     };
 
