@@ -3553,7 +3553,17 @@
       voidplate: { id: 'voidplate', name: 'Void-Hardened Plate', icon: '⛓️', type: 'equipment', slot: 'armor', defBonus: 40, vitBonus: 20, buyPrice: 4000, sellPrice: 1800, desc: 'Armor forged in the Abyssal Void. +40 DEF, +20 VIT.' },
       chroniclebreaker: { id: 'chroniclebreaker', name: 'Chronicle Breaker', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 60, agiBonus: 30, buyPrice: 8000, sellPrice: 3500, desc: 'The blade that ends stories. +60 STR, +30 AGI.' },
       eternalaegis: { id: 'eternalaegis', name: 'Eternal Aegis', icon: '✨', type: 'equipment', slot: 'armor', defBonus: 50, vitBonus: 30, buyPrice: 9000, sellPrice: 4000, desc: 'The ultimate protection from the Abyss. +50 DEF, +30 VIT.' },
-      infinityloop: { id: 'infinityloop', name: 'Infinity Loop', icon: '💍', type: 'equipment', slot: 'ring', intBonus: 40, wisBonus: 40, buyPrice: 10000, sellPrice: 4500, desc: 'A ring with no beginning or end. +40 INT, +40 WIS.' }
+      infinityloop: { id: 'infinityloop', name: 'Infinity Loop', icon: '💍', type: 'equipment', slot: 'ring', intBonus: 40, wisBonus: 40, buyPrice: 10000, sellPrice: 4500, desc: 'A ring with no beginning or end. +40 INT, +40 WIS.' },
+
+      // --- Zone-Specific Loot (Materials/Trophies) ---
+      ashShard: { id: 'ashShard', name: 'Ash Shard', icon: '🌑', type: 'loot', sellPrice: 20, desc: 'A crystalline shard of solidified ash from the Coast.' },
+      frostFiber: { id: 'frostFiber', name: 'Frost Fiber', icon: '🧵', type: 'loot', sellPrice: 50, desc: 'A shimmering thread of ice that never melts.' },
+      decaySpore: { id: 'decaySpore', name: 'Decay Spore', icon: '🍄', type: 'loot', sellPrice: 120, desc: 'A toxic spore that pulses with necromantic energy.' },
+      emberCore: { id: 'emberCore', name: 'Ember Core', icon: '🔥', type: 'loot', sellPrice: 250, desc: 'The burning heart of a Wastes aberration.' },
+      corruptBark: { id: 'corruptBark', name: 'Corrupt Bark', icon: '🌳', type: 'loot', sellPrice: 400, desc: 'Twisted, obsidian-like wood from the Hollow Wilds.' },
+      voidCrystal: { id: 'voidCrystal', name: 'Void Crystal', icon: '💎', type: 'loot', sellPrice: 800, desc: 'A jagged crystal that seems to pull in nearby light.' },
+      abyssalEssence: { id: 'abyssalEssence', name: 'Abyssal Essence', icon: '🌌', type: 'loot', sellPrice: 1500, desc: 'A concentrated droplet of pure void energy.' },
+      realityFragment: { id: 'realityFragment', name: 'Reality Fragment', icon: '✨', type: 'loot', sellPrice: 3000, desc: 'A piece of the Veil itself, shimmering with infinite colors.' }
     };
 
     const SHOP_ITEMS = ['healthPotion', 'manaPotion', 'elixir', 'holyRelic', 'bloodVial', 'veilblade', 'runesword', 'veilstaff', 'apprenticeorb', 'devourerorb', 'covenantmail', 'ashplate', 'veilrobe', 'shadowmantle'];
@@ -3565,7 +3575,7 @@
       // High-Level Enemies (Lv 60-100)
       voidSentinel: {
         name: 'Void Sentinel', icon: '🛡️', level: 60, hp: 600, maxHp: 600, str: 55, def: 40, agi: 20, crit: 10, xp: 800, gold: [100, 250],
-        enemyType: 'void', loot: [{ item: 'voidbreaker', chance: 0.05 }], desc: 'An armored guardian of the peaks, infused with pure void.',
+        enemyType: 'void', loot: [{ item: 'voidbreaker', chance: 0.05 }, { item: 'voidCrystal', chance: 0.35 }], desc: 'An armored guardian of the peaks, infused with pure void.',
         attacks: ['slams', 'void-lashes', 'stares into']
       },
       voidWyvern: {
@@ -3630,7 +3640,7 @@
       },
       abyssWatcher: {
         name: 'Abyss Watcher', icon: '👁️', level: 110, hp: 25000, maxHp: 25000, str: 500, def: 250, agi: 120, crit: 35, xp: 100000, gold: [25000, 75000], isBoss: true,
-        enemyType: 'abyssal', loot: [{ item: 'eternalaegis', chance: 0.8 }, { item: 'infinityloop', chance: 0.8 }], desc: 'The silent sentinel of the end. It has watched the fall of a thousand worlds.',
+        enemyType: 'abyssal', loot: [{ item: 'eternalaegis', chance: 0.8 }, { item: 'infinityloop', chance: 0.8 }, { item: 'realityFragment', chance: 0.5 }], desc: 'The silent sentinel of the end. It has watched the fall of a thousand worlds.',
         attacks: ['stares into existence', 'obliterates', 'rewrites history']
       },
 
@@ -3638,7 +3648,7 @@
       veilWraith: {
         name: 'Veil Wraith', icon: '👻', level: 1, hp: 18, maxHp: 18, str: 3, def: 0, agi: 5, crit: 4, xp: 20, gold: [3, 12], isBoss: false,
         enemyType: 'undead',
-        loot: [{ item: 'manaPotion', chance: .18 }],
+        loot: [{ item: 'manaPotion', chance: .18 }, { item: 'ashShard', chance: 0.25 }],
         desc: 'A soul consumed by the Veil — it screams without sound.',
         attacks: ['phases through', 'slashes at', 'wails at']
       },
@@ -3671,7 +3681,7 @@
       frostGiant: {
         name: 'Frost Giant', icon: '🧊', level: 3, hp: 80, maxHp: 80, str: 14, def: 8, agi: 4, crit: 6, xp: 60, gold: [10, 25], isBoss: false,
         enemyType: 'giant',
-        loot: [{ item: 'covenantmail', chance: .08 }],
+        loot: [{ item: 'covenantmail', chance: .08 }, { item: 'frostFiber', chance: 0.3 }],
         desc: 'A colossal giant wandering the frozen highlands of its ancestors.',
         attacks: ['smashes', 'hurls ice at', 'crushes']
       },
@@ -3697,7 +3707,7 @@
       rottingKnight: {
         name: 'Rotting Knight', icon: '💀', level: 4, hp: 70, maxHp: 70, str: 11, def: 7, agi: 5, crit: 6, xp: 60, gold: [12, 28], isBoss: false,
         enemyType: 'undead',
-        loot: [{ item: 'healthPotion', chance: .2 }],
+        loot: [{ item: 'healthPotion', chance: .2 }, { item: 'decaySpore', chance: 0.3 }],
         desc: 'An undead soldier risen from old wars — rusted armour, endless rage.',
         attacks: ['strikes with a rusted blade', 'shields bashes', 'slashes at']
       },
@@ -3723,7 +3733,7 @@
       veilAberration: {
         name: 'Veil Aberration', icon: '🌀', level: 5, hp: 70, maxHp: 70, str: 9, def: 4, agi: 10, crit: 12, xp: 80, gold: [18, 40], isBoss: false,
         enemyType: 'corrupted',
-        loot: [{ item: 'manaPotion', chance: .3 }, { item: 'veilstaff', chance: .04 }],
+        loot: [{ item: 'manaPotion', chance: .3 }, { item: 'veilstaff', chance: .04 }, { item: 'emberCore', chance: 0.3 }],
         desc: 'Reality bends around this creature. It should not exist.',
         attacks: ['tears at reality near', 'blasts veil energy at', 'distorts space around']
       },
@@ -3747,7 +3757,7 @@
       corruptTreant: {
         name: 'Corrupted Treant', icon: '🌳', level: 6, hp: 110, maxHp: 110, str: 16, def: 10, agi: 3, crit: 5, xp: 110, gold: [25, 55], isBoss: false,
         enemyType: 'corrupted',
-        loot: [{ item: 'healthPotion', chance: .25 }],
+        loot: [{ item: 'healthPotion', chance: .25 }, { item: 'corruptBark', chance: 0.35 }],
         desc: 'An ancient tree-spirit consumed by Veil corruption. It roars in agony.',
         attacks: ['smashes with branches', 'entangles', 'slams the earth near']
       },
@@ -3792,7 +3802,7 @@
       abyssalHorror: {
         name: 'Abyssal Horror', icon: '🌀', level: 85, hp: 600, maxHp: 600, str: 65, def: 45, agi: 35, crit: 25, xp: 1500, gold: [500, 1200], isBoss: false,
         enemyType: 'corrupted',
-        loot: [{ item: 'bloodVial', chance: .4 }],
+        loot: [{ item: 'bloodVial', chance: .4 }, { item: 'abyssalEssence', chance: 0.3 }],
         desc: 'A creature formed from the deepest rot of the Veil. Reality shudders in its presence.',
         attacks: ['tears at the soul of', 'unleashes a void scream at', 'transmutes the air into lead around']
       },
@@ -3841,12 +3851,10 @@
         desc: 'A master of the rift, carrying a scythe that severs the soul from the body.',
         attacks: ['swings a soul-reaping scythe at', 'unleashes a wave of death at', 'reaps the essence of']
       },
-      abyssWatcher: {
-        name: 'The Abyss Watcher', icon: '👁️', level: 100, hp: 12000, maxHp: 12000, str: 350, def: 200, agi: 100, crit: 30, xp: 50000, gold: [20000, 50000], isBoss: true,
-        enemyType: 'aberration',
-        loot: [{ item: 'legendary_relic', chance: 0.1 }],
-        desc: 'The eternal guardian of the absolute void. It sees all possible deaths.',
-        attacks: ['gazes into the future of', 'shatters the reality around', 'erases the existence of']
+      devouringKing: {
+        name: 'The Devouring King', icon: '👑', level: 110, hp: 50000, maxHp: 50000, str: 800, def: 400, agi: 150, crit: 45, xp: 250000, gold: [100000, 250000], isBoss: true,
+        enemyType: 'void', loot: [{ item: 'realityFragment', chance: 1.0 }, { item: 'infinityloop', chance: 0.5 }], desc: 'The source of the rot. The entity that shattered the Veil. He is nothingness given hunger.',
+        attacks: ['consumes the timeline of', 'tears the soul of', 'erases the existence of']
       },
       // World Bosses
       frostKing: {
@@ -3991,7 +3999,7 @@
       },
       ashfall: {
         name: 'Ashfall Coast', icon: '🌋', isTown: false,
-        minLevel: 1, maxLevel: 10,
+        minLevel: 1, maxLevel: 15,
         desc: 'Where Outworlders first fell from the shattered Veil. Craters scar the ash-covered shore.',
         enemies: ['veilWraith', 'corruptWolf', 'lostOutworlder', 'ashSwarmer', 'beachCrawler'], encounterChance: .60,
         events: ['A crater still glows violet from a recent soul-fall.',
@@ -4001,7 +4009,7 @@
       },
       frostvein: {
         name: 'Frostvein Highlands', icon: '🏔️', isTown: false,
-        minLevel: 5, maxLevel: 25,
+        minLevel: 16, maxLevel: 25,
         desc: 'Ancient giant kingdom, abandoned and frozen. Something woke beneath the royal chambers.',
         enemies: ['frostGiant', 'iceRevenant', 'snowStalker', 'frostBat'], encounterChance: .65,
         events: ['Massive stone ruins loom through the blizzard.',
@@ -4011,7 +4019,7 @@
       },
       blackMarsh: {
         name: 'The Black Marsh', icon: '🌿', isTown: false,
-        minLevel: 10, maxLevel: 35,
+        minLevel: 26, maxLevel: 35,
         desc: 'A cursed swamp fully consumed by necromantic magic. The dead rise endlessly from the mud.',
         enemies: ['rottingKnight', 'boneSerpent', 'marshShambler', 'miasmaWorm'], encounterChance: .70,
         events: ['A skeletal hand breaks through the marsh mud near your boot.',
@@ -4021,7 +4029,7 @@
       },
       emberfallWastes: {
         name: 'Emberfall Wastes', icon: '🏜️', isTown: false,
-        minLevel: 20, maxLevel: 50,
+        minLevel: 36, maxLevel: 50,
         desc: 'A desert born when the sky burned during the Shattered Summoning. Veil fragments float in the air.',
         enemies: ['veilAberration', 'sandStinger', 'emberDrift', 'blightNomad'], encounterChance: .70,
         events: ['Floating shards of the Veil hang suspended in the dry air.',
@@ -4031,7 +4039,7 @@
       },
       hollowWilds: {
         name: 'The Hollow Wilds', icon: '🌲', isTown: false,
-        minLevel: 30, maxLevel: 60,
+        minLevel: 51, maxLevel: 65,
         desc: 'A vast corrupted forest. The trees whisper. Travellers vanish. Something sleeps beneath the roots.',
         enemies: ['corruptTreant', 'wildWitch', 'thornBeast'], encounterChance: .72,
         events: ['The trees lean toward you as you pass.',
@@ -4041,7 +4049,7 @@
       },
       voidPeaks: {
         name: 'Void-Touched Peaks', icon: '🏔️', isTown: false,
-        minLevel: 60, maxLevel: 80,
+        minLevel: 66, maxLevel: 80,
         desc: 'High mountain passes where the Veil is thin. Violet snow falls upward.',
         enemies: ['voidSentinel', 'voidStalker', 'riftCondor', 'peaksWraith'], encounterChance: .75,
         events: ['Violet snow falls upward from the ground toward the sky.',
@@ -4051,7 +4059,7 @@
       },
       abyssalVoid: {
         name: 'The Abyssal Void', icon: '🌀', isTown: false,
-        minLevel: 85, maxLevel: 100,
+        minLevel: 81, maxLevel: 100,
         desc: 'The edge of existence. Reality is a suggestion here. The Devouring King\'s influence is absolute.',
         enemies: ['abyssalHorror', 'realityBreaker', 'voidColossus', 'starEater'], encounterChance: .80,
         events: ['The ground beneath your feet feels like liquid shadow.',
@@ -4060,7 +4068,7 @@
           'A voice from the deep calls to your soul.']
       },
       bloodspire: {
-        name: 'Bloodspire Fortress', icon: '🏰', minLevel: 7, maxLevel: 8, enemies: ['bloodCultist', 'darkMage', 'heretic'],
+        name: 'Bloodspire Fortress', icon: '🏰', minLevel: 12, maxLevel: 15, enemies: ['bloodCultist', 'darkMage', 'heretic'],
         desc: 'The heart of Dominion power. Blood runs in the gutters.',
         flavor: ['The air smells of iron and sacrifice.',
           'Dark banners flutter in the cold wind.',
@@ -4068,7 +4076,7 @@
       },
       // --- Dungeons ---
       catacombs: {
-        name: 'Ancient Catacombs', icon: '🕸️', minLevel: 5, maxLevel: 10, enemies: ['veilWraith', 'lostOutworlder', 'boneSerpent', 'cryptLord'],
+        name: 'Ancient Catacombs', icon: '🕸️', minLevel: 10, maxLevel: 15, enemies: ['veilWraith', 'lostOutworlder', 'boneSerpent', 'cryptLord'],
         desc: 'Dungeon (Lv 5-10). A labyrinth of the dead beneath Solmara.',
         isDungeon: true, boss: 'cryptLord',
         flavor: ['Webs brush against your face.',
@@ -4076,7 +4084,7 @@
           'A cold draft smells of ancient dust.']
       },
       garrison: {
-        name: 'Iron Garrison', icon: '🛡️', minLevel: 20, maxLevel: 30, enemies: ['heretic', 'rottingKnight', 'ironGeneral'],
+        name: 'Iron Garrison', icon: '🛡️', minLevel: 20, maxLevel: 25, enemies: ['heretic', 'rottingKnight', 'ironGeneral'],
         desc: 'Dungeon (Lv 20-30). A fortified stronghold of the Ashen Dominion.',
         isDungeon: true, boss: 'ironGeneral',
         flavor: ['The sound of marching feet vibrates through the walls.',
@@ -4084,7 +4092,7 @@
           'The smell of oil and hot metal fills the air.']
       },
       voidrift: {
-        name: 'Void Rift', icon: '🌌', minLevel: 40, maxLevel: 50, enemies: ['veilAberration', 'darkMage', 'voidReaver'],
+        name: 'Void Rift', icon: '🌌', minLevel: 30, maxLevel: 35, enemies: ['veilAberration', 'darkMage', 'voidReaver'],
         desc: 'Dungeon (Lv 40-50). A tear in the fabric of existence itself.',
         isDungeon: true, boss: 'voidReaver',
         flavor: ['Reality shimmers and breaks around you.',
@@ -4092,7 +4100,7 @@
           'Gravity feels light and strange here.']
       },
       throne: {
-        name: 'The Obsidian Throne', icon: '☄️', minLevel: 60, maxLevel: 60, enemies: ['bloodCultist', 'veilAberration', 'obsidianEmperor'],
+        name: 'The Obsidian Throne', icon: '☄️', minLevel: 45, maxLevel: 50, enemies: ['bloodCultist', 'veilAberration', 'obsidianEmperor'],
         desc: 'Final Dungeon (Lv 60). The seat of the Obsidian Emperor.',
         isDungeon: true, boss: 'obsidianEmperor',
         flavor: ['The floor is made of pure, polished obsidian.',
@@ -4100,7 +4108,7 @@
           'This is where it all ends.']
       },
       primalrift: {
-        name: 'Primal Rift Pass', icon: '🌌', minLevel: 70, maxLevel: 80, enemies: ['voidStalker', 'voidSentinel', 'voidReaper'],
+        name: 'Primal Rift Pass', icon: '🌌', minLevel: 75, maxLevel: 80, enemies: ['voidStalker', 'voidSentinel', 'voidReaper'],
         desc: 'High-Level Dungeon (Lv 70-80). A jagged scar in the mountains bleeding void energy.',
         isDungeon: true, boss: 'voidReaper',
         flavor: ['The air crackles with unstable power.',
@@ -4117,7 +4125,7 @@
       },
       velkaris: {
         name: 'Ruins of Velkaris', icon: '🏚️', isTown: true,
-        minLevel: 70, maxLevel: 100,
+        minLevel: 101, maxLevel: 110,
         desc: 'Where the Shattered Summoning happened. Reality is unstable — but a master trainer remains among the echoes.',
         enemies: ['veilAberration', 'darkMage', 'bloodCultist', 'frostKing', 'plagueMother', 'devouringKing'], encounterChance: .80,
         events: ['You see a version of yourself walking the opposite direction.',
