@@ -782,20 +782,24 @@
       }
 
       #world-viewport {
-        flex: 0 1 45%;
+        flex: 0 0 200px;
+        min-height: 140px;
+        max-height: 35vh;
         background: transparent;
       }
 
       #dashboard {
         display: flex !important;
         flex-direction: column;
-        flex: 1 1 55%;
+        flex: 1 1 auto;
         min-height: 0;
+        overflow: hidden;
       }
 
       #dash-col-log {
         flex: 1 1 auto;
         border-right: none;
+        min-height: 0;
       }
 
       /* Stack items side by side in mobile landscape */
@@ -857,6 +861,19 @@
         flex-shrink: 0;
         padding-bottom: var(--safe-bottom);
         z-index: 20;
+        position: relative;
+      }
+
+      /* Glowing active indicator line */
+      #mobile-nav::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--violet-dk), var(--violet), var(--violet-lt), var(--violet), var(--violet-dk), transparent);
+        opacity: 0.5;
       }
 
       .mob-nav-btn {
@@ -876,23 +893,34 @@
         cursor: pointer;
         padding: 6px 4px;
         border-top: 2px solid transparent;
-        transition: all .15s;
+        transition: all .2s;
         -webkit-touch-callout: none;
         touch-action: manipulation;
+        position: relative;
       }
 
       .mob-nav-btn .nav-icon {
         font-size: 20px;
         line-height: 1;
+        transition: transform 0.15s;
       }
 
       .mob-nav-btn:active {
         background: rgba(255, 255, 255, .05);
       }
 
+      .mob-nav-btn:active .nav-icon {
+        transform: scale(0.85);
+      }
+
       .mob-nav-btn.active {
         color: var(--violet-lt);
         border-top-color: var(--violet);
+        background: rgba(144, 96, 216, 0.06);
+      }
+
+      .mob-nav-btn.active .nav-icon {
+        filter: drop-shadow(0 0 6px var(--violet));
       }
 
       .mobile-drawer {
@@ -905,6 +933,19 @@
         overflow-y: auto;
         padding-top: var(--safe-top);
         padding-bottom: var(--safe-bottom);
+        animation: drawerSlideUp 0.2s ease-out;
+      }
+
+      @keyframes drawerSlideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
       }
 
       .mobile-drawer.open {
@@ -1505,8 +1546,30 @@
     }
 
     /* ============================================================
-   BUTTONS
+   MOBILE COMBAT HUD — Persistent HP/MP overlay during combat
    ============================================================ */
+    #mobile-combat-hud {
+      display: none;
+    }
+
+    /* When combat HUD is visible, give the log area extra top padding */
+    @media (max-width: 767px) {
+      body.in-combat-mobile #panel-actions {
+        padding-top: 78px;
+      }
+
+      body.in-combat-mobile .topbar {
+        /* Keep topbar but make it ultra compact */
+        padding: 4px 12px;
+        padding-top: calc(4px + var(--safe-top));
+      }
+
+      body.in-combat-mobile .topbar-btns .btn:not(.btn-red) {
+        display: none;
+      }
+    }
+
+
     .btn {
       background: var(--bg-mid);
       border: 1px solid var(--border);
@@ -2241,8 +2304,10 @@
     <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
       v3.9 &middot; Rune Haven &middot; Mobile &amp; Desktop
     </div>
-    <div style="margin-top:10px; color:var(--text-dim); font-size:9px; max-width:440px; margin-left:auto; margin-right:auto; opacity:0.6; line-height:1.4; font-family:serif; font-style:italic;">
-      This project utilizes AI-assisted development. All core systems, game balance, and content are human-refined to ensure a handcrafted, premium experience.
+    <div
+      style="margin-top:10px; color:var(--text-dim); font-size:9px; max-width:440px; margin-left:auto; margin-right:auto; opacity:0.6; line-height:1.4; font-family:serif; font-style:italic;">
+      This project utilizes AI-assisted development. All core systems, game balance, and content are human-refined to
+      ensure a handcrafted, premium experience.
     </div>
   </div>
 
@@ -2497,6 +2562,55 @@
       <button class="mob-nav-btn" id="nav-map" onclick="MobileNav.show('map')">
         <span class="nav-icon">🗺️</span>MAP
       </button>
+      <!-- Mobile Combat HUD - shown only during combat -->
+      <div id="mobile-combat-hud"
+        style="display:none; position:fixed; top:0; left:0; right:0; z-index:400; background:rgba(8,6,15,0.95); border-bottom:2px solid var(--border); padding:8px 12px; padding-top:calc(8px + var(--safe-top)); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <!-- Player vitals -->
+          <div style="flex:1; min-width:120px;">
+            <div
+              style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-bottom:2px;">
+              <span>❤️ HP</span><span id="mhud-hp"
+                style="color:#e05060; font-family:'Courier Prime',monospace; font-size:11px; font-weight:bold;">—</span>
+            </div>
+            <div
+              style="height:7px; background:var(--bg); border-radius:4px; overflow:hidden; border:1px solid rgba(201,64,80,0.4);">
+              <div id="mhud-hp-bar"
+                style="height:100%; background:linear-gradient(90deg,#8a2030,#e05060); border-radius:4px; transition:width 0.4s ease; width:100%;">
+              </div>
+            </div>
+          </div>
+          <div style="flex:1; min-width:120px;">
+            <div
+              style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-bottom:2px;">
+              <span>🔮 MP</span><span id="mhud-mp"
+                style="color:#9060d8; font-family:'Courier Prime',monospace; font-size:11px; font-weight:bold;">—</span>
+            </div>
+            <div
+              style="height:7px; background:var(--bg); border-radius:4px; overflow:hidden; border:1px solid rgba(144,96,216,0.4);">
+              <div id="mhud-mp-bar"
+                style="height:100%; background:linear-gradient(90deg,#4a2880,#9060d8); border-radius:4px; transition:width 0.4s ease; width:100%;">
+              </div>
+            </div>
+          </div>
+          <!-- Enemy target -->
+          <div id="mhud-enemy-wrap" style="flex:1; min-width:120px; display:none;">
+            <div
+              style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-bottom:2px;">
+              <span id="mhud-enemy-name"
+                style="color:#e08088; font-family:'Cinzel',serif; font-size:10px;">Enemy</span><span
+                id="mhud-enemy-hp-text"
+                style="font-family:'Courier Prime',monospace; font-size:10px; color:#e08088;">—</span>
+            </div>
+            <div
+              style="height:7px; background:var(--bg); border-radius:4px; overflow:hidden; border:1px solid rgba(201,64,80,0.3);">
+              <div id="mhud-enemy-hp-bar"
+                style="height:100%; background:linear-gradient(90deg,#6a1020,#c94050); border-radius:4px; transition:width 0.4s ease; width:100%;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
   </div><!-- end screen-game -->
 
@@ -2513,54 +2627,89 @@
       <button class="drawer-close" onclick="MobileNav.closeDrawer('drawer-stats')">✕</button>
     </div>
     <div style="padding:14px 16px;overflow-y:auto;flex:1;">
-      <div class="bar-wrap">
-        <div class="bar-label-row"><span class="lbl">❤️ HP</span><span class="val" id="d-stat-hp">—</span></div>
-        <div class="main-bar">
-          <div class="main-bar-fill hp-fill" id="d-hp-bar" style="width:100%"></div>
+      <!-- Vitals section - larger, more visual -->
+      <div
+        style="background:var(--bg-mid);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div
+          style="font-family:'Cinzel',serif;font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:10px;">
+          VITALS</div>
+        <div class="bar-wrap">
+          <div class="bar-label-row">
+            <span class="lbl" style="font-size:13px;">❤️ Health</span>
+            <span class="val" id="d-stat-hp"
+              style="font-family:'Courier Prime',monospace;font-size:13px;color:#e05060;">—</span>
+          </div>
+          <div class="main-bar" style="height:12px;border-radius:6px;">
+            <div class="main-bar-fill hp-fill" id="d-hp-bar" style="width:100%;border-radius:6px;"></div>
+          </div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label-row">
+            <span class="lbl" style="font-size:13px;">🔮 Mana</span>
+            <span class="val" id="d-stat-mp"
+              style="font-family:'Courier Prime',monospace;font-size:13px;color:#9060d8;">—</span>
+          </div>
+          <div class="main-bar" style="height:12px;border-radius:6px;">
+            <div class="main-bar-fill mp-fill" id="d-mp-bar" style="width:100%;border-radius:6px;"></div>
+          </div>
+        </div>
+        <div class="bar-wrap" style="margin-bottom:0;">
+          <div class="bar-label-row">
+            <span class="lbl" style="font-size:13px;">⭐ Experience</span>
+            <span class="val" id="d-stat-xp" style="font-family:'Courier Prime',monospace;font-size:11px;">—</span>
+          </div>
+          <div class="main-bar" style="height:8px;border-radius:4px;">
+            <div class="main-bar-fill xp-fill" id="d-xp-bar" style="width:0%;border-radius:4px;"></div>
+          </div>
         </div>
       </div>
-      <div class="bar-wrap">
-        <div class="bar-label-row"><span class="lbl">🔮 MP</span><span class="val" id="d-stat-mp">—</span></div>
-        <div class="main-bar">
-          <div class="main-bar-fill mp-fill" id="d-mp-bar" style="width:100%"></div>
+      <!-- Stats grid -->
+      <div
+        style="background:var(--bg-mid);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div
+          style="font-family:'Cinzel',serif;font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:10px;">
+          ATTRIBUTES</div>
+        <div class="stat-grid">
+          <div class="stat-item" style="padding:5px 0;"><span class="sn" style="font-size:13px;">⚔️ STR</span><span
+              class="sv" id="d-s-str" style="font-size:14px;">—</span></div>
+          <div class="stat-item" style="padding:5px 0;"><span class="sn" style="font-size:13px;">✨ INT</span><span
+              class="sv" id="d-s-int" style="font-size:14px;">—</span></div>
+          <div class="stat-item" style="padding:5px 0;"><span class="sn" style="font-size:13px;">📖 WIS</span><span
+              class="sv" id="d-s-wis" style="font-size:14px;">—</span></div>
+          <div class="stat-item" style="padding:5px 0;"><span class="sn" style="font-size:13px;">💨 AGI</span><span
+              class="sv" id="d-s-agi" style="font-size:14px;">—</span></div>
+          <div class="stat-item" style="padding:5px 0;"><span class="sn" style="font-size:13px;">💪 VIT</span><span
+              class="sv" id="d-s-vit" style="font-size:14px;">—</span></div>
+          <div class="stat-item" style="padding:5px 0;"><span class="sn" style="font-size:13px;">🛡️ DEF</span><span
+              class="sv" id="d-s-def" style="font-size:14px;">—</span></div>
+          <div class="stat-item" style="padding:5px 0;border-bottom:none;"><span class="sn" style="font-size:13px;">🎯
+              CRIT</span><span class="sv" id="d-s-crit" style="font-size:14px;">—</span></div>
         </div>
       </div>
-      <div class="bar-wrap" style="margin-bottom:14px;">
-        <div class="bar-label-row"><span class="lbl">⭐ XP</span><span class="val" id="d-stat-xp">—</span></div>
-        <div class="main-bar">
-          <div class="main-bar-fill xp-fill" id="d-xp-bar" style="width:0%"></div>
-        </div>
+      <div
+        style="display:flex;align-items:center;gap:8px;background:var(--bg-mid);border:1px solid var(--gold-dk);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+        <span style="font-size:22px;">🪙</span>
+        <span style="font-family:'Cinzel',serif;color:var(--gold-lt);font-size:16px;" id="d-stat-gold">0</span>
+        <span style="color:var(--gold-dk);font-size:12px;">Gold</span>
       </div>
-      <div class="stat-grid" style="margin-bottom:14px;">
-        <div class="stat-item"><span class="sn">STR</span><span class="sv" id="d-s-str">—</span></div>
-        <div class="stat-item"><span class="sn">INT</span><span class="sv" id="d-s-int">—</span></div>
-        <div class="stat-item"><span class="sn">WIS</span><span class="sv" id="d-s-wis">—</span></div>
-        <div class="stat-item"><span class="sn">AGI</span><span class="sv" id="d-s-agi">—</span></div>
-        <div class="stat-item"><span class="sn">VIT</span><span class="sv" id="d-s-vit">—</span></div>
-        <div class="stat-item"><span class="sn">DEF</span><span class="sv" id="d-s-def">—</span></div>
-        <div class="stat-item"><span class="sn">CRIT</span><span class="sv" id="d-s-crit">—</span></div>
-      </div>
-      <div class="gold-row" style="border-top:1px solid var(--border);border-bottom:none;padding:10px 0;">
-        🪙 <span id="d-stat-gold">0</span> Gold
-      </div>
-      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-sm btn-gold" onclick="Game.saveGame();MobileNav.closeDrawer('drawer-stats')">💾
-          Save</button>
-        <button class="btn btn-sm" onclick="Game.loadGame();MobileNav.closeDrawer('drawer-stats')">📂 Load</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-sm btn-gold" style="flex:1;"
+          onclick="Game.saveGame();MobileNav.closeDrawer('drawer-stats')">💾 Save</button>
+        <button class="btn btn-sm" style="flex:1;" onclick="Game.loadGame();MobileNav.closeDrawer('drawer-stats')">📂
+          Load</button>
       </div>
     </div>
   </div>
 
-  <!-- Bag/Gear/Map drawer -->
+  <!-- Bag/Gear drawer -->
   <div class="mobile-drawer" id="drawer-bag">
     <div class="drawer-header">
       <span class="drawer-header-title" id="drawer-bag-title">🎒 Inventory</span>
       <button class="drawer-close" onclick="MobileNav.closeDrawer('drawer-bag')">✕</button>
     </div>
     <div class="tab-bar" style="flex-shrink:0;">
-      <button class="tab-btn active" id="dtab-inventory" onclick="UI.switchMobileTab('inventory')">Bag</button>
-      <button class="tab-btn" id="dtab-equipment" onclick="UI.switchMobileTab('equipment')">Gear</button>
-      <button class="tab-btn" id="dtab-location" onclick="UI.switchMobileTab('location')">Map</button>
+      <button class="tab-btn active" id="dtab-inventory" onclick="UI.switchMobileTab('inventory')">🎒 Bag</button>
+      <button class="tab-btn" id="dtab-equipment" onclick="UI.switchMobileTab('equipment')">⚔️ Gear</button>
     </div>
     <div class="tab-content active" id="dtc-inventory" style="flex:1;overflow:hidden;">
       <div class="inv-list" id="d-inv-list">
@@ -2573,7 +2722,8 @@
     <div class="tab-content" id="dtc-equipment" style="flex:1;overflow:hidden;">
       <div class="eq-list" id="d-eq-list"></div>
     </div>
-    <div class="tab-content" id="dtc-location" style="flex:1;overflow:hidden;">
+    <!-- Keep dtc-location hidden but in DOM for compatibility -->
+    <div class="tab-content" id="dtc-location" style="display:none;">
       <div class="eq-list" id="d-map-list"></div>
     </div>
   </div>
@@ -2756,11 +2906,13 @@
   </div>
 
   <div class="modal-overlay" id="modal-shop">
-    <div class="modal" style="max-width:550px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+    <div class="modal"
+      style="max-width:550px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
       <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
         <div class="modal-title">🏪 Solmara Outpost Market</div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-          <div style="color:var(--text-dim);font-style:italic;font-size:12px;">Your gold: <span id="shop-gold" style="color:var(--gold);font-size:14px;font-family:'Cinzel',serif;">0</span></div>
+          <div style="color:var(--text-dim);font-style:italic;font-size:12px;">Your gold: <span id="shop-gold"
+              style="color:var(--gold);font-size:14px;font-family:'Cinzel',serif;">0</span></div>
         </div>
       </div>
       <div id="shop-items" style="flex:1; overflow-y:auto; padding:16px;"></div>
@@ -2833,7 +2985,9 @@
             <span>🗺️ Sequenced World Progression (Max Lv 110)</span>
           </div>
           <div style="padding-left:18px;">
-            The world of Eryndor has been restructured into a strict, non-overlapping progression path. Level up from level 1 up to the <strong>new level cap of 110</strong>. New high-level zones like the <strong>Void-Touched Peaks</strong> and the <strong>Abyssal Void</strong> await those brave enough to venture beyond.
+            The world of Eryndor has been restructured into a strict, non-overlapping progression path. Level up from
+            level 1 up to the <strong>new level cap of 110</strong>. New high-level zones like the <strong>Void-Touched
+              Peaks</strong> and the <strong>Abyssal Void</strong> await those brave enough to venture beyond.
           </div>
         </div>
 
@@ -2842,7 +2996,9 @@
             <span>🌊 Dungeon & Combat Overhaul</span>
           </div>
           <div style="padding-left:18px;">
-            Dungeons have been revamped into intense <strong>5-wave endurance trials</strong>, concluding with a powerful Dungeon Boss. Victory seals a dungeon for 10 minutes, but the <strong>Epic and Legendary</strong> rewards are worth the wait.
+            Dungeons have been revamped into intense <strong>5-wave endurance trials</strong>, concluding with a
+            powerful Dungeon Boss. Victory seals a dungeon for 10 minutes, but the <strong>Epic and Legendary</strong>
+            rewards are worth the wait.
           </div>
         </div>
 
@@ -2851,7 +3007,9 @@
             <span>💎 Legendary Loot & Materials</span>
           </div>
           <div style="padding-left:18px;">
-            Enemies now drop <strong>zone-specific trophies</strong> and materials like Ash Shards and Void Crystals. Seek out <strong>Reality Fragments</strong> from the ultimate bosses to obtain the most powerful artifacts in history.
+            Enemies now drop <strong>zone-specific trophies</strong> and materials like Ash Shards and Void Crystals.
+            Seek out <strong>Reality Fragments</strong> from the ultimate bosses to obtain the most powerful artifacts
+            in history.
           </div>
         </div>
 
@@ -2860,7 +3018,8 @@
             <span>👑 The Devouring King</span>
           </div>
           <div style="padding-left:18px;">
-            Venture into the <strong>Ruins of Velkaris</strong> (Lv 101–110) to face the source of the rot itself. The <strong>Devouring King</strong> is the ultimate test of an Outworlder's strength.
+            Venture into the <strong>Ruins of Velkaris</strong> (Lv 101–110) to face the source of the rot itself. The
+            <strong>Devouring King</strong> is the ultimate test of an Outworlder's strength.
           </div>
         </div>
 
@@ -2869,7 +3028,9 @@
             <span>🔥 The Mystic Forge</span>
           </div>
           <div style="padding-left:18px;">
-            Visit the <strong>Mystic Forge</strong> in Solmara Outpost to combine your zone materials into <strong>Legendary Artifacts</strong>. Craft items that grant <strong>Skill Points</strong> or forge the most powerful class-specific gear in Eryndor.
+            Visit the <strong>Mystic Forge</strong> in Solmara Outpost to combine your zone materials into
+            <strong>Legendary Artifacts</strong>. Craft items that grant <strong>Skill Points</strong> or forge the most
+            powerful class-specific gear in Eryndor.
           </div>
         </div>
 
@@ -2878,7 +3039,9 @@
             <span>📜 Legal & System Safeguards</span>
           </div>
           <div style="padding-left:18px;">
-            We have implemented a professional <strong>Terms and Conditions</strong> agreement to protect all players. The AI assistance disclaimer has also been refined to reflect our commitment to a human-curated development process.
+            We have implemented a professional <strong>Terms and Conditions</strong> agreement to protect all players.
+            The AI assistance disclaimer has also been refined to reflect our commitment to a human-curated development
+            process.
           </div>
         </div>
       </div>
@@ -2917,10 +3080,12 @@
 
   <!-- Mystic Forge Modal -->
   <div class="modal-overlay" id="modal-forge">
-    <div class="modal" style="max-width:550px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+    <div class="modal"
+      style="max-width:550px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
       <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
         <div class="modal-title">🔥 The Mystic Forge</div>
-        <div style="color:var(--text-dim); font-size:11px; font-style:italic; margin-top:4px;">Combine zone patterns into legendary artifacts.</div>
+        <div style="color:var(--text-dim); font-size:11px; font-style:italic; margin-top:4px;">Combine zone patterns
+          into legendary artifacts.</div>
       </div>
       <div id="forge-recipe-list" style="flex:1; overflow-y:auto; padding:20px;"></div>
       <div style="padding:12px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
@@ -3157,14 +3322,16 @@
       style="max-width:600px; height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden; border-color:var(--violet);">
       <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
         <div class="modal-title" style="text-align:center;">📜 Legal Agreements</div>
-        <div style="color:var(--text-dim); font-size:11px; text-align:center; margin-top:4px; font-family:'Cinzel',serif; letter-spacing:1px;">
+        <div
+          style="color:var(--text-dim); font-size:11px; text-align:center; margin-top:4px; font-family:'Cinzel',serif; letter-spacing:1px;">
           HAVEN STUDIOS &middot; THE CHRONICLES OF RUNE HAVEN
         </div>
       </div>
 
       <div style="padding:16px 20px 0; flex-shrink:0;">
         <div class="legal-tabs">
-          <button class="legal-tab active" id="tab-btn-terms" onclick="UI.switchLegalTab('terms')">Terms & Conditions</button>
+          <button class="legal-tab active" id="tab-btn-terms" onclick="UI.switchLegalTab('terms')">Terms &
+            Conditions</button>
           <button class="legal-tab" id="tab-btn-privacy" onclick="UI.switchLegalTab('privacy')">Privacy Policy</button>
         </div>
       </div>
@@ -3176,15 +3343,18 @@
           <p><strong>The Chronicles of Rune Haven</strong><br>Operated by Haven Studios<br>Last Updated: March 2026</p>
 
           <h3>1. Acceptance of Terms</h3>
-          <p>By accessing or playing The Chronicles of Rune Haven, you agree to follow these Terms and Conditions. If you do not agree with these terms, you should not use the game.</p>
+          <p>By accessing or playing The Chronicles of Rune Haven, you agree to follow these Terms and Conditions. If
+            you do not agree with these terms, you should not use the game.</p>
           <p>These terms apply to all players, visitors, and users of the game and related services.</p>
 
           <h3>2. About the Game</h3>
-          <p>The Chronicles of Rune Haven is a browser-based text RPG created and operated by Haven Studios. The game may be updated, changed, or temporarily unavailable at any time without notice.</p>
+          <p>The Chronicles of Rune Haven is a browser-based text RPG created and operated by Haven Studios. The game
+            may be updated, changed, or temporarily unavailable at any time without notice.</p>
           <p>We reserve the right to modify game systems, mechanics, content, and balance whenever necessary.</p>
 
           <h3>3. Player Accounts and Data</h3>
-          <p>Players may create characters and game progress while using the service. By playing the game you understand that:</p>
+          <p>Players may create characters and game progress while using the service. By playing the game you understand
+            that:</p>
           <ul>
             <li>Your progress may be stored in browser storage, cloud storage, or external databases.</li>
             <li>Loss of saved data may occur due to updates, browser changes, or technical issues.</li>
@@ -3204,33 +3374,47 @@
           <p>Violation of these rules may result in account resets, suspensions, or bans.</p>
 
           <h3>5. Intellectual Property</h3>
-          <p>All content within The Chronicles of Rune Haven, including but not limited to: Game systems, Artwork, Writing and lore, Music and audio, UI design, Code and scripts, are the intellectual property of Haven Studios unless otherwise credited.</p>
+          <p>All content within The Chronicles of Rune Haven, including but not limited to: Game systems, Artwork,
+            Writing and lore, Music and audio, UI design, Code and scripts, are the intellectual property of Haven
+            Studios unless otherwise credited.</p>
           <p>You may not copy, redistribute, sell, or reuse game assets without permission.</p>
 
           <h3>6. AI-Generated and AI-Assisted Content</h3>
-          <p>Parts of The Chronicles of Rune Haven may be created or assisted by artificial intelligence tools. This may include but is not limited to: Story content and lore, Dialogue or quest writing, Code assistance, Design concepts, Art or visual elements.</p>
-          <p>All AI-assisted content is reviewed, edited, and curated by Haven Studios before being used in the game.</p>
-          <p>Players may not use the game or its assets to train AI systems, scrape data, or generate derivative AI datasets without written permission.</p>
+          <p>Parts of The Chronicles of Rune Haven may be created or assisted by artificial intelligence tools. This may
+            include but is not limited to: Story content and lore, Dialogue or quest writing, Code assistance, Design
+            concepts, Art or visual elements.</p>
+          <p>All AI-assisted content is reviewed, edited, and curated by Haven Studios before being used in the game.
+          </p>
+          <p>Players may not use the game or its assets to train AI systems, scrape data, or generate derivative AI
+            datasets without written permission.</p>
 
           <h3>7. Game Balance and Updates</h3>
-          <p>Game mechanics, items, enemies, quests, and systems may change at any time to maintain balance or improve gameplay. This may include: Stat changes, Item adjustments, Skill reworks, Quest modifications, Character resets if required for stability.</p>
+          <p>Game mechanics, items, enemies, quests, and systems may change at any time to maintain balance or improve
+            gameplay. This may include: Stat changes, Item adjustments, Skill reworks, Quest modifications, Character
+            resets if required for stability.</p>
           <p>Haven Studios is not obligated to compensate players for these changes.</p>
 
           <h3>8. Availability</h3>
-          <p>While we strive to keep the game accessible, The Chronicles of Rune Haven is provided as-is. We cannot guarantee: Continuous uptime, No bugs or errors, Permanent access to the service.</p>
+          <p>While we strive to keep the game accessible, The Chronicles of Rune Haven is provided as-is. We cannot
+            guarantee: Continuous uptime, No bugs or errors, Permanent access to the service.</p>
           <p>The game may be modified, paused, or shut down at any time.</p>
 
           <h3>9. Limitation of Liability</h3>
-          <p>Haven Studios is not liable for: Data loss, Account loss, Technical issues, Damages resulting from use of the game. Use of the game is entirely at your own risk.</p>
+          <p>Haven Studios is not liable for: Data loss, Account loss, Technical issues, Damages resulting from use of
+            the game. Use of the game is entirely at your own risk.</p>
 
           <h3>10. Third-Party Services</h3>
-          <p>The game may be hosted or distributed using third-party services including but not limited to: website hosting platforms, browser technologies, game distribution platforms. Haven Studios is not responsible for the policies or outages of these external services.</p>
+          <p>The game may be hosted or distributed using third-party services including but not limited to: website
+            hosting platforms, browser technologies, game distribution platforms. Haven Studios is not responsible for
+            the policies or outages of these external services.</p>
 
           <h3>11. Changes to These Terms</h3>
-          <p>Haven Studios may update these Terms and Conditions at any time. Continued use of the game after updates means you accept the revised terms.</p>
+          <p>Haven Studios may update these Terms and Conditions at any time. Continued use of the game after updates
+            means you accept the revised terms.</p>
 
           <h3>12. Contact</h3>
-          <p>If you have questions about these Terms and Conditions, you may contact Haven Studios regarding The Chronicles of Rune Haven.</p>
+          <p>If you have questions about these Terms and Conditions, you may contact Haven Studios regarding The
+            Chronicles of Rune Haven.</p>
         </div>
 
         <!-- Privacy Policy Content -->
@@ -3239,36 +3423,54 @@
           <p><strong>The Chronicles of Rune Haven</strong><br>Operated by Haven Studios<br>Last Updated: March 2026</p>
 
           <h3>1. Introduction</h3>
-          <p>This Privacy Policy explains how Haven Studios collects, uses, and protects information when you play The Chronicles of Rune Haven, a browser-based text RPG.</p>
+          <p>This Privacy Policy explains how Haven Studios collects, uses, and protects information when you play The
+            Chronicles of Rune Haven, a browser-based text RPG.</p>
           <p>By using the game, you agree to the practices described in this policy.</p>
 
           <h3>2. Information We Collect</h3>
-          <p><strong>Game Data:</strong> When you play the game, the following information may be stored: Character names, Player progression, Inventory and items, Game choices and quest progress, Gameplay statistics. This data is used strictly to allow the game to function and save progress.</p>
-          <p><strong>Technical Data:</strong> Some basic technical information may be automatically collected, including: Browser type, Device type, Operating system, IP address, Session information. This helps maintain game performance and troubleshoot issues.</p>
+          <p><strong>Game Data:</strong> When you play the game, the following information may be stored: Character
+            names, Player progression, Inventory and items, Game choices and quest progress, Gameplay statistics. This
+            data is used strictly to allow the game to function and save progress.</p>
+          <p><strong>Technical Data:</strong> Some basic technical information may be automatically collected,
+            including: Browser type, Device type, Operating system, IP address, Session information. This helps maintain
+            game performance and troubleshoot issues.</p>
 
           <h3>3. Local Storage and Cookies</h3>
-          <p>The Chronicles of Rune Haven may store data using: Browser local storage, Cookies, Cloud storage services (if enabled). This allows the game to remember player progress and settings. Disabling cookies or clearing browser storage may result in loss of saved progress.</p>
+          <p>The Chronicles of Rune Haven may store data using: Browser local storage, Cookies, Cloud storage services
+            (if enabled). This allows the game to remember player progress and settings. Disabling cookies or clearing
+            browser storage may result in loss of saved progress.</p>
 
           <h3>4. How We Use Information</h3>
-          <p>Information collected may be used to: Save player progress, Improve gameplay systems, Fix bugs and technical problems, Balance game mechanics, Improve performance and stability. Haven Studios does not sell personal data to third parties.</p>
+          <p>Information collected may be used to: Save player progress, Improve gameplay systems, Fix bugs and
+            technical problems, Balance game mechanics, Improve performance and stability. Haven Studios does not sell
+            personal data to third parties.</p>
 
           <h3>5. AI-Assisted Systems</h3>
-          <p>Some parts of The Chronicles of Rune Haven may involve AI-assisted tools for development or content creation. Player data is not intentionally used to train AI models.</p>
+          <p>Some parts of The Chronicles of Rune Haven may involve AI-assisted tools for development or content
+            creation. Player data is not intentionally used to train AI models.</p>
 
           <h3>6. Third-Party Services</h3>
-          <p>The game may rely on third-party services such as hosting platforms, cloud infrastructure providers, and game distribution platforms. These services may collect limited technical data according to their own privacy policies.</p>
+          <p>The game may rely on third-party services such as hosting platforms, cloud infrastructure providers, and
+            game distribution platforms. These services may collect limited technical data according to their own
+            privacy policies.</p>
 
           <h3>7. Data Security</h3>
-          <p>Haven Studios takes reasonable steps to protect game data. However, no online service can guarantee complete security. Players should understand that using online services always involves some level of risk.</p>
+          <p>Haven Studios takes reasonable steps to protect game data. However, no online service can guarantee
+            complete security. Players should understand that using online services always involves some level of risk.
+          </p>
 
           <h3>8. Children's Privacy</h3>
-          <p>The Chronicles of Rune Haven is not specifically directed toward children under 13. If you believe a child has submitted personal information, please contact Haven Studios and the data will be removed when possible.</p>
+          <p>The Chronicles of Rune Haven is not specifically directed toward children under 13. If you believe a child
+            has submitted personal information, please contact Haven Studios and the data will be removed when possible.
+          </p>
 
           <h3>9. Player Rights</h3>
-          <p>Players may request: deletion of stored data (when technically possible), clarification about what data is stored. Requests can be made by contacting Haven Studios.</p>
+          <p>Players may request: deletion of stored data (when technically possible), clarification about what data is
+            stored. Requests can be made by contacting Haven Studios.</p>
 
           <h3>10. Changes to This Policy</h3>
-          <p>This Privacy Policy may be updated occasionally as the game evolves. Continued use of The Chronicles of Rune Haven means you accept any updated policies.</p>
+          <p>This Privacy Policy may be updated occasionally as the game evolves. Continued use of The Chronicles of
+            Rune Haven means you accept any updated policies.</p>
 
           <h3>11. Contact</h3>
           <p>For privacy-related questions, contact Haven Studios regarding The Chronicles of Rune Haven.</p>
@@ -3276,11 +3478,14 @@
       </div>
 
       <div style="padding:16px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
-        <div style="margin-bottom:12px; font-size:12px; color:var(--text-lt); display:flex; align-items:center; justify-content:center; gap:8px;">
+        <div
+          style="margin-bottom:12px; font-size:12px; color:var(--text-lt); display:flex; align-items:center; justify-content:center; gap:8px;">
           <input type="checkbox" id="legal-agree-check" style="width:16px; height:16px; cursor:pointer;">
-          <label for="legal-agree-check" style="cursor:pointer; user-select:none; font-family:'Cinzel',serif;">I agree to the Terms and Privacy Policy</label>
+          <label for="legal-agree-check" style="cursor:pointer; user-select:none; font-family:'Cinzel',serif;">I agree
+            to the Terms and Privacy Policy</label>
         </div>
-        <button id="legal-accept-btn" class="btn btn-violet btn-lg" style="width:100%;" onclick="CloudSave.acceptLegal()">Accept & Enter Eryndor</button>
+        <button id="legal-accept-btn" class="btn btn-violet btn-lg" style="width:100%;"
+          onclick="CloudSave.acceptLegal()">Accept & Enter Eryndor</button>
       </div>
     </div>
   </div>
@@ -3616,7 +3821,7 @@
       voidCrystal: { id: 'voidCrystal', name: 'Void Crystal', icon: '💎', type: 'loot', sellPrice: 800, desc: 'A jagged crystal that seems to pull in nearby light.' },
       abyssalEssence: { id: 'abyssalEssence', name: 'Abyssal Essence', icon: '🌌', type: 'loot', sellPrice: 1500, desc: 'A concentrated droplet of pure void energy.' },
       realityFragment: { id: 'realityFragment', name: 'Reality Fragment', icon: '✨', type: 'loot', sellPrice: 3000, desc: 'A piece of the Veil itself, shimmering with infinite colors.' },
-      
+
       voidTome: { id: 'voidTome', name: 'Void Tome', icon: '📖', type: 'consumable', effect: 'grant_skill_points', points: 5, buyPrice: 5000, sellPrice: 2000, desc: 'An ancient book bound in void-silk. Grants +5 Skill Points when read.' }
     };
 
@@ -4413,9 +4618,22 @@
         });
         document.querySelectorAll('.mobile-drawer, #dash-col-chat').forEach(d => d.classList.remove('open'));
         if (panel === 'stats') { UI.refreshDrawerStats(); document.getElementById('drawer-stats').classList.add('open'); }
-        else if (panel === 'bag' || panel === 'map') {
-          if (panel === 'map') UI.switchMobileTab('location'); else UI.switchMobileTab('inventory');
+        else if (panel === 'bag') {
+          UI.switchMobileTab('inventory');
           document.getElementById('drawer-bag').classList.add('open');
+        }
+        else if (panel === 'map') {
+          // Open the full map modal directly — no dependency on inventory/bag state
+          Explore.openMap();
+          // Reset nav active to log after modal opens
+          setTimeout(() => {
+            ['log', 'chat', 'stats', 'bag', 'map'].forEach(id => {
+              const btn = document.getElementById('nav-' + id);
+              if (btn) btn.classList.remove('active');
+            });
+            const nLog = document.getElementById('nav-log');
+            if (nLog) nLog.classList.add('active');
+          }, 100);
         }
         else if (panel === 'chat') {
           document.getElementById('dash-col-chat').classList.add('open');
@@ -4439,6 +4657,11 @@
     const UI = {
       refresh() {
         const p = G.player; if (!p) return;
+        // Ensure required arrays/objects exist (guard against old saves)
+        if (!p.inventory) p.inventory = [];
+        if (!p.equipment) p.equipment = { weapon: null, offhand: null, armor: null, neck: null, ring: null, earrings: null };
+        if (!p.stash) p.stash = [];
+
         const maxHp = effectiveMaxHp(), cls = CLASSES[p.classKey];
 
         // Dynamic Backgrounds for Main Game Screen
@@ -4473,8 +4696,48 @@
         document.getElementById('location-name').textContent = LOCATIONS[G.location].name;
         this.refreshInventory(); this.refreshEquipment(); this.refreshMapTab(); this.refreshCompanions();
 
+        // Mobile combat HUD
+        this.updateMobileCombatHUD();
+
         // Ensure enemy UI is refreshed if in combat (Fixes Leader HUD lag)
         if (G.inCombat) this.showEnemyPanel(G.enemies);
+      },
+
+      updateMobileCombatHUD() {
+        const hud = document.getElementById('mobile-combat-hud');
+        if (!hud) return;
+        const p = G.player;
+        if (!p || !G.inCombat || window.innerWidth >= 768) {
+          hud.style.display = 'none';
+          return;
+        }
+        hud.style.display = 'block';
+        const maxHp = effectiveMaxHp();
+        const maxMp = effectiveMaxMp();
+        const hpPct = Math.max(0, Math.min(100, p.hp / maxHp * 100));
+        const mpPct = Math.max(0, Math.min(100, p.mp / maxMp * 100));
+        const hpEl = document.getElementById('mhud-hp');
+        const mpEl = document.getElementById('mhud-mp');
+        const hpBar = document.getElementById('mhud-hp-bar');
+        const mpBar = document.getElementById('mhud-mp-bar');
+        if (hpEl) hpEl.textContent = `${p.hp}/${maxHp}`;
+        if (mpEl) mpEl.textContent = `${p.mp}/${maxMp}`;
+        if (hpBar) hpBar.style.width = hpPct + '%';
+        if (mpBar) mpBar.style.width = mpPct + '%';
+        // Enemy target
+        const enemyWrap = document.getElementById('mhud-enemy-wrap');
+        const enemy = G.enemies && G.enemies[G.targetIndex];
+        if (enemy && enemy.hp > 0 && enemyWrap) {
+          enemyWrap.style.display = 'block';
+          const nameEl = document.getElementById('mhud-enemy-name');
+          const eTxt = document.getElementById('mhud-enemy-hp-text');
+          const eBar = document.getElementById('mhud-enemy-hp-bar');
+          if (nameEl) nameEl.textContent = `${enemy.icon || ''} ${enemy.name}`;
+          if (eTxt) eTxt.textContent = `${Math.max(0, enemy.hp)}/${enemy.maxHp}`;
+          if (eBar) eBar.style.width = Math.max(0, enemy.hp / enemy.maxHp * 100) + '%';
+        } else if (enemyWrap) {
+          enemyWrap.style.display = 'none';
+        }
       },
 
       refreshCompanions() {
@@ -4577,16 +4840,20 @@
 
       refreshInventory() {
         const p = G.player;
+        if (!p) return;
+        if (!p.inventory) p.inventory = [];
         let total = 0;
         const html = !p.inventory.length ? `<div style="color:var(--text-dim);padding:16px;text-align:center;">Empty</div>` :
           p.inventory.map((invItem, idx) => {
+            if (!invItem || !invItem.id || !ITEMS[invItem.id]) return '';
             const item = getScaledItem(invItem.id, invItem.level, invItem.rarity || 'common', false);
-            total += invItem.qty;
+            if (!item) return '';
+            total += invItem.qty || 1;
             const color = item.color || '#fff';
             return `<div class="inv-item" onclick="UI.showItemModal('${invItem.id}', ${idx})" style="border-left:2px solid ${color};">
               <div class="inv-item-info">
                 <div class="item-nm" style="color:${color}">${item.icon} ${item.name}</div>
-                <div class="item-qty">${invItem.qty > 1 ? 'x' + invItem.qty : ''}</div>
+                <div class="item-qty">${(invItem.qty || 1) > 1 ? 'x' + invItem.qty : ''}</div>
               </div>
             </div>`;
           }).join('');
@@ -4648,12 +4915,17 @@
         }
       },
       switchMobileTab(tab) {
-        ['inventory', 'equipment', 'location'].forEach(t => {
+        // Support 2 tabs in bag drawer (inventory, equipment)
+        // location tab is hidden; map is now a modal
+        const tabs = ['inventory', 'equipment'];
+        tabs.forEach(t => {
           const b = document.getElementById('dtab-' + t), tc = document.getElementById('dtc-' + t);
-          if (b) b.classList.toggle('active', t === tab); if (tc) tc.classList.toggle('active', t === tab);
+          if (b) b.classList.toggle('active', t === tab);
+          if (tc) tc.classList.toggle('active', t === tab);
         });
-        const titles = { inventory: '🎒 Inventory', equipment: '⚔️ Equipment', location: '🗺️ Eryndor Map' };
-        const el = document.getElementById('drawer-bag-title'); if (el) el.textContent = titles[tab] || '🎒 Inventory';
+        const titles = { inventory: '🎒 Inventory', equipment: '⚔️ Equipment' };
+        const el = document.getElementById('drawer-bag-title');
+        if (el) el.textContent = titles[tab] || '🎒 Inventory';
       },
 
       showItemModal(itemId, inventoryIndex) {
@@ -4724,7 +4996,7 @@
       showEnemyPanel(enemies) {
         const area = document.getElementById('viewport-enemy-ui');
         if (!area) return;
-        if (!enemies || enemies.length === 0) { area.style.display = 'none'; area.innerHTML = ''; return; }
+        if (!enemies || enemies.length === 0) { area.style.display = 'none'; area.innerHTML = ''; this.updateMobileCombatHUD(); return; }
         area.style.display = 'flex';
         area.style.flexDirection = 'column';
         area.style.gap = '8px';
@@ -4751,6 +5023,8 @@
             </div>
           `;
         }).join('');
+        // Also update mobile combat HUD
+        this.updateMobileCombatHUD();
       },
       updateEnemyBar(enemy) {
 
@@ -4786,17 +5060,19 @@
             Log.add(`⚠️ <strong>Sync Warning:</strong> ${loc.name} requires level ${loc.minLevel}, but you're following your leader! Prepare for a struggle.`, 'death');
           } else {
             Log.add(`⚠️ <strong>Danger!</strong> ${loc.name} requires Level ${loc.minLevel}+. You are Level ${G.player.level} — this place will crush you!`, 'death');
-
           }
         }
         G.location = key;
 
-        // Force player spawn perfectly in the center of the new viewport
+        // Reset player world position to center — use stored viewport size or safe default
+        // Don't query DOM size here since on mobile the viewport may be hidden/collapsed
         const vp = document.getElementById('world-viewport');
-        const vpw = vp ? (vp.clientWidth || vp.offsetWidth || 800) : 800;
-        const vph = vp ? (vp.clientHeight || vp.offsetHeight || 400) : 400;
-        G.world.x = vpw / 2;
-        G.world.y = vph / 2;
+        const vpw = (vp && vp.offsetWidth > 0) ? vp.offsetWidth : 400;
+        const vph = (vp && vp.offsetHeight > 0) ? vp.offsetHeight : 300;
+        G.world.x = Math.max(50, vpw / 2);
+        G.world.y = Math.max(50, vph / 2);
+        // Store preferred center so World.render can use it after layout resolves
+        G._pendingCenter = true;
 
         QuestSystem.updateProgress('visit', key);
         Log.divider();
@@ -4807,6 +5083,17 @@
         World.updateTerrain();
         loc.isTown ? this.showTownActions() : this.showExploreActions();
         Game.autosave();
+
+        // Re-center after layout settles (important for mobile)
+        requestAnimationFrame(() => {
+          const vp2 = document.getElementById('world-viewport');
+          if (vp2 && vp2.offsetWidth > 0) {
+            G.world.x = vp2.offsetWidth / 2;
+            G.world.y = vp2.offsetHeight / 2;
+            World.render();
+          }
+          G._pendingCenter = false;
+        });
 
         // Party Sync
         if (G.partyCode && G.isPartyLeader && !isSync) {
@@ -5258,7 +5545,7 @@
       openShop(tab = 'buy') {
         const p = G.player;
         document.getElementById('shop-gold').textContent = p.gold;
-        
+
         let html = `
           <div style="display:flex; gap:10px; margin-bottom:16px; position:sticky; top:0; background:var(--bg-panel); z-index:10; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
             <button class="btn btn-sm ${tab === 'buy' ? 'btn-violet' : 'btn-raised'}" style="flex:1;" onclick="Explore.openShop('buy')">Buy</button>
@@ -5292,7 +5579,7 @@
               const isStackable = inv.qty > 1;
               return `<div class="shop-item">
                 <div class="shop-item-info">
-                  <div class="item-nm" style="color:${item.color}">${item.icon} ${item.name} ${inv.qty > 1 ? 'x'+inv.qty : ''}</div>
+                  <div class="item-nm" style="color:${item.color}">${item.icon} ${item.name} ${inv.qty > 1 ? 'x' + inv.qty : ''}</div>
                   <div class="item-dsc">Value: 🪙${item.sellPrice} ea.</div>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
@@ -5315,9 +5602,9 @@
         let qty = input ? parseInt(input.value) : 1;
         if (isNaN(qty) || qty < 1) qty = 1;
         if (qty > entry.qty) qty = entry.qty;
-        
+
         Combat.sellItem(entry.id, idx, qty);
-        this.openShop('sell'); 
+        this.openShop('sell');
       },
 
       buyItem(id, rarity = 'common') {
@@ -5662,14 +5949,14 @@
         list.innerHTML = Object.values(FORGE_RECIPES).map(recipe => {
           const item = ITEMS[recipe.result];
           const canCraft = this.canCraft(recipe);
-          
+
           let ingredientsHtml = '';
           for (const [id, count] of Object.entries(recipe.ingredients)) {
             const has = this.countItem(id);
             const color = has >= count ? 'var(--green)' : 'var(--red)';
             ingredientsHtml += `<div style="font-size:11px; color:${color};">${ITEMS[id].icon} ${ITEMS[id].name}: ${has}/${count}</div>`;
           }
-          
+
           const goldColor = G.player.gold >= recipe.goldCost ? 'var(--gold)' : 'var(--red)';
 
           return `<div class="shop-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px; border:1px solid ${canCraft ? 'var(--violet-lt)' : 'var(--border)'}; background:${canCraft ? 'rgba(144,96,216,0.05)' : 'transparent'}; border-radius:8px; margin-bottom:12px;">
@@ -5945,7 +6232,7 @@
               currentKey = randKey;
             }
             if (currentKey === 'mimic') hasMimic = true;
-            
+
             const base = ENEMIES[currentKey];
             const e = this.scaleEnemy(base);
             e.id = currentKey; // Added: Fix quest tracking
@@ -5963,6 +6250,9 @@
         }
         G.targetIndex = 0;
         G.inCombat = true; G.playerDefending = false; G.combatBuffs = {}; G.cooldowns = {}; G.turnCount = 0; G.canAct = true;
+
+        // Toggle mobile combat class for HUD layout
+        if (window.innerWidth < 768) document.body.classList.add('in-combat-mobile');
 
         Log.divider();
         if (G.enemies[0].isBoss) {
@@ -6516,7 +6806,7 @@
         const ratio = clampedTarget / Math.max(1, baseLevel);
         const scaled = Object.assign({}, base);
         scaled.level = clampedTarget;
-        
+
         // Dynamic Scaling Weights:
         // New players (lv 1-15) need a smoother entry.
         // End-game players (lv 60+) need massive HP to challenge summons/legendaries.
@@ -6640,6 +6930,10 @@
         AudioSystem.playBGM('Mainmenu.wav');
         AudioSystem.playSFX('combat_end');
         G.inCombat = false; G.playerDefending = false; G.combatBuffs = {}; G.cooldowns = {};
+        // Remove mobile combat HUD
+        document.body.classList.remove('in-combat-mobile');
+        const mhud = document.getElementById('mobile-combat-hud');
+        if (mhud) mhud.style.display = 'none';
         UI.showEnemyPanel(null);
         if (died) {
           const p = G.player;
@@ -6851,9 +7145,9 @@
       removeFromInventory(id, qty, level = null, rarity = null) {
         const p = G.player;
         const targetRar = rarity || 'common';
-        const idx = p.inventory.findIndex(e => 
-          e.id === id && 
-          (level === null || e.level === level) && 
+        const idx = p.inventory.findIndex(e =>
+          e.id === id &&
+          (level === null || e.level === level) &&
           ((e.rarity || 'common') === targetRar)
         );
         if (idx === -1) return;
@@ -8732,7 +9026,7 @@
         }
         // Force re-sync of my guild membership in case data drifted
         await this.refresh();
-        this._syncMyGuild(); 
+        this._syncMyGuild();
         this.showTab(this._mine ? 'mine' : 'browse');
       },
 
