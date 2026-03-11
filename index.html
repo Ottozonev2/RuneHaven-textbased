@@ -2904,6 +2904,20 @@
     </div>
   </div>
 
+  <!-- Mystic Forge Modal -->
+  <div class="modal-overlay" id="modal-forge">
+    <div class="modal" style="max-width:550px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+      <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
+        <div class="modal-title">🔥 The Mystic Forge</div>
+        <div style="color:var(--text-dim); font-size:11px; font-style:italic; margin-top:4px;">Combine zone patterns into legendary artifacts.</div>
+      </div>
+      <div id="forge-recipe-list" style="flex:1; overflow-y:auto; padding:20px;"></div>
+      <div style="padding:12px; border-top:1px solid var(--border); background:var(--bg-mid); flex-shrink:0;">
+        <button class="btn btn-violet" style="width:100%;" onclick="UI.closeModal('modal-forge')">Leave Forge</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Tavern Modal -->
   <div class="modal-overlay" id="modal-tavern">
     <div class="modal">
@@ -3576,6 +3590,12 @@
       chroniclebreaker: { id: 'chroniclebreaker', name: 'Chronicle Breaker', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 60, agiBonus: 30, buyPrice: 8000, sellPrice: 3500, desc: 'The blade that ends stories. +60 STR, +30 AGI.' },
       eternalaegis: { id: 'eternalaegis', name: 'Eternal Aegis', icon: '✨', type: 'equipment', slot: 'armor', defBonus: 50, vitBonus: 30, buyPrice: 9000, sellPrice: 4000, desc: 'The ultimate protection from the Abyss. +50 DEF, +30 VIT.' },
       infinityloop: { id: 'infinityloop', name: 'Infinity Loop', icon: '💍', type: 'equipment', slot: 'ring', intBonus: 40, wisBonus: 40, buyPrice: 10000, sellPrice: 4500, desc: 'A ring with no beginning or end. +40 INT, +40 WIS.' },
+
+      // --- Mystic Forge Exclusive Gear ---
+      forge_cindershade: { id: 'forge_cindershade', name: 'Ashen Cindershade', icon: '👘', type: 'equipment', slot: 'armor', agiBonus: 25, critChanceBonus: 10, buyPrice: 2000, sellPrice: 1000, desc: 'A cloak woven from ash and decay. Ghostly and light. +25 AGI, +10% Crit.' },
+      forge_bulwark: { id: 'forge_bulwark', name: 'Frostvein Bulwark', icon: '🛡️', type: 'equipment', slot: 'offhand', defBonus: 35, vitBonus: 20, buyPrice: 3000, sellPrice: 1500, desc: 'A shield of frozen iron and burning coal. +35 DEF, +20 VIT.' },
+      forge_voidreaver: { id: 'forge_voidreaver', name: 'Void-Touched Reaver', icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 45, intBonus: 30, buyPrice: 5000, sellPrice: 2500, desc: 'A blade that tears through reality. +45 STR, +30 INT.' },
+      forge_abyssalheart: { id: 'forge_abyssalheart', name: 'Abyssal Heart', icon: '📿', type: 'equipment', slot: 'neck', strBonus: 25, intBonus: 25, vitBonus: 25, buyPrice: 15000, sellPrice: 7500, desc: 'Pulsing with the essence of the Void. +25 STR, +25 INT, +25 VIT.' },
 
       // --- Zone-Specific Loot (Materials/Trophies) ---
       ashShard: { id: 'ashShard', name: 'Ash Shard', icon: '🌑', type: 'loot', sellPrice: 20, desc: 'A crystalline shard of solidified ash from the Coast.' },
@@ -4791,6 +4811,7 @@
           { label: '🏪 Market', fn: "Explore.openShop()", cls: 'btn-gold' },
           { label: '🏦 Stash', fn: "Explore.openStash()", cls: 'btn-gold' },
           { label: '📜 Quests', fn: "QuestSystem.open()", cls: 'btn-gold' },
+          { label: '🔥 Forge', fn: "ForgeSystem.open()", cls: 'btn-violet' },
           { label: '🏋️ Trainer', fn: "Explore.openTrainer()", cls: 'btn-violet' },
           { label: '📊 Stats', fn: "Explore.openStats()", cls: 'btn-blue' },
           { label: compLabel, fn: "Explore.openTavern()", cls: 'btn-green' },
@@ -5537,6 +5558,138 @@
           G.world.entities = snap.val() || {};
           this.render();
         });
+      }
+    };
+
+    const FORGE_RECIPES = {
+      cindershade: {
+        id: 'cindershade', result: 'forge_cindershade', goldCost: 500,
+        ingredients: { ashShard: 5, decaySpore: 2 },
+        desc: 'Woven from volcanic ash and swamp rot. (AGI/Crit)'
+      },
+      frostbulwark: {
+        id: 'frostbulwark', result: 'forge_bulwark', goldCost: 800,
+        ingredients: { frostFiber: 5, emberCore: 2 },
+        desc: 'A shield of absolute zero and eternal fire. (DEF/VIT)'
+      },
+      voidreaver: {
+        id: 'voidreaver', result: 'forge_voidreaver', goldCost: 2000,
+        ingredients: { voidCrystal: 5, corruptBark: 3 },
+        desc: 'Tears the fabric of space with every swing. (STR/INT)'
+      },
+      abyssalheart: {
+        id: 'abyssalheart', result: 'forge_abyssalheart', goldCost: 10000,
+        ingredients: { abyssalEssence: 3, realityFragment: 1 },
+        desc: 'The center of all void power. (Massive stats)'
+      }
+    };
+
+    const ForgeSystem = {
+      open() {
+        if (G.location !== 'solmara') {
+          Log.add("The Mystic Forge is only found in Solmara Outpost.", "system");
+          return;
+        }
+        this.refreshUI();
+        UI.openModal('modal-forge');
+      },
+
+      refreshUI() {
+        const list = document.getElementById('forge-recipe-list');
+        if (!list) return;
+
+        list.innerHTML = Object.values(FORGE_RECIPES).map(recipe => {
+          const item = ITEMS[recipe.result];
+          const canCraft = this.canCraft(recipe);
+          
+          let ingredientsHtml = '';
+          for (const [id, count] of Object.entries(recipe.ingredients)) {
+            const has = this.countItem(id);
+            const color = has >= count ? 'var(--green)' : 'var(--red)';
+            ingredientsHtml += `<div style="font-size:11px; color:${color};">${ITEMS[id].icon} ${ITEMS[id].name}: ${has}/${count}</div>`;
+          }
+          
+          const goldColor = G.player.gold >= recipe.goldCost ? 'var(--gold)' : 'var(--red)';
+
+          return `<div class="shop-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px; border:1px solid ${canCraft ? 'var(--violet-lt)' : 'var(--border)'}; background:${canCraft ? 'rgba(144,96,216,0.05)' : 'transparent'}; border-radius:8px; margin-bottom:12px;">
+            <div style="display:flex; width:100%; justify-content:space-between; align-items:flex-start;">
+              <div style="display:flex; gap:12px;">
+                <div style="font-size:28px;">${item.icon}</div>
+                <div>
+                  <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:14px;">${item.name}</div>
+                  <div style="font-size:11px; color:var(--text-dim); font-style:italic;">${recipe.desc}</div>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:12px; color:${goldColor}; font-weight:bold;">🪙 ${recipe.goldCost}</div>
+              </div>
+            </div>
+            <div style="width:100%; border-top:1px solid var(--border); padding-top:10px; display:flex; gap:20px; flex-wrap:wrap;">
+              ${ingredientsHtml}
+            </div>
+            <button class="btn btn-sm ${canCraft ? 'btn-violet' : 'btn-dim'}" style="width:100%; margin-top:5px;" 
+              ${canCraft ? `onclick="ForgeSystem.craft('${recipe.id}')"` : 'disabled'}>
+              Forge Artifact
+            </button>
+          </div>`;
+        }).join('');
+      },
+
+      countItem(itemId) {
+        let count = 0;
+        // Check inventory
+        G.player.inventory.forEach(i => { if (i.id === itemId) count++; });
+        // Check stash
+        if (G.player.stash) {
+          G.player.stash.forEach(i => { if (i.id === itemId) count++; });
+        }
+        return count;
+      },
+
+      canCraft(recipe) {
+        if (G.player.gold < recipe.goldCost) return false;
+        for (const [id, count] of Object.entries(recipe.ingredients)) {
+          if (this.countItem(id) < count) return false;
+        }
+        return true;
+      },
+
+      craft(recipeId) {
+        const recipe = FORGE_RECIPES[recipeId];
+        if (!this.canCraft(recipe)) return;
+
+        // Take Gold
+        G.player.gold -= recipe.goldCost;
+
+        // Take Ingredients
+        for (const [id, count] of Object.entries(recipe.ingredients)) {
+          let needed = count;
+          // From inventory
+          for (let i = G.player.inventory.length - 1; i >= 0 && needed > 0; i--) {
+            if (G.player.inventory[i].id === id) {
+              G.player.inventory.splice(i, 1);
+              needed--;
+            }
+          }
+          // From stash
+          if (needed > 0 && G.player.stash) {
+            for (let i = G.player.stash.length - 1; i >= 0 && needed > 0; i--) {
+              if (G.player.stash[i].id === id) {
+                G.player.stash.splice(i, 1);
+                needed--;
+              }
+            }
+          }
+        }
+
+        // Give Item
+        const newItem = JSON.parse(JSON.stringify(ITEMS[recipe.result]));
+        G.player.inventory.push(newItem);
+
+        Log.add(`🔥 The Mystic Forge roars! You have forged the <strong>${newItem.name}</strong>!`, 'violet');
+        this.refreshUI();
+        UI.refresh();
+        Game.saveGame(); // Force save after crafting
       }
     };
 
