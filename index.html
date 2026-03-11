@@ -2818,6 +2818,11 @@
           <div style="border-top:1px dashed var(--border); padding-top:16px;">
             <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeGuilds()">⚠️
               WIPE ALL GUILDS</button>
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;"
+              onclick="AdminSystem.wipeLeaderboard()">🏆
+              RESET LEADERBOARD</button>
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeFactionWar()">⚔️
+              RESET FACTION WAR</button>
             <button class="btn btn-violet" style="width:100%; margin-bottom:8px;"
               onclick="AdminSystem.checkDbHealth()">🧪 Database Health Check</button>
             <button id="admin-maintenance-btn" class="btn btn-gold" style="width:100%;"
@@ -8180,6 +8185,30 @@
         }
         alert("The Great Purge is complete. All guilds have returned to the Void.");
         location.reload();
+      },
+
+      async wipeLeaderboard() {
+        if (!confirm("⚠️ RESET LEADERBOARD?\nThis will permanently delete all player rankings. Players will reappear as they log in. This cannot be undone.")) return;
+        try {
+          await firebase.database().ref('leaderboard').set(null);
+          Log.add('🏆 Leaderboard wiped. The chronicles are blank once more.', 'system');
+          alert("Leaderboard has been reset. All rankings erased.");
+        } catch (e) {
+          console.error("Leaderboard wipe failed:", e);
+          Log.add('❌ Failed to wipe leaderboard. Check Firebase permissions.', 'error');
+        }
+      },
+
+      async wipeFactionWar() {
+        if (!confirm("⚠️ RESET FACTION WAR?\nThis will zero out all kill counts for both the Luminous Covenant and the Ashen Dominion. This cannot be undone.")) return;
+        try {
+          await firebase.database().ref('world/faction_war').set({ saints: 0, demons: 0 });
+          Log.add('⚔️ Faction War reset. The eternal conflict begins anew.', 'system');
+          alert("Faction War has been reset. Saints: 0 — Demons: 0.");
+        } catch (e) {
+          console.error("Faction war reset failed:", e);
+          Log.add('❌ Failed to reset Faction War. Check Firebase permissions.', 'error');
+        }
       },
 
       async refreshGuildList() {
