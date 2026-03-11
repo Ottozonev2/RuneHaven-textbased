@@ -2862,6 +2862,15 @@
           </div>
         </div>
 
+        <div style="margin-bottom:24px;">
+          <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
+            <span>🔥 The Mystic Forge</span>
+          </div>
+          <div style="padding-left:18px;">
+            Visit the <strong>Mystic Forge</strong> in Solmara Outpost to combine your zone materials into <strong>Legendary Artifacts</strong>. Craft items that grant <strong>Skill Points</strong> or forge the most powerful class-specific gear in Eryndor.
+          </div>
+        </div>
+
         <div style="margin-bottom:12px;">
           <div style="color:var(--violet-lt); font-family:'Cinzel',serif; margin-bottom:8px;">
             <span>📜 Legal & System Safeguards</span>
@@ -3605,7 +3614,9 @@
       corruptBark: { id: 'corruptBark', name: 'Corrupt Bark', icon: '🌳', type: 'loot', sellPrice: 400, desc: 'Twisted, obsidian-like wood from the Hollow Wilds.' },
       voidCrystal: { id: 'voidCrystal', name: 'Void Crystal', icon: '💎', type: 'loot', sellPrice: 800, desc: 'A jagged crystal that seems to pull in nearby light.' },
       abyssalEssence: { id: 'abyssalEssence', name: 'Abyssal Essence', icon: '🌌', type: 'loot', sellPrice: 1500, desc: 'A concentrated droplet of pure void energy.' },
-      realityFragment: { id: 'realityFragment', name: 'Reality Fragment', icon: '✨', type: 'loot', sellPrice: 3000, desc: 'A piece of the Veil itself, shimmering with infinite colors.' }
+      realityFragment: { id: 'realityFragment', name: 'Reality Fragment', icon: '✨', type: 'loot', sellPrice: 3000, desc: 'A piece of the Veil itself, shimmering with infinite colors.' },
+      
+      voidTome: { id: 'voidTome', name: 'Void Tome', icon: '📖', type: 'consumable', effect: 'grant_skill_points', points: 5, buyPrice: 5000, sellPrice: 2000, desc: 'An ancient book bound in void-silk. Grants +5 Skill Points when read.' }
     };
 
     const SHOP_ITEMS = ['healthPotion', 'manaPotion', 'elixir', 'holyRelic', 'bloodVial', 'veilblade', 'runesword', 'veilstaff', 'apprenticeorb', 'devourerorb', 'covenantmail', 'ashplate', 'veilrobe', 'shadowmantle'];
@@ -5581,6 +5592,11 @@
         id: 'abyssalheart', result: 'forge_abyssalheart', goldCost: 10000,
         ingredients: { abyssalEssence: 3, realityFragment: 1 },
         desc: 'The center of all void power. (Massive stats)'
+      },
+      voidtome: {
+        id: 'voidtome', result: 'voidTome', goldCost: 3000,
+        ingredients: { abyssalEssence: 5, voidCrystal: 3 },
+        desc: 'Extract forbidden knowledge from the Void. (+5 Skill Points)'
       }
     };
 
@@ -6273,6 +6289,10 @@
           p.crit = b.crit + (g.crit * lvBonus);
 
           Log.add(`🧪 Drank <strong>${item.name}</strong>. Your essence is renewed! You now have <strong>${p.statPoints}</strong> stat points to spend.`, 'gold');
+        }
+        if (item.effect === 'grant_skill_points') {
+          p.skillPoints = (p.skillPoints || 0) + (item.points || 5);
+          Log.add(`📖 Read <strong>${item.name}</strong>. You have gained <strong>${item.points || 5}</strong> skill points!`, 'violet');
         }
 
         this.removeFromInventory(id, 1, invEntry.level, invEntry.rarity || 'common');
