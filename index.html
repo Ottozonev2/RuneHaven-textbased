@@ -3546,10 +3546,14 @@
       masterRapier: { id: 'masterRapier', name: "Duelist's Rapier", icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 10, agiBonus: 22, buyPrice: 900, sellPrice: 400, desc: 'Perfect balance. +10 STR, +22 AGI.' },
 
       // --- Jewelry Expansion (Totaling ~20 Jewelry now) ---
-      sapphireRing: { id: 'sapphireRing', name: 'Sapphire Ring', icon: '💍', type: 'equipment', slot: 'ring', intBonus: 10, buyPrice: 500, sellPrice: 220, desc: 'Deep blue magic. +10 INT.' },
-      rubyNecklace: { id: 'rubyNecklace', name: 'Ruby Necklace', icon: '📿', type: 'equipment', slot: 'neck', strBonus: 12, buyPrice: 550, sellPrice: 240, desc: 'Fire in the stone. +12 STR.' },
-      onyxBand: { id: 'onyxBand', name: 'Onyx Band', icon: '💍', type: 'equipment', slot: 'ring', agiBonus: 15, buyPrice: 700, sellPrice: 310, desc: 'Shadow-bonded. +15 AGI.' },
-      emeraldSeal: { id: 'emeraldSeal', name: 'Emerald Earrings', icon: '👂', type: 'equipment', slot: 'earrings', vitBonus: 18, buyPrice: 850, sellPrice: 380, desc: 'Nature’s breath. +18 VIT.' }
+      emeraldSeal: { id: 'emeraldSeal', name: 'Emerald Earrings', icon: '👂', type: 'equipment', slot: 'earrings', vitBonus: 18, buyPrice: 850, sellPrice: 380, desc: 'Nature’s breath. +18 VIT.' },
+      voidbreaker: { id: 'voidbreaker', name: 'Void-Touched Blade', icon: '⚔️', type: 'equipment', slot: 'weapon', strBonus: 35, buyPrice: 2000, sellPrice: 900, desc: 'Pulsing with raw void energy. +35 STR.' },
+      primalshield: { id: 'primalshield', name: 'Primal Rift Shield', icon: '🛡️', type: 'equipment', slot: 'offhand', defBonus: 25, vitBonus: 10, buyPrice: 1800, sellPrice: 800, desc: 'A shield made from rift-glass. +25 DEF, +10 VIT.' },
+      abyssalscepter: { id: 'abyssalscepter', name: 'Abyssal Scepter', icon: '🔱', type: 'equipment', slot: 'weapon', intBonus: 45, wisBonus: 20, buyPrice: 3500, sellPrice: 1500, desc: 'The eye of the void. +45 INT, +20 WIS.' },
+      voidplate: { id: 'voidplate', name: 'Void-Hardened Plate', icon: '⛓️', type: 'equipment', slot: 'armor', defBonus: 40, vitBonus: 20, buyPrice: 4000, sellPrice: 1800, desc: 'Armor forged in the Abyssal Void. +40 DEF, +20 VIT.' },
+      chroniclebreaker: { id: 'chroniclebreaker', name: 'Chronicle Breaker', icon: '🗡️', type: 'equipment', slot: 'weapon', strBonus: 60, agiBonus: 30, buyPrice: 8000, sellPrice: 3500, desc: 'The blade that ends stories. +60 STR, +30 AGI.' },
+      eternalaegis: { id: 'eternalaegis', name: 'Eternal Aegis', icon: '✨', type: 'equipment', slot: 'armor', defBonus: 50, vitBonus: 30, buyPrice: 9000, sellPrice: 4000, desc: 'The ultimate protection from the Abyss. +50 DEF, +30 VIT.' },
+      infinityloop: { id: 'infinityloop', name: 'Infinity Loop', icon: '💍', type: 'equipment', slot: 'ring', intBonus: 40, wisBonus: 40, buyPrice: 10000, sellPrice: 4500, desc: 'A ring with no beginning or end. +40 INT, +40 WIS.' }
     };
 
     const SHOP_ITEMS = ['healthPotion', 'manaPotion', 'elixir', 'holyRelic', 'bloodVial', 'veilblade', 'runesword', 'veilstaff', 'apprenticeorb', 'devourerorb', 'covenantmail', 'ashplate', 'veilrobe', 'shadowmantle'];
@@ -3558,6 +3562,78 @@
        ENEMIES — All from Eryndor world lore
        ============================================================ */
     const ENEMIES = {
+      // High-Level Enemies (Lv 60-100)
+      voidSentinel: {
+        name: 'Void Sentinel', icon: '🛡️', level: 60, hp: 600, maxHp: 600, str: 55, def: 40, agi: 20, crit: 10, xp: 800, gold: [100, 250],
+        enemyType: 'void', loot: [{ item: 'voidbreaker', chance: 0.05 }], desc: 'An armored guardian of the peaks, infused with pure void.',
+        attacks: ['slams', 'void-lashes', 'stares into']
+      },
+      voidWyvern: {
+        name: 'Void Wyvern', icon: '🐉', level: 65, hp: 750, maxHp: 750, str: 65, def: 35, agi: 45, crit: 15, xp: 1200, gold: [150, 350],
+        enemyType: 'void', loot: [{ item: 'primalshield', chance: 0.04 }], desc: 'A draconic beast that breathes violet rift-fire.',
+        attacks: ['dives', 'breathes void', 'claws']
+      },
+      shadowCreeper: {
+        name: 'Shadow Creeper', icon: '👣', level: 72, hp: 550, maxHp: 550, str: 80, def: 25, agi: 65, crit: 25, xp: 1500, gold: [200, 450],
+        enemyType: 'void', loot: [{ item: 'onyxBand', chance: 0.1 }], desc: 'A silent hunter that blinks through the Veil.',
+        attacks: ['backstabs', 'bites', 'vanishes into']
+      },
+      voidStalker: {
+        name: 'Void Stalker', icon: '👻', level: 70, hp: 600, maxHp: 600, str: 75, def: 20, agi: 70, crit: 30, xp: 1300, gold: [180, 400],
+        enemyType: 'void', loot: [{ item: 'shadowmantle', chance: 0.05 }], desc: 'A predator that tracks souls through the rift.',
+        attacks: ['blinks', 'shadow-slices', 'stares into the soul']
+      },
+      riftCondor: {
+        name: 'Rift Condor', icon: '🦅', level: 68, hp: 450, maxHp: 450, str: 60, def: 20, agi: 55, crit: 20, xp: 1100, gold: [120, 300],
+        enemyType: 'beast', loot: [], desc: 'A scavenger with wings made of unstable energy.',
+        attacks: ['pecks', 'void-talon strikes', 'shrieks']
+      },
+      peaksWraith: {
+        name: 'Peaks Wraith', icon: '👻', level: 75, hp: 900, maxHp: 900, str: 85, def: 40, agi: 40, crit: 15, xp: 2000, gold: [250, 600],
+        enemyType: 'undead', loot: [{ item: 'voidbreaker', chance: 0.02 }], desc: 'An Outworlder who died in the high thin air, now a part of the peaks.',
+        attacks: ['freezes soul', 'chilling touch', 'howl of the heights']
+      },
+      voidReaper: {
+        name: 'Void Reaper', icon: '🎭', level: 80, hp: 3500, maxHp: 3500, str: 120, def: 60, agi: 60, crit: 20, xp: 5000, gold: [1000, 2500], isBoss: true,
+        enemyType: 'void', loot: [{ item: 'abyssalscepter', chance: 0.2 }], desc: 'The harvester of souls in the high peaks.',
+        attacks: ['reaps', 'soul-burns', 'tears the Veil']
+      },
+      abyssalFiend: {
+        name: 'Abyssal Fiend', icon: '😈', level: 88, hp: 1200, maxHp: 1200, str: 150, def: 50, agi: 45, crit: 15, xp: 2500, gold: [400, 800],
+        enemyType: 'abyssal', loot: [{ item: 'voidplate', chance: 0.08 }], desc: 'A twisted demon born from the deepest reaches of the void.',
+        attacks: ['claws', 'blood-spews', 'howls']
+      },
+      abyssalHorror: {
+        name: 'Abyssal Horror', icon: '👾', level: 90, hp: 2500, maxHp: 2500, str: 180, def: 70, agi: 30, crit: 20, xp: 4000, gold: [500, 1200],
+        enemyType: 'abyssal', loot: [{ item: 'voidplate', chance: 0.05 }], desc: 'An indescribable mass of eyes and teeth from the true Void.',
+        attacks: ['gazes into the abyss', 'unmakes', 'tentacle lash']
+      },
+      realityBreaker: {
+        name: 'Reality Breaker', icon: '⚡', level: 95, hp: 2000, maxHp: 2000, str: 220, def: 40, agi: 80, crit: 35, xp: 6000, gold: [800, 2000],
+        enemyType: 'void', loot: [{ item: 'chroniclebreaker', chance: 0.02 }], desc: 'A localized collapse of physics given form.',
+        attacks: ['distorts time', 'cracks space', 'unexists']
+      },
+      voidColossus: {
+        name: 'Void Colossus', icon: '🧌', level: 98, hp: 8000, maxHp: 8000, str: 250, def: 120, agi: 10, crit: 10, xp: 12000, gold: [1500, 4000],
+        enemyType: 'void', loot: [{ item: 'chroniclebreaker', chance: 0.1 }], desc: 'A mountain-sized entity that consumes entire ley line nodes.',
+        attacks: ['catastrophic slam', 'energy pulse', 'stomp']
+      },
+      starEater: {
+        name: 'Star Eater', icon: '✨', level: 105, hp: 12000, maxHp: 12000, str: 400, def: 180, agi: 60, crit: 25, xp: 25000, gold: [5000, 15000],
+        enemyType: 'void', loot: [{ item: 'infinityloop', chance: 0.3 }], desc: 'The herald of the end. It consumes all light.',
+        attacks: ['supernova burst', 'black hole pulse', 'cosmic strike']
+      },
+      voidTitan: {
+        name: 'Void Titan', icon: '🗿', level: 95, hp: 4500, maxHp: 4500, str: 180, def: 120, agi: 10, crit: 5, xp: 8000, gold: [2000, 5000],
+        enemyType: 'void', loot: [{ item: 'chroniclebreaker', chance: 0.05 }], desc: 'A living statue of void-stone. It moves with tectonic indifference.',
+        attacks: ['pulverizes', 'quakes', 'void-crushes']
+      },
+      abyssWatcher: {
+        name: 'Abyss Watcher', icon: '👁️', level: 110, hp: 25000, maxHp: 25000, str: 500, def: 250, agi: 120, crit: 35, xp: 100000, gold: [25000, 75000], isBoss: true,
+        enemyType: 'abyssal', loot: [{ item: 'eternalaegis', chance: 0.8 }, { item: 'infinityloop', chance: 0.8 }], desc: 'The silent sentinel of the end. It has watched the fall of a thousand worlds.',
+        attacks: ['stares into existence', 'obliterates', 'rewrites history']
+      },
+
       // Ashfall Coast (lv 1-2)
       veilWraith: {
         name: 'Veil Wraith', icon: '👻', level: 1, hp: 18, maxHp: 18, str: 3, def: 0, agi: 5, crit: 4, xp: 20, gold: [3, 12], isBoss: false,
@@ -3580,7 +3656,18 @@
         desc: 'An Outworlder who lost their mind to the Veil. They attack on instinct.',
         attacks: ['claws at', 'bites', 'slams into']
       },
-      // Frostvein Highlands (lv 3-4)
+      ashSwarmer: {
+        name: 'Ash Swarmer', icon: '🦟', level: 1, hp: 14, maxHp: 14, str: 2, def: 0, agi: 15, crit: 2, xp: 15, gold: [1, 5],
+        enemyType: 'insect', loot: [], desc: 'A cloud of soot-caked insects that bite with frantic hunger.',
+        attacks: ['swarms', 'bites', 'clutters around']
+      },
+      beachCrawler: {
+        name: 'Beach Crawler', icon: '🦀', level: 2, hp: 45, maxHp: 45, str: 5, def: 8, agi: 3, crit: 4, xp: 30, gold: [4, 10],
+        enemyType: 'beast', loot: [], desc: 'A heavily armored crustacean warped by the salty mist of the Veil.',
+        attacks: ['pinches', 'snaps at', 'slams with a claw']
+      },
+
+      // Frostvein Highlands (lv 3-4+)
       frostGiant: {
         name: 'Frost Giant', icon: '🧊', level: 3, hp: 80, maxHp: 80, str: 14, def: 8, agi: 4, crit: 6, xp: 60, gold: [10, 25], isBoss: false,
         enemyType: 'giant',
@@ -3595,7 +3682,18 @@
         desc: 'An undead spirit of the ancient giants, frozen in eternal hatred.',
         attacks: ['blasts frost at', 'chills the bones of', 'slams into']
       },
-      // Black Marsh (lv 4-5)
+      snowStalker: {
+        name: 'Snow Stalker', icon: '🐆', level: 3, hp: 55, maxHp: 55, str: 11, def: 4, agi: 12, crit: 15, xp: 45, gold: [5, 15],
+        enemyType: 'beast', loot: [], desc: 'A feline predator whose fur perfectly matches the Highland blizzards.',
+        attacks: ['pounces on', 'tears at', 'leaps through the fog at']
+      },
+      frostBat: {
+        name: 'Frost Bat', icon: '🦇', level: 4, hp: 40, maxHp: 40, str: 8, def: 2, agi: 18, crit: 20, xp: 40, gold: [2, 12],
+        enemyType: 'beast', loot: [{ item: 'manaPotion', chance: 0.1 }], desc: 'Frozen wings flap silently. Its bite numbs the blood.',
+        attacks: ['dives at', 'bites the neck of', 'shrieks at']
+      },
+
+      // Black Marsh (lv 4-5+)
       rottingKnight: {
         name: 'Rotting Knight', icon: '💀', level: 4, hp: 70, maxHp: 70, str: 11, def: 7, agi: 5, crit: 6, xp: 60, gold: [12, 28], isBoss: false,
         enemyType: 'undead',
@@ -3610,7 +3708,18 @@
         desc: 'A massive serpent skeleton driven by necromantic hunger.',
         attacks: ['bites venomously', 'coils around', 'strikes at']
       },
-      // Emberfall / Ruins (lv 5-6)
+      marshShambler: {
+        name: 'Marsh Shambler', icon: '🧟‍♂️', level: 4, hp: 90, maxHp: 90, str: 13, def: 6, agi: 4, crit: 3, xp: 65, gold: [8, 20],
+        enemyType: 'undead', loot: [{ item: 'bloodVial', chance: 0.1 }], desc: 'A pile of mud and corpses held together by dark magic.',
+        attacks: ['slams with a muddy limb', 'drags into the muck', 'chokes']
+      },
+      miasmaWorm: {
+        name: 'Miasma Worm', icon: '🐛', level: 5, hp: 60, maxHp: 60, str: 9, def: 3, agi: 8, crit: 18, xp: 70, gold: [10, 25],
+        enemyType: 'beast', loot: [], desc: 'A giant worm that exhales toxic fumes from the Marsh depths.',
+        attacks: ['spews acid at', 'burrows under', 'bites']
+      },
+
+      // Emberfall Wastes (lv 20-50)
       veilAberration: {
         name: 'Veil Aberration', icon: '🌀', level: 5, hp: 70, maxHp: 70, str: 9, def: 4, agi: 10, crit: 12, xp: 80, gold: [18, 40], isBoss: false,
         enemyType: 'corrupted',
@@ -3618,20 +3727,98 @@
         desc: 'Reality bends around this creature. It should not exist.',
         attacks: ['tears at reality near', 'blasts veil energy at', 'distorts space around']
       },
-      bloodCultist: {
-        name: 'Blood Cultist', icon: '🩸', level: 6, hp: 80, maxHp: 80, str: 13, def: 6, agi: 9, crit: 14, xp: 95, gold: [20, 50], isBoss: false,
-        enemyType: 'humanoid',
-        loot: [{ item: 'bloodVial', chance: .35 }, { item: 'shadowmantle', chance: .05 }],
-        desc: 'A devotee of the Ashen Dominion, drunk on blood magic.',
-        attacks: ['hexes', 'slashes at', 'hurls a blood curse at']
+      sandStinger: {
+        name: 'Sand Stinger', icon: '🦂', level: 20, hp: 120, maxHp: 120, str: 18, def: 15, agi: 25, crit: 15, xp: 180, gold: [30, 80],
+        enemyType: 'beast', loot: [{ item: 'bloodVial', chance: 0.1 }], desc: 'A desert scorpion the size of a wagon, glowing with heat.',
+        attacks: ['stings', 'pinches with hot claws', 'scuttles behind']
       },
-      // Hollow Wilds / Bloodspire (lv 6-7)
+      emberDrift: {
+        name: 'Ember Drift', icon: '🌫️', level: 25, hp: 100, maxHp: 100, str: 15, def: 5, agi: 35, crit: 25, xp: 220, gold: [40, 100],
+        enemyType: 'aberration', loot: [{ item: 'manaPotion', chance: 0.2 }], desc: 'A sentient cloud of ash and flame that burns the lungs.',
+        attacks: ['scorches', 'suffocates with ash', 'pulses heat at']
+      },
+      blightNomad: {
+        name: 'Blight Nomad', icon: '👤', level: 30, hp: 150, maxHp: 150, str: 24, def: 18, agi: 22, crit: 18, xp: 300, gold: [60, 150],
+        enemyType: 'humanoid', loot: [{ item: 'healthPotion', chance: 0.2 }], desc: 'An Outworlder who learned to survive the Wastes by eating Veil shards.',
+        attacks: ['strikes with a jagged flint', 'hurls a jar of fire at', 'slashes at']
+      },
+
+      // Hollow Wilds (lv 30-60)
       corruptTreant: {
         name: 'Corrupted Treant', icon: '🌳', level: 6, hp: 110, maxHp: 110, str: 16, def: 10, agi: 3, crit: 5, xp: 110, gold: [25, 55], isBoss: false,
         enemyType: 'corrupted',
         loot: [{ item: 'healthPotion', chance: .25 }],
         desc: 'An ancient tree-spirit consumed by Veil corruption. It roars in agony.',
         attacks: ['smashes with branches', 'entangles', 'slams the earth near']
+      },
+      wildWitch: {
+        name: 'Wild Witch', icon: '🧙‍♀️', level: 35, hp: 130, maxHp: 130, str: 12, def: 10, agi: 18, crit: 22, xp: 450, gold: [80, 200],
+        enemyType: 'humanoid', loot: [{ item: 'manaPotion', chance: 0.3 }], desc: 'A shaman of the forest who bartered her sight for dark power.',
+        attacks: ['curses', 'summons thorns beneath', 'blasts with green flame at']
+      },
+      thornBeast: {
+        name: 'Thorn Beast', icon: '🐗', level: 40, hp: 300, maxHp: 300, str: 35, def: 30, agi: 10, crit: 12, xp: 550, gold: [100, 250],
+        enemyType: 'beast', loot: [], desc: 'A massive boar whose hide has been replaced by iron-hard thorns.',
+        attacks: ['gores', 'tramples', 'shakes thorns at']
+      },
+
+      // Void Peaks (lv 60-80)
+      voidSentinel: {
+        name: 'Void Sentinel', icon: '🛡️', level: 60, hp: 400, maxHp: 400, str: 40, def: 25, agi: 20, crit: 15, xp: 800, gold: [200, 500], isBoss: false,
+        enemyType: 'aberration',
+        loot: [{ item: 'manaPotion', chance: .3 }],
+        desc: 'A construct of pure Veil energy, guarding the path to the depths.',
+        attacks: ['slams with an energy fist', 'beams void light at', 'pulses shadow at']
+      },
+      voidStalker: {
+        name: 'Void Stalker', icon: '🐺', level: 70, hp: 500, maxHp: 500, str: 55, def: 30, agi: 45, crit: 20, xp: 1000, gold: [300, 700], isBoss: false,
+        enemyType: 'aberration',
+        loot: [{ item: 'manaPotion', chance: .25 }],
+        desc: 'A shadow-borne predator that hunts those who wander too close to the rift.',
+        attacks: ['lunges from the shadows at', 'slashes with void-claws', 'bites with ethereal teeth']
+      },
+      riftCondor: {
+        name: 'Rift Condor', icon: '🦅', level: 65, hp: 350, maxHp: 350, str: 45, def: 15, agi: 60, crit: 30, xp: 900, gold: [150, 400],
+        enemyType: 'beast', loot: [], desc: 'A giant bird whose feathers shimmer with violet static.',
+        attacks: ['swoops on', 'tears at the eyes of', 'buffets with energy-wind']
+      },
+      peaksWraith: {
+        name: 'Peaks Wraith', icon: '👻', level: 72, hp: 480, maxHp: 480, str: 50, def: 20, agi: 30, crit: 25, xp: 1200, gold: [300, 600],
+        enemyType: 'undead', loot: [{ item: 'manaPotion', chance: 0.3 }], desc: 'The remains of climbers who died in the violet snow.',
+        attacks: ['freezes the heart of', 'wails through', 'reaches for']
+      },
+
+      // Abyssal Void (lv 85-100)
+      abyssalHorror: {
+        name: 'Abyssal Horror', icon: '🌀', level: 85, hp: 600, maxHp: 600, str: 65, def: 45, agi: 35, crit: 25, xp: 1500, gold: [500, 1200], isBoss: false,
+        enemyType: 'corrupted',
+        loot: [{ item: 'bloodVial', chance: .4 }],
+        desc: 'A creature formed from the deepest rot of the Veil. Reality shudders in its presence.',
+        attacks: ['tears at the soul of', 'unleashes a void scream at', 'transmutes the air into lead around']
+      },
+      realityBreaker: {
+        name: 'Reality Breaker', icon: '💥', level: 90, hp: 800, maxHp: 800, str: 110, def: 60, agi: 50, crit: 30, xp: 2000, gold: [1000, 3000],
+        enemyType: 'aberration', loot: [{ item: 'manaPotion', chance: 0.5 }], desc: 'A floating fracture in space that lashes out at the living.',
+        attacks: ['collapses space around', 'fires a beam of absolute gravity at', 'fractures the mind of']
+      },
+      voidColossus: {
+        name: 'Void Colossus', icon: '🗿', level: 95, hp: 2000, maxHp: 2000, str: 180, def: 120, agi: 10, crit: 15, xp: 4500, gold: [2000, 5000],
+        enemyType: 'aberration', loot: [], desc: 'A towering mountain of shadow and stone, moving with sluggish intent.',
+        attacks: ['pulverizes', 'steps on', 'unleashes a roar of silence on']
+      },
+      starEater: {
+        name: 'Star Eater', icon: '☄️', level: 98, hp: 1500, maxHp: 1500, str: 150, def: 80, agi: 80, crit: 45, xp: 6000, gold: [5000, 10000],
+        enemyType: 'aberration', loot: [{ item: 'bloodVial', chance: 0.6 }], desc: 'A serpent of pure void that consumes the light of distant worlds.',
+        attacks: ['bites with the cold of space', 'wraps around the soul of', 'constricts reality near']
+      },
+
+      // Bloodspire Fortress (Unique)
+      bloodCultist: {
+        name: 'Blood Cultist', icon: '🩸', level: 6, hp: 80, maxHp: 80, str: 13, def: 6, agi: 9, crit: 14, xp: 95, gold: [20, 50], isBoss: false,
+        enemyType: 'humanoid',
+        loot: [{ item: 'bloodVial', chance: .35 }, { item: 'shadowmantle', chance: .05 }],
+        desc: 'A devotee of the Ashen Dominion, drunk on blood magic.',
+        attacks: ['hexes', 'slashes at', 'hurls a blood curse at']
       },
       darkMage: {
         name: 'Veil-Touched Mage', icon: '🧙', level: 7, hp: 85, maxHp: 85, str: 8, def: 5, agi: 8, crit: 12, xp: 120, gold: [25, 60], isBoss: false,
@@ -3646,6 +3833,20 @@
         loot: [{ item: 'healthPotion', chance: .2 }, { item: 'covenantmail', chance: .06 }],
         desc: 'A Saint who abandoned the Covenant — now hunted by both factions.',
         attacks: ['slashes at', 'charges', 'hurls a light lance at']
+      },
+      voidReaper: {
+        name: 'The Void Reaper', icon: '💀', level: 75, hp: 1500, maxHp: 1500, str: 80, def: 50, agi: 40, crit: 15, xp: 5000, gold: [2000, 4000], isBoss: true,
+        enemyType: 'undead',
+        loot: [{ item: 'shadowmantle', chance: .4 }, { item: 'veilstaff', chance: .4 }],
+        desc: 'A master of the rift, carrying a scythe that severs the soul from the body.',
+        attacks: ['swings a soul-reaping scythe at', 'unleashes a wave of death at', 'reaps the essence of']
+      },
+      abyssWatcher: {
+        name: 'The Abyss Watcher', icon: '👁️', level: 100, hp: 12000, maxHp: 12000, str: 350, def: 200, agi: 100, crit: 30, xp: 50000, gold: [20000, 50000], isBoss: true,
+        enemyType: 'aberration',
+        loot: [{ item: 'legendary_relic', chance: 0.1 }],
+        desc: 'The eternal guardian of the absolute void. It sees all possible deaths.',
+        attacks: ['gazes into the future of', 'shatters the reality around', 'erases the existence of']
       },
       // World Bosses
       frostKing: {
@@ -3792,7 +3993,7 @@
         name: 'Ashfall Coast', icon: '🌋', isTown: false,
         minLevel: 1, maxLevel: 10,
         desc: 'Where Outworlders first fell from the shattered Veil. Craters scar the ash-covered shore.',
-        enemies: ['veilWraith', 'corruptWolf', 'lostOutworlder'], encounterChance: .60,
+        enemies: ['veilWraith', 'corruptWolf', 'lostOutworlder', 'ashSwarmer', 'beachCrawler'], encounterChance: .60,
         events: ['A crater still glows violet from a recent soul-fall.',
           'Twisted creatures circle in the distance — watching.',
           'You find scorched earth where a battle recently took place.',
@@ -3802,7 +4003,7 @@
         name: 'Frostvein Highlands', icon: '🏔️', isTown: false,
         minLevel: 5, maxLevel: 25,
         desc: 'Ancient giant kingdom, abandoned and frozen. Something woke beneath the royal chambers.',
-        enemies: ['frostGiant', 'iceRevenant', 'corruptWolf'], encounterChance: .65,
+        enemies: ['frostGiant', 'iceRevenant', 'snowStalker', 'frostBat'], encounterChance: .65,
         events: ['Massive stone ruins loom through the blizzard.',
           'Giant footprints — fresh — lead into the fog.',
           'An ancient sentinel stands motionless. Then turns its head.',
@@ -3812,7 +4013,7 @@
         name: 'The Black Marsh', icon: '🌿', isTown: false,
         minLevel: 10, maxLevel: 35,
         desc: 'A cursed swamp fully consumed by necromantic magic. The dead rise endlessly from the mud.',
-        enemies: ['rottingKnight', 'boneSerpent', 'lostOutworlder'], encounterChance: .70,
+        enemies: ['rottingKnight', 'boneSerpent', 'marshShambler', 'miasmaWorm'], encounterChance: .70,
         events: ['A skeletal hand breaks through the marsh mud near your boot.',
           'Necromantic runes glow on sunken stones.',
           'The smell of rot hangs so thick it has weight.',
@@ -3822,7 +4023,7 @@
         name: 'Emberfall Wastes', icon: '🏜️', isTown: false,
         minLevel: 20, maxLevel: 50,
         desc: 'A desert born when the sky burned during the Shattered Summoning. Veil fragments float in the air.',
-        enemies: ['veilAberration', 'corruptWolf', 'darkMage'], encounterChance: .70,
+        enemies: ['veilAberration', 'sandStinger', 'emberDrift', 'blightNomad'], encounterChance: .70,
         events: ['Floating shards of the Veil hang suspended in the dry air.',
           'Reality ripples at the edge of your vision.',
           'A mutated creature drags itself across the burning sand.',
@@ -3832,11 +4033,31 @@
         name: 'The Hollow Wilds', icon: '🌲', isTown: false,
         minLevel: 30, maxLevel: 60,
         desc: 'A vast corrupted forest. The trees whisper. Travellers vanish. Something sleeps beneath the roots.',
-        enemies: ['corruptTreant', 'darkMage', 'bloodCultist'], encounterChance: .72,
+        enemies: ['corruptTreant', 'wildWitch', 'thornBeast'], encounterChance: .72,
         events: ['The trees lean toward you as you pass.',
           'You hear a name whispered — your name.',
           'A path that was not there appears, then disappears.',
           'Ancient roots pulse with dark light beneath the soil.']
+      },
+      voidPeaks: {
+        name: 'Void-Touched Peaks', icon: '🏔️', isTown: false,
+        minLevel: 60, maxLevel: 80,
+        desc: 'High mountain passes where the Veil is thin. Violet snow falls upward.',
+        enemies: ['voidSentinel', 'voidStalker', 'riftCondor', 'peaksWraith'], encounterChance: .75,
+        events: ['Violet snow falls upward from the ground toward the sky.',
+          'The wind sounds like a chorus of whispering voices.',
+          'You see a reflection of another world in a frozen lake.',
+          'A massive shadow passes over the peaks — but there is nothing in the sky.']
+      },
+      abyssalVoid: {
+        name: 'The Abyssal Void', icon: '🌀', isTown: false,
+        minLevel: 85, maxLevel: 100,
+        desc: 'The edge of existence. Reality is a suggestion here. The Devouring King\'s influence is absolute.',
+        enemies: ['abyssalHorror', 'realityBreaker', 'voidColossus', 'starEater'], encounterChance: .80,
+        events: ['The ground beneath your feet feels like liquid shadow.',
+          'You hear the heartbeat of the world, slowing down.',
+          'Stars blink out one by one in the sky above.',
+          'A voice from the deep calls to your soul.']
       },
       bloodspire: {
         name: 'Bloodspire Fortress', icon: '🏰', minLevel: 7, maxLevel: 8, enemies: ['bloodCultist', 'darkMage', 'heretic'],
@@ -3878,6 +4099,22 @@
           'The Emperor awaits at the end of the long hall.',
           'This is where it all ends.']
       },
+      primalrift: {
+        name: 'Primal Rift Pass', icon: '🌌', minLevel: 70, maxLevel: 80, enemies: ['voidStalker', 'voidSentinel', 'voidReaper'],
+        desc: 'High-Level Dungeon (Lv 70-80). A jagged scar in the mountains bleeding void energy.',
+        isDungeon: true, boss: 'voidReaper',
+        flavor: ['The air crackles with unstable power.',
+          'Shards of reality float in the freezing wind.',
+          'The Reaper’s call echoes from the darkness.']
+      },
+      abyssagate: {
+        name: 'The Abyssal Gate', icon: '👁️', minLevel: 95, maxLevel: 100, enemies: ['abyssalHorror', 'voidSentinel', 'abyssWatcher'],
+        desc: 'Absolute End-game Dungeon (Lv 95-100). The final barrier before the true Void.',
+        isDungeon: true, boss: 'abyssWatcher',
+        flavor: ['Time and space have no meaning here.',
+          'The Watcher is always seeing you.',
+          'Only those who have transcended their mortality can survive.']
+      },
       velkaris: {
         name: 'Ruins of Velkaris', icon: '🏚️', isTown: true,
         minLevel: 70, maxLevel: 100,
@@ -3885,15 +4122,14 @@
         enemies: ['veilAberration', 'darkMage', 'bloodCultist', 'frostKing', 'plagueMother', 'devouringKing'], encounterChance: .80,
         events: ['You see a version of yourself walking the opposite direction.',
           'A clock tower counts backwards. Then stops.',
-          'Arcane phantoms replay the moment the Veil broke on loop.',
-          'The ground whispers the names of gods long forgotten.']
+          'Arcane phantoms replay the moment the Veil broke on loop.']
       }
     };
 
     /* ============================================================
        GAME STATE
        ============================================================ */
-    const MAX_LEVEL = 100;
+    const MAX_LEVEL = 110;
 
     let G = {
       player: null, location: 'solmara',
@@ -6010,13 +6246,13 @@
         const loc = LOCATIONS[G.location] || { minLevel: 1, maxLevel: 100 };
         const baseLevel = base.level || 1;
         // Target level: bias ABOVE player so fights are a real challenge
-        const targetLevel = Math.min(60, Math.max(loc.minLevel,
+        const targetLevel = Math.min(110, Math.max(loc.minLevel,
           Math.floor(pLevel * 1.0 + Math.random() * pLevel * 0.5 + 1)));
         const clampedTarget = Math.max(baseLevel, Math.min(loc.maxLevel, targetLevel));
         const ratio = clampedTarget / Math.max(1, baseLevel);
         const scaled = Object.assign({}, base);
         scaled.level = clampedTarget;
-        scaled.hp = Math.floor((base.hp || 10) * ratio * 7.5 + (clampedTarget * 50));  // Even larger HP buff to match high damage
+        scaled.hp = Math.floor((base.hp || 10) * ratio * 8.5 + (clampedTarget * 60));  // Even larger HP buff to match high damage
         scaled.maxHp = scaled.hp;
         scaled.str = Math.floor((base.str || 5) * ratio * 2.0);  // +100% more damage
         scaled.def = Math.floor((base.def || 1) * ratio * 1.5);  // +50% more defense
@@ -6267,7 +6503,7 @@
 
       levelUp() {
         const p = G.player;
-        if (p.level >= MAX_LEVEL) { Log.add('You have reached the maximum level of 100!', 'levelup'); return; }
+        if (p.level >= MAX_LEVEL) { Log.add(`You have reached the maximum level of ${MAX_LEVEL}!`, 'levelup'); return; }
         const cls = CLASSES[p.classKey], g = cls.growth;
         p.level++; p.maxHp += g.hp; p.maxMp += g.mp; p.hp = effectiveMaxHp(); p.mp = effectiveMaxMp();
         p.str += g.str; p.int += g.int; p.wis += g.wis; p.agi += g.agi; p.vit += g.vit; p.def += g.def; p.crit += g.crit;
@@ -8211,7 +8447,9 @@
           this._content('<div style="color:var(--text-dim);padding:16px;text-align:center;">Guild system not configured.<br>Create a JSONBin with <code>{"guilds":[]}</code> and add its ID as <strong>guildId</strong> in WORLD_CONFIG.</div>');
           return;
         }
+        // Force re-sync of my guild membership in case data drifted
         await this.refresh();
+        this._syncMyGuild(); 
         this.showTab(this._mine ? 'mine' : 'browse');
       },
 
@@ -8243,11 +8481,11 @@
           }
 
           this._syncMyGuild();
-          if (document.getElementById('modal-guild')?.classList.contains('active')) {
+          if (document.getElementById('modal-guild')?.classList.contains('open')) {
             this.showTab(this._tab);
           }
           // Refresh admin manager if open
-          if (document.getElementById('modal-admin')?.classList.contains('active')) {
+          if (document.getElementById('modal-admin')?.classList.contains('open')) {
             AdminSystem.refreshGuildList();
           }
         });
@@ -8304,6 +8542,11 @@
         p.guildName = this._mine?.name || '';
         G.guildName = p.guildName;
         this._status(this._mine ? `Guild: ${this._mine.name} · ${this._myMem?.role || 'Member'}` : 'Not in a guild.');
+
+        // Extra check: If we have a guild but modal is open and showing "Not in a guild", force refresh
+        if (this._mine && document.getElementById('guild-content')?.textContent?.includes('not in a guild')) {
+          this.showTab(this._tab);
+        }
       },
 
       showTab(tab) {
