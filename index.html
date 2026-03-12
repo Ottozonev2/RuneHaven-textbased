@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Rune Haven">
-  <meta name="theme-color" content="#08060f">
+  <meta name="theme-color" content="#000000">
   <meta name="description" content="Rune Haven — A dark RPG set in the dying world of Eryndor.">
   <link rel="manifest" href="manifest.json">
   <link
@@ -24,41 +24,49 @@
 
   <style>
     /* ============================================================
-   DESIGN TOKENS — Eryndor dark/violet palette
+   DESIGN TOKENS — Rune Haven Aesthetic
    ============================================================ */
     :root {
-      --bg: #08060f;
-      --bg-panel: #110d1a;
-      --bg-mid: #1a1526;
-      --bg-raised: #241d32;
-      --border: #3a2d52;
-      --border-lt: #5a4880;
+      /* Rune Haven Palette */
+      --rh-bg: #000000;
+      --rh-panel: #3e3529;
+      --rh-panel-lt: #4e4435;
+      --rh-border: #5d4a37;
+      --rh-border-lt: #7a6a58;
+      --rh-text: #ff9800;
+      --rh-text-lt: #ffcc00;
+      --rh-text-dim: #998877;
+      --rh-gold: #c9a84c;
+      
+      --bg: var(--rh-bg);
+      --bg-panel: var(--rh-panel);
+      --bg-mid: #2b231a;
+      --bg-raised: #4e4435;
+      --border: var(--rh-border);
+      --border-lt: var(--rh-border-lt);
 
-      /* Violet / arcane gold palette fitting the Veil theme */
-      --gold: #c9a84c;
-      --gold-lt: #e8c96a;
-      --gold-dk: #7a6230;
-      --violet: #9060d8;
-      --violet-lt: #b890ff;
-      --violet-dk: #4a2880;
+      /* Theme Mapping */
+      --gold: #ff9800;
+      --gold-lt: #ffcc00;
+      --gold-dk: #5d4a37;
       --red: #c94050;
       --red-dk: #8a2030;
       --green: #4a9c6e;
       --green-dk: #2a6040;
-      --blue: #4a70cf;
-      --blue-dk: #2a3a8a;
-      --teal: #40b0a0;
-      --teal-dk: #206858;
-
-      --text: #d4c4e0;
-      --text-dim: #7a6890;
-      --text-lt: #f0e8ff;
+      --blue: #3264ff;
+      --blue-dk: #1a3a8a;
+      
+      --text: #ffffff;
+      --text-dim: #aaaaaa;
+      --text-lt: #ffffff;
 
       --tap-min: 48px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-right: env(safe-area-inset-right, 0px);
+      
+      --panel-bg-img: url('hud_bg.png');
     }
 
     /* ============================================================
@@ -96,7 +104,7 @@
       user-select: text;
     }
 
-    /* Veil crack — subtle animated violet glow at top of screen */
+    /* Glow — subtle animated gold glow at top of screen */
     body::after {
       content: '';
       position: fixed;
@@ -104,14 +112,14 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, transparent 0%, var(--violet) 30%, var(--violet-lt) 50%, var(--violet) 70%, transparent 100%);
+      background: linear-gradient(90deg, transparent 0%, var(--rh-gold) 30%, var(--gold-lt) 50%, var(--rh-gold) 70%, transparent 100%);
       opacity: 0.6;
-      animation: veilCrack 4s ease-in-out infinite;
+      animation: amberPulse 4s ease-in-out infinite;
       z-index: 9999;
       pointer-events: none;
     }
 
-    @keyframes veilCrack {
+    @keyframes amberPulse {
 
       0%,
       100% {
@@ -197,17 +205,17 @@
     #screen-maintenance img {
       max-width: 80%;
       max-height: 50vh;
-      border: 2px solid var(--violet-dk);
+      border: 2px solid var(--gold-dk);
       border-radius: 8px;
       margin-bottom: 30px;
-      box-shadow: 0 0 30px rgba(184, 144, 255, 0.2);
+      box-shadow: 0 0 30px rgba(201, 168, 76, 0.2);
     }
 
     .maintenance-title {
       font-family: 'Cinzel', serif;
       font-size: 32px;
-      color: var(--violet-lt);
-      text-shadow: 0 0 15px var(--violet);
+      color: var(--gold-lt);
+      text-shadow: 0 0 15px var(--gold);
       margin-bottom: 20px;
     }
 
@@ -246,14 +254,14 @@
     .title-emblem {
       width: 110px;
       height: 110px;
-      border: 2px solid var(--violet);
+      border: 2px solid var(--gold);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 52px;
       margin: 0 auto 20px;
-      box-shadow: 0 0 40px rgba(144, 96, 216, .5), inset 0 0 20px rgba(0, 0, 0, .6);
+      box-shadow: 0 0 40px rgba(201, 168, 76, .5), inset 0 0 20px rgba(0, 0, 0, .6);
       animation: emblemPulse 3s ease-in-out infinite;
       flex-shrink: 0;
       position: relative;
@@ -263,11 +271,11 @@
 
       0%,
       100% {
-        box-shadow: 0 0 30px rgba(144, 96, 216, .4), inset 0 0 20px rgba(0, 0, 0, .6);
+        box-shadow: 0 0 30px rgba(201, 168, 76, .4), inset 0 0 20px rgba(0, 0, 0, .6);
       }
 
       50% {
-        box-shadow: 0 0 70px rgba(184, 144, 255, .7), inset 0 0 20px rgba(0, 0, 0, .6);
+        box-shadow: 0 0 70px rgba(255, 204, 0, .7), inset 0 0 20px rgba(0, 0, 0, .6);
       }
     }
 
@@ -275,8 +283,8 @@
       font-family: 'Cinzel', serif;
       font-size: clamp(26px, 6vw, 56px);
       font-weight: 700;
-      color: var(--violet-lt);
-      text-shadow: 0 0 30px rgba(184, 144, 255, .6), 2px 2px 0 #000;
+      color: var(--gold-lt);
+      text-shadow: 0 0 30px rgba(201, 168, 76, .6), 2px 2px 0 #000;
       letter-spacing: 4px;
       margin-bottom: 4px;
       flex-shrink: 0;
@@ -367,7 +375,7 @@
     .create-title {
       font-family: 'Cinzel', serif;
       font-size: clamp(18px, 4vw, 30px);
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       text-align: center;
       margin-bottom: 4px;
       letter-spacing: 2px;
@@ -438,7 +446,7 @@
     }
 
     .name-row label {
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-family: 'Cinzel', serif;
       font-size: 12px;
       letter-spacing: 1px;
@@ -461,7 +469,7 @@
     }
 
     .name-row input:focus {
-      border-color: var(--violet);
+      border-color: var(--gold);
     }
 
     .class-grid {
@@ -493,7 +501,7 @@
     }
 
     .class-card.selected {
-      border-color: var(--violet);
+      border-color: var(--gold);
       background: var(--bg-raised);
     }
 
@@ -502,7 +510,7 @@
       position: absolute;
       top: 8px;
       right: 10px;
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-size: 16px;
     }
 
@@ -594,10 +602,6 @@
       background: linear-gradient(90deg, #7a6230, #c9a84c);
     }
 
-    .bar-violet {
-      background: linear-gradient(90deg, #4a2880, #9060d8);
-    }
-
     .bar-green {
       background: linear-gradient(90deg, #2a6040, #4a9c6e);
     }
@@ -637,7 +641,7 @@
 
     .topbar-title {
       font-family: 'Cinzel', serif;
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-size: 14px;
       letter-spacing: 2px;
     }
@@ -701,13 +705,15 @@
 
     /* Fixed-height dashboard at the bottom */
     #dashboard {
-      background: var(--bg-panel);
-      border-top: 2px solid var(--border);
+      background-image: var(--panel-bg-img);
+      background-size: 100% 100%;
+      border-top: 4px solid #3d3427;
       display: grid;
       grid-template-columns: 240px 1fr 1fr 1fr;
       /* 4 Columns */
       min-height: 340px;
       z-index: 100;
+      box-shadow: inset 2px 2px 15px rgba(0,0,0,0.9), 0 -4px 20px rgba(0,0,0,0.6);
     }
 
     #world-viewport {
@@ -872,7 +878,7 @@
         left: 0;
         right: 0;
         height: 2px;
-        background: linear-gradient(90deg, transparent, var(--violet-dk), var(--violet), var(--violet-lt), var(--violet), var(--violet-dk), transparent);
+        background: linear-gradient(90deg, transparent, var(--gold-dk), var(--gold), var(--gold-lt), var(--gold), var(--gold-dk), transparent);
         opacity: 0.5;
       }
 
@@ -914,13 +920,13 @@
       }
 
       .mob-nav-btn.active {
-        color: var(--violet-lt);
-        border-top-color: var(--violet);
-        background: rgba(144, 96, 216, 0.06);
+        color: var(--gold-lt);
+        border-top-color: var(--gold);
+        background: rgba(201, 168, 76, 0.06);
       }
 
       .mob-nav-btn.active .nav-icon {
-        filter: drop-shadow(0 0 6px var(--violet));
+        filter: drop-shadow(0 0 6px var(--gold));
       }
 
       .mobile-drawer {
@@ -964,7 +970,7 @@
 
       .drawer-header-title {
         font-family: 'Cinzel', serif;
-        color: var(--violet-lt);
+        color: var(--gold-lt);
         font-size: 14px;
         letter-spacing: 1px;
       }
@@ -995,15 +1001,17 @@
 
     /* Panel internals */
     .panel-header {
-      background: rgba(26, 21, 38, 0.5);
-      border-bottom: 1px solid var(--border);
-      padding: 7px 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 2px solid var(--rh-border);
+      padding: 8px 12px;
       font-family: 'Cinzel', serif;
-      font-size: 10px;
+      font-size: 11px;
       letter-spacing: 2px;
-      color: var(--violet-dk);
+      color: var(--rh-text);
       text-transform: uppercase;
       flex-shrink: 0;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px #000;
     }
 
     .stat-section {
@@ -1024,7 +1032,7 @@
 
     .char-name-dsp {
       font-family: 'Cinzel', serif;
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-size: 11px;
       font-weight: 600;
     }
@@ -1076,15 +1084,18 @@
     }
 
     .hp-fill {
-      background: linear-gradient(90deg, #8a2030, #e05060);
+      background: linear-gradient(180deg, #e05060, #8a2030);
+      border-bottom: 1px solid rgba(0,0,0,0.5);
     }
 
     .mp-fill {
-      background: linear-gradient(90deg, #4a2880, #9060d8);
+      background: linear-gradient(180deg, #5080e0, #1a3a8a);
+      border-bottom: 1px solid rgba(0,0,0,0.5);
     }
 
     .xp-fill {
-      background: linear-gradient(90deg, #7a6230, #e0b050);
+      background: linear-gradient(180deg, #e0b050, #7a6230);
+      border-bottom: 1px solid rgba(0,0,0,0.5);
     }
 
     .stat-grid {
@@ -1189,7 +1200,7 @@
     }
 
     .log-entry.levelup {
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-weight: bold;
       font-family: 'Cinzel', serif;
     }
@@ -1212,8 +1223,8 @@
       color: #90d070;
     }
 
-    .log-entry.veil {
-      color: var(--violet-lt);
+    .log-entry.rh {
+      color: var(--gold-lt);
       font-style: italic;
     }
 
@@ -1235,7 +1246,7 @@
 
     .legal-container h2 {
       font-family: 'Cinzel', serif;
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-size: 16px;
       margin-top: 24px;
       margin-bottom: 12px;
@@ -1288,7 +1299,7 @@
     }
 
     .legal-tab.active {
-      background: var(--violet);
+      background: var(--gold);
       color: white;
     }
 
@@ -1303,7 +1314,7 @@
     }
 
     .location-bar span {
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-family: 'Cinzel', serif;
     }
 
@@ -1361,27 +1372,30 @@
 
     .tab-btn {
       flex: 1;
-      padding: 8px 4px;
-      background: none;
-      border: none;
-      color: var(--text-dim);
+      padding: 10px 4px;
+      background: #3e3529;
+      border: 1px solid #5d4a37;
+      color: #ff9800;
       cursor: pointer;
       font-family: 'Cinzel', serif;
-      font-size: 10px;
+      font-size: 11px;
       letter-spacing: .5px;
       transition: all .2s;
-      border-bottom: 2px solid transparent;
       min-height: var(--tap-min);
       touch-action: manipulation;
+      font-weight: bold;
     }
 
     .tab-btn:hover {
-      color: var(--text);
+      background: #5d4a37;
+      color: #fff;
     }
 
     .tab-btn.active {
-      color: var(--violet-lt);
-      border-bottom-color: var(--violet);
+      background: #ff9800;
+      color: #000;
+      box-shadow: inset 0 0 5px #000;
+      border-color: #ffcc00;
     }
 
     .tab-content {
@@ -1500,7 +1514,7 @@
       color: var(--text-lt);
       padding: 8px 12px;
       border-radius: 6px;
-      border: 1px solid var(--violet);
+      border: 1px solid var(--rh-gold);
       font-size: 11px;
       font-family: 'IM Fell English', serif;
       width: clamp(140px, 40vw, 220px);
@@ -1526,7 +1540,7 @@
       left: 50%;
       transform: translateX(-50%);
       border: 6px solid transparent;
-      border-top-color: var(--violet);
+      border-top-color: var(--rh-gold);
       opacity: 0;
       pointer-events: none;
       transition: all 0.2s ease-out;
@@ -1615,14 +1629,14 @@
       color: var(--gold-lt);
     }
 
-    .btn-violet {
-      border-color: var(--violet-dk);
-      color: var(--violet-lt);
+    .btn-rh {
+      border-color: var(--gold-dk);
+      color: var(--gold-lt);
     }
 
-    .btn-violet:hover {
-      background: rgba(144, 96, 216, .14);
-      border-color: var(--violet);
+    .btn-rh:hover {
+      background: rgba(201, 168, 76, .14);
+      border-color: var(--rh-gold);
     }
 
     .btn-red {
@@ -1690,7 +1704,7 @@
       margin-bottom: 8px;
       padding: 8px 12px;
       background: var(--bg-panel);
-      border: 1px solid var(--violet);
+      border: 1px solid var(--gold);
       border-radius: 6px;
       color: var(--text-lt);
       font-size: 11px;
@@ -1712,7 +1726,7 @@
       transform: translateX(-50%);
       margin-bottom: 2px;
       border: 6px solid transparent;
-      border-top-color: var(--violet);
+      border-top-color: var(--gold);
       z-index: 1001;
       pointer-events: none;
     }
@@ -1790,7 +1804,7 @@
 
     .modal-title {
       font-family: 'Cinzel', serif;
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-size: 17px;
       margin-bottom: 14px;
       border-bottom: 1px solid var(--border);
@@ -1831,15 +1845,15 @@
       top: 70px;
       left: 50%;
       transform: translateX(-50%);
-      background: linear-gradient(135deg, #1a0a30, #2a1060);
-      border: 2px solid var(--violet);
-      color: var(--violet-lt);
+      background: linear-gradient(135deg, #1a1510, #3d3427);
+      border: 2px solid var(--rh-gold);
+      color: var(--gold-lt);
       font-family: 'Cinzel', serif;
       font-size: clamp(13px, 4vw, 17px);
       padding: 12px 24px;
       border-radius: 4px;
       z-index: 5000;
-      box-shadow: 0 0 30px rgba(144, 96, 216, .6);
+      box-shadow: 0 0 30px rgba(201, 168, 76, .6);
       animation: bannerAnim 2.5s ease forwards;
       pointer-events: none;
       white-space: nowrap;
@@ -1855,16 +1869,16 @@
       transform: translateX(-50%);
       width: 90%;
       max-width: 700px;
-      background: rgba(10, 5, 20, 0.95);
-      border: 2px solid var(--violet);
+      background: rgba(10, 8, 5, 0.95);
+      border: 2px solid var(--rh-gold);
       border-radius: 8px;
       padding: 24px;
       z-index: 500;
       text-align: center;
-      box-shadow: 0 0 50px rgba(138, 43, 226, 0.6), inset 0 0 20px rgba(138, 43, 226, 0.2);
+      box-shadow: 0 0 50px rgba(201, 168, 76, 0.4), inset 0 0 20px rgba(201, 168, 76, 0.1);
       animation: serverBannerIn 0.8s cubic-bezier(0.19, 1, 0.22, 1);
       backdrop-filter: blur(8px);
-      border-top: 4px solid var(--violet);
+      border-top: 4px solid var(--rh-gold);
     }
 
     @keyframes serverBannerIn {
@@ -1902,17 +1916,17 @@
       }
     }
 
-    /* Veil flash on big hits */
-    .veil-flash {
+    /* Flash on big hits */
+    .rh-flash {
       position: fixed;
       inset: 0;
-      background: rgba(144, 96, 216, .15);
+      background: rgba(201, 168, 76, .15);
       pointer-events: none;
       z-index: 4000;
-      animation: veilFlash .4s ease forwards;
+      animation: rhFlash .4s ease forwards;
     }
 
-    @keyframes veilFlash {
+    @keyframes rhFlash {
       0% {
         opacity: 1;
       }
@@ -2070,7 +2084,7 @@
 
     #world-player .entity-avatar {
       font-size: 28px;
-      text-shadow: 0 0 15px var(--violet-lt), 0 0 30px var(--violet);
+      text-shadow: 0 0 15px var(--gold-lt), 0 0 30px var(--gold);
       animation: playerHover 2s infinite ease-in-out;
     }
 
@@ -2079,7 +2093,7 @@
       0%,
       100% {
         transform: translateY(0) scale(1);
-        filter: brightness(1) drop-shadow(0 0 5px rgba(184, 144, 255, 0.4));
+        filter: brightness(1) drop-shadow(0 0 5px rgba(201, 168, 76, 0.4));
       }
 
       50% {
@@ -2145,7 +2159,7 @@
 
     .party-member-card {
       background: rgba(0, 0, 0, 0.7);
-      border: 1px solid var(--violet-dk);
+      border: 1px solid var(--gold-dk);
       border-radius: 4px;
       padding: 6px 10px;
       min-width: 140px;
@@ -2168,7 +2182,7 @@
     }
 
     .party-member-level {
-      color: var(--violet-lt);
+      color: var(--gold-lt);
       font-size: 9px;
     }
 
@@ -2198,7 +2212,7 @@
     }
 
     .party-xp-fill {
-      background: #b890ff;
+      background: #e0b050;
     }
   </style>
 </head>
@@ -2230,7 +2244,7 @@
       style="position:absolute; top:12px; right:12px; z-index:100; display:flex; align-items:center; gap:10px;">
       <div id="user-info"
         style="color:var(--text-dim); font-size:11px; font-family:'Cinzel',serif; text-align:right; display:none;">
-        <div style="color:var(--violet-lt); font-weight:bold;" id="user-email"></div>
+        <div style="color:var(--gold-lt); font-weight:bold;" id="user-email"></div>
         <div style="font-size:9px;">Eryndor Identity Bound</div>
       </div>
       <div id="user-button-container"></div>
@@ -2240,7 +2254,7 @@
     <div id="screen-login" class="screen full-screen active"
       style="background:var(--bg); align-items:center; justify-content:center; z-index:9000; position:fixed; top:0; left:0; width:100%; height:100%;">
       <div
-        style="font-family:'Cinzel',serif; font-size:42px; color:var(--violet-lt); text-shadow:0 0 15px var(--violet); margin-bottom:10px;">
+        style="font-family:'Cinzel',serif; font-size:42px; color:var(--gold-lt); text-shadow:0 0 15px var(--gold); margin-bottom:10px;">
         RUNE HAVEN</div>
       <div
         style="font-size:13px; color:var(--text-dim); margin-bottom:30px; letter-spacing:3px; text-transform:uppercase;">
@@ -2267,7 +2281,7 @@
             style="width:100%; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); outline:none; font-family:'Courier Prime',monospace;">
         </div>
 
-        <button id="auth-btn-primary" class="btn btn-violet" style="width:100%; margin-bottom:12px;"
+        <button id="auth-btn-primary" class="btn btn-rh" style="width:100%; margin-bottom:12px;"
           onclick="AuthSystem.primaryAction()">Authenticate</button>
         <div id="auth-toggle" style="text-align:center; font-size:12px; color:var(--text-dim); cursor:pointer;"
           onclick="AuthSystem.toggleMode()">New Outworlder? <span style="color:var(--gold);">Register here</span></div>
@@ -2279,7 +2293,7 @@
     </div>
     <div class="title-world" style="margin-top: min(45vh, 400px); text-shadow: 0 0 10px #000;">World of Eryndor</div>
     <div class="title-story">
-      The Veil between worlds is broken. Violet lightning tears the sky.
+      The Veil between worlds is broken. Amber lightning tears the sky.
       The dead walk freely and entire kingdoms have warped into unnatural waste-lands.
       You are an <em>Outworlder</em> — a soul dragged through the Veil during the
       failed Shattered Summoning — cast into the dying world of <strong>Eryndor</strong>
@@ -2296,7 +2310,7 @@
       <span class="faction-pill faction-demons">💀 The Ashen Dominion</span>
     </div>
     <div class="title-btns">
-      <button class="btn btn-violet btn-lg" onclick="CharSelect.show()">&#127760; Enter Eryndor</button>
+      <button class="btn btn-rh btn-lg" onclick="CharSelect.show()">&#127760; Enter Eryndor</button>
     </div>
     <div style="margin-top:12px;">
       <button class="btn btn-sm btn-gold" onclick="UI.openModal('modal-updates')">📜 Latest Updates</button>
@@ -2317,7 +2331,7 @@
   <div id="screen-charselect" class="screen">
     <div
       style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--bg-panel);">
-      <div style="font-family:'Cinzel',serif;color:var(--violet-lt);font-size:16px;letter-spacing:2px;">🌀 Chronicles of
+      <div style="font-family:'Cinzel',serif;color:var(--gold-lt);font-size:16px;letter-spacing:2px;">🌀 Chronicles of
         Eryndor</div>
       <button class="btn btn-sm" onclick="Game.showTitle()">&#8592; Back</button>
     </div>
@@ -2380,7 +2394,7 @@
     </div>
 
     <div class="create-btns">
-      <button class="btn btn-violet btn-lg" onclick="Game.startGame()">Enter Eryndor →</button>
+      <button class="btn btn-rh btn-lg" onclick="Game.startGame()">Enter Eryndor →</button>
       <button class="btn btn-lg" onclick="Game.showTitle()">← Back</button>
     </div>
   </div>
@@ -2503,12 +2517,12 @@
             </div>
             <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
               <div>World Chat</div>
-              <button class="btn btn-sm btn-violet" style="min-height:20px; padding:2px 6px; font-size:9px;"
+              <button class="btn btn-sm btn-rh" style="min-height:20px; padding:2px 6px; font-size:9px;"
                 onclick="GlobalChat.openPartyMenu()">Manage Party</button>
             </div>
             <div id="chat-tabs" style="display:flex; flex-shrink:0; border-bottom:1px solid var(--border);">
               <button id="cht-g" onclick="GlobalChat.setChannel('global')"
-                style="flex:1; padding:6px; font-size:10px; background:var(--bg-mid); border:none; color:var(--violet-lt); font-family:'Cinzel',serif;">Global</button>
+                style="flex:1; padding:6px; font-size:10px; background:var(--bg-mid); border:none; color:var(--gold-lt); font-family:'Cinzel',serif;">Global</button>
               <button id="cht-gu" onclick="GlobalChat.setChannel('guild')"
                 style="flex:1; padding:6px; font-size:10px; background:var(--bg); border:none; color:var(--text-dim); font-family:'Cinzel',serif;">Guild</button>
               <button id="cht-p" onclick="GlobalChat.setChannel('party')"
@@ -2521,7 +2535,7 @@
               <input id="chat-input" type="text" placeholder="Speak..."
                 style="flex:1; background:var(--bg-mid); border:1px solid var(--border); color:var(--text-lt); padding:6px; font-size:11px; border-radius:4px; outline:none;"
                 onkeydown="if(event.key==='Enter')GlobalChat.send()">
-              <button class="btn btn-violet btn-sm" onclick="GlobalChat.send()"
+              <button class="btn btn-rh btn-sm" onclick="GlobalChat.send()"
                 style="min-width:40px; min-height:30px; height:30px;">➤</button>
             </div>
           </div>
@@ -2741,7 +2755,7 @@
           Master Volume <span id="volume-readout">100%</span>
         </label>
         <input type="range" id="volume-slider" min="0" max="100" value="100"
-          style="width:100%; accent-color:var(--violet);" oninput="AudioSystem.setVolume(this.value)">
+          style="width:100%; accent-color:var(--gold);" oninput="AudioSystem.setVolume(this.value)">
       </div>
       <div style="display:flex; justify-content:flex-end;">
         <button class="btn btn-sm" onclick="UI.closeModal('modal-settings')">Close</button>
@@ -2754,9 +2768,9 @@
     <div class="modal"
       style="max-width:500px; max-height:85vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
       <div style="padding:16px; background:var(--bg-mid); border-bottom:1px solid var(--border); flex-shrink:0;">
-        <div class="modal-title">👑 ARCANE DOMINION</div>
+        <div class="modal-title">👑 HAVEN OVERSEER</div>
         <div
-          style="color:var(--violet-lt); font-size:10px; font-family:'Cinzel',serif; letter-spacing:1px; margin-top:4px;">
+          style="color:var(--gold-lt); font-size:10px; font-family:'Cinzel',serif; letter-spacing:1px; margin-top:4px;">
           DEVELOPER CONSOLE</div>
       </div>
 
@@ -2774,8 +2788,8 @@
         <!-- Self Tab -->
         <div class="tab-content active" id="atc-admin-self">
           <div style="display:flex; flex-direction:column; gap:12px;">
-            <button class="btn btn-violet" onclick="AdminSystem.grantGold(10000)">Give 10,000 Gold</button>
-            <button class="btn btn-violet" onclick="AdminSystem.grantLevel(5)">Give 5 Levels</button>
+            <button class="btn btn-rh" onclick="AdminSystem.grantGold(10000)">Give 10,000 Gold</button>
+            <button class="btn btn-rh" onclick="AdminSystem.grantLevel(5)">Give 5 Levels</button>
             <div style="display:flex; gap:8px;">
               <input id="admin-item-input" type="text" placeholder="Item ID..."
                 style="flex:1; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); font-family:monospace;">
@@ -3205,7 +3219,7 @@
       <div id="lb-list" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;"></div>
       <div id="lb-status" style="color:var(--text-dim);font-size:11px;text-align:center;margin-top:8px;"></div>
       <div style="display:flex;gap:8px;margin-top:14px;">
-        <button class="btn btn-violet" style="flex:1;" onclick="WorldServer.refresh()">&#8635; Refresh</button>
+        <button class="btn btn-rh" style="flex:1;" onclick="WorldServer.refresh()">&#8635; Refresh</button>
         <button class="btn" style="flex:1;" onclick="UI.closeModal('modal-leaderboard')">Close</button>
       </div>
     </div>
@@ -3218,7 +3232,7 @@
       <div id="zonenotes-list"
         style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
       <div
-        style="font-family:'Cinzel',serif;font-size:11px;color:var(--violet-lt);margin-bottom:6px;letter-spacing:1px;">
+        style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold-lt);margin-bottom:6px;letter-spacing:1px;">
         LEAVE A NOTE</div>
       <textarea id="zonenotes-input" maxlength="120" placeholder="Leave a message for other Outworlders... (120 chars)"
         style="width:100%;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:10px;font-family:'IM Fell English',serif;font-size:13px;border-radius:4px;resize:none;height:60px;outline:none;"></textarea>
@@ -3235,12 +3249,12 @@
       <div
         style="padding:12px 14px;background:var(--bg-mid);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;">
         <span style="font-size:20px;">&#127968;</span>
-        <div style="font-family:'Cinzel',serif;color:var(--violet-lt);font-size:15px;flex:1;">Guild Hall</div>
+        <div style="font-family:'Cinzel',serif;color:var(--gold-lt);font-size:15px;flex:1;">Guild Hall</div>
         <button class="btn btn-sm" onclick="UI.closeModal('modal-guild')">&#x2715;</button>
       </div>
       <div style="display:flex;flex-shrink:0;border-bottom:1px solid var(--border);">
         <button id="gtab-mine" onclick="GuildSystem.showTab('mine')"
-          style="flex:1;padding:8px 4px;background:var(--bg-mid);border:none;border-right:1px solid var(--border);color:var(--violet-lt);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;">&#127984;
+          style="flex:1;padding:8px 4px;background:var(--bg-mid);border:none;border-right:1px solid var(--border);color:var(--gold-lt);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;">&#127984;
           My Guild</button>
         <button id="gtab-browse" onclick="GuildSystem.showTab('browse')"
           style="flex:1;padding:8px 4px;background:var(--bg);border:none;border-right:1px solid var(--border);color:var(--text-dim);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;">&#128269;
@@ -3263,7 +3277,7 @@
       <div
         style="padding:12px 16px;background:var(--bg-mid);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;">
         <span style="font-size:20px;">&#128506;</span>
-        <div style="font-family:'Cinzel',serif;color:var(--violet-lt);font-size:15px;flex:1;">World Map &#8212; Eryndor
+        <div style="font-family:'Cinzel',serif;color:var(--gold-lt);font-size:15px;flex:1;">World Map &#8212; Eryndor
         </div>
         <button class="btn btn-sm" onclick="UI.closeModal('modal-map')">&#x2715;</button>
       </div>
@@ -4999,9 +5013,9 @@
         setTimeout(() => el.remove(), 2600);
       },
 
-      veilFlash() {
+      rhFlash() {
         const el = document.createElement('div');
-        el.className = 'veil-flash';
+        el.className = 'rh-flash';
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 450);
       },
@@ -5130,12 +5144,12 @@
           { label: '🏪 Market', fn: "Explore.openShop()", cls: 'btn-gold' },
           { label: '🏦 Stash', fn: "Explore.openStash()", cls: 'btn-gold' },
           { label: '📜 Quests', fn: "QuestSystem.open()", cls: 'btn-gold' },
-          { label: '🔥 Forge', fn: "ForgeSystem.open()", cls: 'btn-violet' },
-          { label: '🏋️ Trainer', fn: "Explore.openTrainer()", cls: 'btn-violet' },
+          { label: '🔥 Forge', fn: "ForgeSystem.open()", cls: 'btn-rh' },
+          { label: '🏋️ Trainer', fn: "Explore.openTrainer()", cls: 'btn-rh' },
           { label: '📊 Stats', fn: "Explore.openStats()", cls: 'btn-blue' },
           { label: compLabel, fn: "Explore.openTavern()", cls: 'btn-green' },
-          { label: gLabel, fn: "GuildSystem.open()", cls: 'btn-violet btn-sm' },
-          { label: '🏆 World', fn: "WorldServer.openLeaderboard()", cls: 'btn-violet btn-sm' },
+          { label: gLabel, fn: "GuildSystem.open()", cls: 'btn-rh btn-sm' },
+          { label: '🏆 World', fn: "WorldServer.openLeaderboard()", cls: 'btn-rh btn-sm' },
           { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' },
           { label: '💾 Save', fn: "Game.saveGame()", cls: 'btn-sm' }
         ]);
@@ -5525,7 +5539,7 @@
         const container = document.getElementById('trainer-skills-list');
         const trainerSp = document.getElementById('trainer-gold-display');
         if (trainerSp) {
-          trainerSp.innerHTML = `<span style="color:var(--violet-lt);">${p.skillPoints} Skill Points available</span>`;
+          trainerSp.innerHTML = `<span style="color:var(--gold-lt);">${p.skillPoints} Skill Points available</span>`;
         }
         document.getElementById('trainer-class-display').textContent = CLASSES[p.classKey].name;
 
@@ -6277,7 +6291,7 @@
         Log.divider();
         if (G.enemies[0].isBoss) {
           Log.add(`⚠️ <strong>WORLD BOSS!</strong> ${G.enemies[0].icon} <strong>${G.enemies[0].name}</strong> (Lv.${G.enemies[0].level}) emerges!`, 'death');
-          UI.veilFlash();
+          UI.rhFlash();
         } else {
           const names = G.enemies.map(e => `<strong>${e.name}</strong>`).join(', ');
           Log.add(`⚔️ A group of ${G.enemies.length} enemies (${names}) bars your path!`, 'combat');
@@ -6313,7 +6327,7 @@
           const isTurn = G.partyState && (G.partyState.currentTurn === name);
 
           return `
-            <div class="party-member-card" style="${isYou ? 'border-color:var(--gold);' : ''} ${isTurn ? 'box-shadow: 0 0 10px var(--violet-lt); border-color:var(--violet-lt);' : ''}">
+            <div class="party-member-card" style="${isYou ? 'border-color:var(--gold);' : ''} ${isTurn ? 'box-shadow: 0 0 10px var(--gold-lt); border-color:var(--gold-lt);' : ''}">
               <div class="party-member-header">
                 <span class="party-member-name">${m.icon || '👤'} ${name} ${isYou ? '<span style="color:var(--gold); font-size:8px;">[YOU]</span>' : ''} ${isTurn ? '⚡' : ''}</span>
                 <span class="party-member-level">Lv.${m.level || '?'}</span>
@@ -6400,7 +6414,7 @@
             const isOnCd = G.cooldowns && G.cooldowns[sk] > 0;
             if (isOnCd) tooltip += ` | Cooldown: ${G.cooldowns[sk]}T`;
 
-            const itColor = hasMp ? 'btn-violet' : '';
+            const itColor = hasMp ? 'btn-rh' : '';
             const rarColor = s.color || '#fff';
 
             return {
@@ -6521,7 +6535,7 @@
             GlobalChat._broadcastPartyCmd(`/party_dmg ${G.targetIndex} ${dmg}`);
             if (G.isPartyLeader) GlobalChat._broadcastEnemyHealth();
           }
-          if (enemy.isBoss) UI.veilFlash();
+          if (enemy.isBoss) UI.rhFlash();
         } else if (skill.type === 'drain') {
           let dmg = Math.max(1, Math.floor(effectiveStat('int') * (skill.mult || 0) * lvMult * typeMult) - Math.floor(enemy.def / 2));
           const heal = Math.floor(dmg * 0.5);
@@ -6763,7 +6777,7 @@
                 if (crit) dmg = Math.floor(dmg * 2.0);
                 target.ref.hp -= dmg;
                 if (target.ref.hp <= 0 && target.type === 'player' && G.combatBuffs.immortal) { target.ref.hp = 1; Log.add(`👼 <strong>Guardian Angel!</strong> You were saved from death!`, 'success'); }
-                if (enemy.isBoss) UI.veilFlash();
+                if (enemy.isBoss) UI.rhFlash();
                 const targetTitle = target.type === 'player' ? 'you' : `<strong>${target.icon} ${target.name}</strong>`;
                 Log.add(`The ${enemy.icon} ${enemy.name} ${atk} ${targetTitle} for <strong>${dmg}</strong>${crit ? ' 💥 (CRITICAL!)' : ''}!`, 'combat');
                 if (G.partyCode && G.isPartyLeader) GlobalChat._broadcastPartyCmd(`/party_enemy_atk ${target.type} ${target.name} ${dmg} ${crit} ${G.enemies.indexOf(enemy)} ${atk}`);
@@ -6853,7 +6867,7 @@
         buttons.push({
           label: `You (${p.hp}/${effectiveMaxHp()} HP)`,
           fn: `Combat.executeHeal('${skillKey}', '${p.name}')`,
-          cls: 'btn-violet'
+          cls: 'btn-rh'
         });
 
         // Add party members
@@ -7318,7 +7332,7 @@
         if (!this.canEnter(locKey)) return;
         G.dungeonState = { inProgress: true, wave: 1, maxWaves: 5, locKey: locKey };
         Log.divider();
-        Log.add(`🏰 <strong>Entering Dungeon:</strong> ${LOCATIONS[locKey].name}`, 'veil');
+        Log.add(`🏰 <strong>Entering Dungeon:</strong> ${LOCATIONS[locKey].name}`, 'rh');
         this.nextWave();
       },
 
@@ -7404,7 +7418,7 @@
           <div class="stat-bar-row">
             <div class="stat-bar-label">${stat.toUpperCase()}</div>
             <div class="stat-bar-track">
-              <div class="stat-bar-fill ${stat === 'hp' ? 'bar-red' : stat === 'mp' ? 'bar-violet' : ['str'].includes(stat) ? 'bar-gold' : ['int'].includes(stat) ? 'bar-violet' : stat === 'def' ? 'bar-green' : 'bar-green'}"
+              <div class="stat-bar-fill ${stat === 'hp' ? 'bar-red' : stat === 'mp' ? 'bar-blue' : ['str'].includes(stat) ? 'bar-gold' : ['int'].includes(stat) ? 'bar-blue' : stat === 'def' ? 'bar-green' : 'bar-green'}"
                    style="width:${cls.bars[stat]}%"></div>
             </div>
           </div>`).join('')}
@@ -7438,15 +7452,15 @@
         Log.clear();
         const faction = G.player.faction;
         Log.add('════════════════════════════════════', 'divider');
-        Log.add(`<strong>${name}</strong> — you fall through the Veil and crash into Eryndor.`, 'veil');
-        Log.add(`The sky above cracks with violet lightning. You are an <em>Outworlder</em>.`, 'story');
+        Log.add(`<strong>${name}</strong> — you fall through the Veil and crash into Eryndor.`, 'system');
+        Log.add(`The sky above cracks with gold lightning. You are an <em>Outworlder</em>.`, 'story');
         Log.add(`You have pledged to the <strong>${factionLabel(faction)}</strong>.`, (faction === 'saints' ? 'saints' : 'demons'));
         if (isHardcore) {
           Log.add(`⚠ <strong style="color:#e08088;">PERMADEATH ENABLED.</strong> If you fall, your chronicle is gone forever.`, 'death');
         }
         Log.add(`The dying world of Eryndor stretches before you.`, 'story');
         Log.add(`The Shattered Summoning broke the Veil. Two factions war for what remains.`, 'story');
-        Log.add(`And something far worse than either of them stirs in the depths.`, 'veil');
+        Log.add(`And something far worse than either of them stirs in the depths.`, 'system');
         Log.add('════════════════════════════════════', 'divider');
         Log.add(`You stand at <strong>Solmara Outpost</strong>. Rest, trade, then explore Eryndor.`, 'system');
         Log.add(`Use the buttons below to act. On mobile, use the bottom nav.`, 'system');
@@ -7621,7 +7635,7 @@
                     </div>
                   </div>
                   <div style="display:flex;gap:8px;">
-                    <button class="btn btn-violet" style="flex:1;" onclick="CharSelect.load(${i})">&#128220; Continue</button>
+                    <button class="btn btn-rh" style="flex:1;" onclick="CharSelect.load(${i})">&#128220; Continue</button>
                     <button class="btn btn-red btn-sm" onclick="CharSelect.confirmDelete(${i})" title="Delete">&#128465;</button>
                   </div>
                 </div>`;
@@ -7639,7 +7653,7 @@
               <div style="font-family:'Cinzel',serif;color:var(--text-dim);font-size:13px;">Chronicle ${i + 1} &mdash; Empty</div>
               <div style="color:var(--text-dim);font-size:11px;font-style:italic;">No Outworlder bound to this slot.</div>
             </div>
-            <button class="btn btn-violet btn-sm" onclick="CharSelect.newGame(${i})">+ New</button>
+            <button class="btn btn-rh btn-sm" onclick="CharSelect.newGame(${i})">+ New</button>
           </div>`;
       },
 
@@ -7750,6 +7764,7 @@
       },
 
       logout() {
+        if (typeof GlobalChat !== 'undefined') GlobalChat.stop();
         firebase.auth().signOut();
         location.reload();
       }
@@ -8035,7 +8050,7 @@
         banner.style.top = '60px'; // Positioned slightly below the maintenance countdown
         banner.style.left = '50%';
         banner.style.transform = 'translateX(-50%)';
-        banner.style.background = 'var(--violet)';
+        banner.style.background = 'var(--gold)';
         banner.style.color = 'white';
         banner.style.padding = '8px 24px';
         banner.style.borderRadius = '20px';
@@ -8044,8 +8059,8 @@
         banner.style.fontSize = '12px';
         banner.style.letterSpacing = '1px';
         banner.style.zIndex = '9998';
-        banner.style.boxShadow = '0 0 15px rgba(138, 43, 226, 0.5)';
-        banner.style.border = '1px solid var(--violet-lt)';
+        banner.style.boxShadow = '0 0 15px rgba(201, 168, 76, 0.5)';
+        banner.style.border = '1px solid var(--gold-lt)';
         banner.style.animation = 'pulse 1.5s infinite';
         banner.style.textAlign = 'center';
         banner.innerHTML = `📣 <strong>DIVINE DECREE:</strong> ${this._e(text)}`;
@@ -8383,7 +8398,7 @@
               const fi = n.faction === 'saints' ? '☀️' : '💀';
               return `<div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:8px;">
                 <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">
-                  <span style="color:var(--violet-lt);">${n.author}</span>
+                  <span style="color:var(--gold-lt);">${n.author}</span>
                   <span style="color:${fc};margin-left:6px;">${fi}</span>
                   <span style="float:right;">${new Date(n.ts).toLocaleDateString()}</span>
                 </div>
@@ -8420,7 +8435,7 @@
     const GlobalChat = {
       _cache: [],
       _channel: 'global',
-      _sessionStart: Date.now(),
+      _sessionStart: 0,
       _initialized: false,
       _unread: { global: 0, guild: 0, party: 0 },
       _lastTs: { global: 0, guild: 0, party: 0 },
@@ -8457,8 +8472,20 @@
           WorldServer.submitScore();
         }, 10000);
 
+        this._sessionStart = Date.now();
         this._initialized = true;
         this._setDot('green');
+      },
+
+      stop() {
+        if (!this._initialized) return;
+        if (WorldServer._db) {
+          WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/messages').off();
+        }
+        this._cleanupPartyListener();
+        this._initialized = false;
+        this.clear();
+        this._setDot('red');
       },
 
       clear() {
@@ -8839,7 +8866,7 @@
         }
 
         const msgs = this._cache.filter(m => {
-          if (m.ts < this._sessionStart) return false;
+          if (this._sessionStart && m.ts < this._sessionStart) return false;
           if (!m.text || m.text.startsWith('/')) return false;
           const mch = m.ch || 'global';
           if (mch !== this._channel) return false;
@@ -9176,7 +9203,7 @@
           const btn = document.getElementById('gtab-' + t);
           if (!btn) return;
           btn.style.background = t === tab ? 'var(--bg-mid)' : 'var(--bg)';
-          btn.style.color = t === tab ? 'var(--violet-lt)' : 'var(--text-dim)';
+          btn.style.color = t === tab ? 'var(--gold-lt)' : 'var(--text-dim)';
         });
         switch (tab) {
           case 'mine': this._renderMine(); break;
@@ -9194,7 +9221,7 @@
           <div style="font-family:'Cinzel',serif;font-size:14px;margin-bottom:8px;">You are not in a guild.</div>
           <div style="font-size:12px;font-style:italic;">Browse guilds or create your own.</div>
           <div style="display:flex;gap:8px;margin-top:16px;justify-content:center;">
-            <button class="btn btn-violet btn-sm" onclick="GuildSystem.showTab('browse')">Browse Guilds</button>
+            <button class="btn btn-rh btn-sm" onclick="GuildSystem.showTab('browse')">Browse Guilds</button>
             <button class="btn btn-sm" onclick="GuildSystem.showTab('create')">Create Guild</button>
           </div>
         </div>`);
@@ -9206,12 +9233,12 @@
         const fColor = g.faction === 'saints' ? 'var(--gold)' : '#e08088';
         const fIcon = g.faction === 'saints' ? '☀' : '💀';
         const focuses = (g.focus || []).map(f => { const fd = GUILD_FOCUSES.find(x => x.id === f); return fd ? `<span style="background:var(--bg-mid);border:1px solid var(--border);border-radius:12px;padding:2px 8px;font-size:11px;">${fd.icon} ${fd.label}</span>` : ''; }).join(' ');
-        const roleColor = { leader: 'var(--gold)', officer: 'var(--violet-lt)', member: 'var(--text-dim)' };
+        const roleColor = { leader: 'var(--gold)', officer: 'var(--gold-lt)', member: 'var(--text-dim)' };
 
         let memberRows = g.members.map(m => {
           const rc = roleColor[m.role] || 'var(--text-dim)';
           const isMe = m.name === G.player.name;
-          const inviteBtn = isMe ? '' : `<button onclick="GlobalChat.inviteToParty('${m.name}')" style="background:var(--violet);border:none;color:#fff;font-size:10px;padding:2px 6px;border-radius:3px;cursor:pointer;margin-right:4px;">Invite</button>`;
+          const inviteBtn = isMe ? '' : `<button onclick="GlobalChat.inviteToParty('${m.name}')" style="background:var(--gold);border:none;color:#fff;font-size:10px;padding:2px 6px;border-radius:3px;cursor:pointer;margin-right:4px;">Invite</button>`;
 
           const actions = (isLeader && !isMe) ? `
             ${inviteBtn}
@@ -9255,7 +9282,7 @@
 
 
         let inviteSection = isOfficer ? `
-      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--violet-lt);margin:14px 0 6px;letter-spacing:1px;">INVITE PLAYER</div>
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold-lt);margin:14px 0 6px;letter-spacing:1px;">INVITE PLAYER</div>
       <div style="display:flex;gap:6px;">
         <input id="guild-invite-input" type="text" maxlength="30" placeholder="Enter player name..."
           style="flex:1;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:7px 10px;font-size:12px;border-radius:4px;outline:none;">
@@ -9263,13 +9290,13 @@
       </div>` : '';
 
         let leaderSection = isLeader ? `
-      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--violet-lt);margin:14px 0 6px;letter-spacing:1px;">EDIT GUILD INFO</div>
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold-lt);margin:14px 0 6px;letter-spacing:1px;">EDIT GUILD INFO</div>
       <input id="guild-edit-desc" type="text" maxlength="120" value="${this._e(g.description || '')}" placeholder="Guild description..."
         style="width:100%;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:7px 10px;font-size:12px;border-radius:4px;outline:none;margin-bottom:6px;">
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-        ${GUILD_FOCUSES.map(fd => `<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;"><input type="checkbox" id="gedit-${fd.id}" ${(g.focus || []).includes(fd.id) ? 'checked' : ''} style="accent-color:var(--violet);"> ${fd.icon} ${fd.label}</label>`).join('')}
+        ${GUILD_FOCUSES.map(fd => `<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;"><input type="checkbox" id="gedit-${fd.id}" ${(g.focus || []).includes(fd.id) ? 'checked' : ''} style="accent-color:var(--gold);"> ${fd.icon} ${fd.label}</label>`).join('')}
       </div>
-      <button class="btn btn-violet btn-sm" style="width:100%;margin-bottom:6px;" onclick="GuildSystem.saveGuildInfo('${g.id}')">Save Changes</button>
+      <button class="btn btn-rh btn-sm" style="width:100%;margin-bottom:6px;" onclick="GuildSystem.saveGuildInfo('${g.id}')">Save Changes</button>
       <button class="btn btn-sm" style="width:100%;color:#e08088;" onclick="GuildSystem.disband('${g.id}')">&#128465; Disband Guild</button>
     ` : `<button class="btn btn-sm" style="width:100%;margin-top:14px;color:#e08088;" onclick="GuildSystem.leave('${g.id}')">Leave Guild</button>`;
 
@@ -9280,7 +9307,7 @@
         <div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:8px;">${this._e(g.description || 'No description set.')}</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px;">${focuses}</div>
       </div>
-      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--violet-lt);margin-bottom:6px;letter-spacing:1px;">MEMBERS (${g.members.length})</div>
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold-lt);margin-bottom:6px;letter-spacing:1px;">MEMBERS (${g.members.length})</div>
       ${memberRows}
       ${pendingSection}
       ${inviteSection}
@@ -9326,7 +9353,7 @@
             ? `<span style="color:#4ade80;font-size:11px;">✓ Member</span>`
             : hasReq
               ? `<span style="color:var(--text-dim);font-size:11px;">Request Pending</span>`
-              : `<button onclick="GuildSystem.requestJoin('${g.id}')" style="background:var(--violet);border:none;color:#fff;font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;">Request to Join</button>`;
+              : `<button onclick="GuildSystem.requestJoin('${g.id}')" style="background:var(--gold);border:none;color:#fff;font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;">Request to Join</button>`;
           return `
         <div style="background:var(--bg-mid);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px;">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
@@ -9354,12 +9381,12 @@
         const hasGold = p && p.gold >= 500;
         const focusInputs = GUILD_FOCUSES.map(fd =>
           `<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;background:var(--bg-mid);border:1px solid var(--border);border-radius:6px;padding:6px 10px;">
-        <input type="checkbox" id="gfoc-${fd.id}" style="accent-color:var(--violet);"> ${fd.icon} <span>${fd.label}</span>
+        <input type="checkbox" id="gfoc-${fd.id}" style="accent-color:var(--gold);"> ${fd.icon} <span>${fd.label}</span>
        </label>`
         ).join('');
 
         this._content(`
-      <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--violet-lt);margin-bottom:12px;letter-spacing:1px;">FOUND A NEW GUILD</div>
+      <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold-lt);margin-bottom:12px;letter-spacing:1px;">FOUND A NEW GUILD</div>
       <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">Cost: <strong style="color:var(--gold);">500 Gold</strong> (you have ${p?.gold || 0}g). You become the Guild Leader.</div>
 
       <div style="margin-bottom:8px;">
