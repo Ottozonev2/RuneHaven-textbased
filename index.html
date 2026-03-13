@@ -2862,13 +2862,21 @@
              </div>
              
              <!-- Item Granting -->
-             <div style="display:grid; grid-template-columns:2fr 1fr; gap:6px; margin-bottom:10px;">
-                <input id="admin-manage-item-id" type="text" placeholder="Item ID" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; font-family:monospace;">
-                <input id="admin-manage-item-level" type="number" placeholder="Lv" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px;">
-                <button class="btn btn-sm btn-gold" style="grid-column: span 2;" onclick="AdminSystem.doAction('ITEM')">Grant Item</button>
-             </div>
+              <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:6px; margin-bottom:10px;">
+                 <input id="admin-manage-item-id" type="text" placeholder="Item ID" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px; font-family:monospace;">
+                 <input id="admin-manage-item-level" type="number" placeholder="Lv" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px;">
+                 <select id="admin-manage-item-rarity" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px;">
+                    <option value="white">Common</option>
+                    <option value="green">Uncommon</option>
+                    <option value="blue">Rare</option>
+                    <option value="violet">Epic</option>
+                    <option value="gold">Legendary</option>
+                    <option value="crimson">Mythic</option>
+                 </select>
+                 <button class="btn btn-sm btn-gold" style="grid-column: span 3;" onclick="AdminSystem.doAction('ITEM')">Grant Item</button>
+              </div>
 
-             <!-- Moderation Section -->
+              <!-- Moderation Section -->
               <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
                  <input id="admin-manage-reason" type="text" placeholder="Reason for action..." style="width:100%; background:#000; border:1px solid var(--red); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px; margin-bottom:8px;">
                  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
@@ -8182,16 +8190,18 @@
         }
       },
 
-      grantItem(itemId, targetUid = null, qty = 1, level = 1) {
+      grantItem(itemId, targetUid = null, qty = 1, level = 1, rarity = 'white') {
         if (targetUid) {
-          this.sendRemoteCommand(targetUid, { type: 'ITEM', itemId: itemId, qty: qty, level: level });
+          this.sendRemoteCommand(targetUid, { type: 'ITEM', itemId: itemId, qty: qty, level: level, rarity: rarity });
         } else {
-          Combat.addToInventory(itemId, qty, level);
-          Notify.success(`Admin granted you ${qty}x item: ${itemId} (Lv.${level})`);
+          Combat.addToInventory(itemId, qty, level, rarity);
+          Notify.success(`Admin granted you ${qty}x item: ${itemId} (Lv.${level}, ${rarity})`);
           // Clear self inputs if they exist
-          if (document.getElementById('admin-item-input')) document.getElementById('admin-item-input').value = '';
-          if (document.getElementById('admin-item-qty')) document.getElementById('admin-item-qty').value = '';
-          if (document.getElementById('admin-item-level')) document.getElementById('admin-item-level').value = '';
+          const inputs = ['admin-item-input', 'admin-item-qty', 'admin-item-level'];
+          inputs.forEach(id => {
+             const el = document.getElementById(id);
+             if (el) el.value = '';
+          });
           UI.refresh();
         }
       },
@@ -8248,8 +8258,6 @@
 
       handleRemoteCommand(cmd) {
         const p = G.player;
-        if (!p || !cmd) return;
-
         switch (cmd.type) {
           case 'GOLD':
             p.gold += cmd.amount;
@@ -8260,8 +8268,8 @@
             Log.add(`🌀 <strong>Admin Gift:</strong> You have been granted ${cmd.amount} levels!`, 'levelup');
             break;
           case 'ITEM':
-            Combat.addToInventory(cmd.itemId, cmd.qty || 1, cmd.level || 1);
-            Log.add(`📦 <strong>Admin Gift:</strong> Received ${cmd.qty || 1}x ${cmd.itemId} (Lv.${cmd.level || 1})!`, 'violet');
+            Combat.addToInventory(cmd.itemId, cmd.qty || 1, cmd.level || 1, cmd.rarity || 'white');
+            Log.add(`📦 <strong>Admin Gift:</strong> Received ${cmd.qty || 1}x ${cmd.itemId} (Lv.${cmd.level || 1}, ${cmd.rarity || 'white'})!`, 'violet');
             break;
           case 'KICK':
             AuthSystem.logout();
@@ -8270,7 +8278,7 @@
             p.gold = 0;
             p.inventory = [];
             p.stash = [];
-            Log.add("⚡ <strong style='color:var(--red);'>DIVINE RETRIBUTION:</strong> Your wealth and belongings have been stripped by the gods.", "error");
+            Log.add('⚡ <strong style="color:var(--red);">DIVINE RETRIBUTION:</strong> Your wealth and belongings have been stripped by the gods.', 'error');
             break;
         }
         UI.refresh();
@@ -8351,9 +8359,10 @@
             break;
           case 'ITEM':
             const iQty = parseInt(val) || 1;
+            const rarity = document.getElementById('admin-manage-item-rarity').value;
             if (!itemId) { Notify.error("Enter an Item ID"); return; }
-            this.grantItem(itemId, uid, iQty, itemLevel);
-            Notify.success(`Granted ${iQty}x [${itemId}] to ${name}`);
+            this.grantItem(itemId, uid, iQty, itemLevel, rarity);
+            Notify.success(`Granted ${iQty}x [${itemId}] (${rarity}) to ${name}`);
             break;
           case 'KICK':
             const kHours = parseFloat(val) || 0.5;
