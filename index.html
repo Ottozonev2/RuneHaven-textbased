@@ -2104,30 +2104,48 @@
 
     .world-entity {
       position: absolute;
-      width: 48px;
-      height: 48px;
+      width: 80px;
+      height: 80px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       transition: transform 0.1s linear;
       z-index: 10;
+      /* Centering logic: offset by half width/height */
+      margin-left: -40px;
+      margin-top: -40px;
+      background: transparent !important;
     }
 
     .entity-avatar {
-      width: 32px;
-      height: 32px;
+      width: 64px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 40px;
       position: relative;
+      background: transparent !important;
+    }
+
+    .entity-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: transparent !important;
+      border: none !important;
+      /* Default glow for other players */
+      filter: drop-shadow(0 0 3px rgba(255,255,255,0.3));
     }
 
     #world-player .entity-avatar {
       font-size: 28px;
-      text-shadow: 0 0 15px var(--gold-lt), 0 0 30px var(--gold);
       animation: playerHover 2s infinite ease-in-out;
+    }
+
+    #world-player .entity-avatar img {
+      filter: drop-shadow(0 0 8px var(--gold-lt)) drop-shadow(0 0 15px var(--gold));
     }
 
     @keyframes playerHover {
@@ -2148,10 +2166,10 @@
       font-family: 'Cinzel', serif;
       font-size: 10px;
       color: var(--text-lt);
-      text-shadow: 1px 1px 2px #000;
+      text-shadow: 1px 1px 3px #000, 0 0 5px #000;
       white-space: nowrap;
       margin-top: 4px;
-      background: rgba(0, 0, 0, 0.6);
+      background: transparent;
       padding: 1px 6px;
       border-radius: 4px;
     }
@@ -5964,16 +5982,28 @@
         }
       },
 
+      getClassImage(classKey) {
+        const mapping = {
+          'paladin': 'paladin.png',
+          'inquisitor': 'inquisitor.png',
+          'cleric': 'cleric.png',
+          'lightbinder': 'lightbrinder.png',
+          'necromancer': 'necromancer.png',
+          'warlock': 'warloc.png',
+          'barbarian': 'Barb.png',
+          'assassin': 'assasin.png'
+        };
+        return mapping[classKey] || null;
+      },
+
       render() {
         const layer = document.getElementById('world-entities-layer');
         const grid = document.getElementById('world-grid');
         const vp = document.getElementById('world-viewport');
         if (!layer || !vp || !G.player) return;
 
-
         const vpw = vp.clientWidth || vp.offsetWidth || 800;
         const vph = vp.clientHeight || vp.offsetHeight || 400;
-
 
         if (!G.world.x || !G.world.y) {
           G.world.x = vpw / 2;
@@ -5983,7 +6013,6 @@
         // Camera stays static exactly matching the width/height of the viewport
         layer.style.transform = `translate(0px, 0px)`;
         if (grid) grid.style.transform = `translate(0px, 0px)`;
-
 
         this.renderDecor(layer);
 
@@ -5996,7 +6025,9 @@
           layer.appendChild(pEl);
         }
         pEl.style.transform = `translate(${G.world.x}px, ${G.world.y}px)`;
-        pEl.innerHTML = `<div class="entity-avatar">${G.player.icon || '🌀'}</div><div class="entity-name">${G.player.name}</div>`;
+        const pImg = this.getClassImage(G.player.classKey);
+        const pAvatar = pImg ? `<img src="${pImg}" alt="${G.player.classKey}">` : (G.player.icon || '🌀');
+        pEl.innerHTML = `<div class="entity-avatar">${pAvatar}</div><div class="entity-name">${G.player.name}</div>`;
 
         // Others
         for (const uid in G.world.entities) {
@@ -6017,7 +6048,9 @@
             layer.appendChild(eEl);
           }
           eEl.style.transform = `translate(${data.x}px, ${data.y}px)`;
-          eEl.innerHTML = `<div class="entity-avatar">${data.icon || '👤'}</div><div class="entity-name">${data.name}</div>`;
+          const eImg = this.getClassImage(data.classKey);
+          const eAvatar = eImg ? `<img src="${eImg}" alt="${data.classKey || 'entity'}">` : (data.icon || '👤');
+          eEl.innerHTML = `<div class="entity-avatar">${eAvatar}</div><div class="entity-name">${data.name}</div>`;
         }
       },
 
@@ -6038,6 +6071,7 @@
             y: G.world.y,
             name: G.player.name,
             icon: G.player.icon || '👤',
+            classKey: G.player.classKey || '',
             lastSeen: Date.now()
           });
         } catch (e) { }
