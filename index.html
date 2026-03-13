@@ -2833,29 +2833,40 @@
           <div style="display:flex; flex-direction:column; gap:12px;">
             <button class="btn btn-rh" onclick="AdminSystem.grantGold(10000)">Give 10,000 Gold</button>
             <button class="btn btn-rh" onclick="AdminSystem.grantLevel(5)">Give 5 Levels</button>
-            <div style="display:flex; gap:8px;">
-              <input id="admin-item-input" type="text" placeholder="Item ID..."
-                style="flex:1; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); font-family:monospace;">
-              <button class="btn btn-gold"
-                onclick="AdminSystem.grantItem(document.getElementById('admin-item-input').value)">Give Item</button>
+            <div style="display:flex; flex-direction:column; gap:8px; background:var(--bg-mid); border:1px solid var(--border); border-radius:8px; padding:12px;">
+              <div style="font-size:10px; color:var(--gold-lt); font-family:'Cinzel',serif; margin-bottom:4px;">GRANT ITEM TO SELF</div>
+              <div style="display:flex; gap:8px;">
+                <input id="admin-item-input" type="text" placeholder="Item ID (e.g. veilblade)" style="flex:2; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-family:monospace; font-size:12px;">
+                <input id="admin-item-level" type="number" placeholder="Lv" title="Item Level" style="flex:1; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-size:12px; width:50px;">
+                <input id="admin-item-qty" type="number" placeholder="Qty" title="Amount" style="flex:1; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-size:12px; width:50px;">
+              </div>
+              <button class="btn btn-gold" style="width:100%;" onclick="AdminSystem.grantItem(document.getElementById('admin-item-input').value, null, parseInt(document.getElementById('admin-item-qty').value)||1, parseInt(document.getElementById('admin-item-level').value)||1)">Grant To Self</button>
             </div>
           </div>
         </div>
 
         <!-- Players Tab -->
         <div class="tab-content" id="atc-admin-players">
-          <div id="admin-give-panel" style="display:none; background:var(--bg-mid); border:1px solid var(--gold); border-radius:8px; padding:12px; margin-bottom:12px;">
-             <div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold-lt); margin-bottom:8px; display:flex; justify-content:space-between;">
-                <span>GRANTING TO: <span id="admin-give-target-name">...</span></span>
-                <button onclick="document.getElementById('admin-give-panel').style.display='none'" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">✕</button>
+          <div id="admin-give-panel" style="display:none; background:var(--bg-mid); border:2px solid var(--gold); border-radius:8px; padding:12px; margin-bottom:12px; box-shadow: 0 0 15px rgba(255,183,0,0.2);">
+             <div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold-lt); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:6px;">
+                <span>GRANTING TO: <strong id="admin-give-target-name" style="color:var(--text-lt);">...</strong></span>
+                <button onclick="document.getElementById('admin-give-panel').style.display='none'" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
              </div>
-             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+             
+             <!-- Gold/Level row -->
+             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; align-items:center;">
+                <input id="admin-give-amount" type="number" placeholder="Qty/Amt" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:100%;">
                 <button class="btn btn-sm btn-gold" onclick="AdminSystem.doGive('GOLD')">Give Gold</button>
                 <button class="btn btn-sm btn-violet" onclick="AdminSystem.doGive('LEVEL')">Give Levels</button>
              </div>
-             <div style="display:flex; gap:6px;">
-                <input id="admin-give-amount" type="text" placeholder="Amt or Item ID" style="flex:1; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:6px; font-size:12px; border-radius:4px;">
-                <button class="btn btn-sm btn-gold" onclick="AdminSystem.doGive('ITEM')">Give Item</button>
+             
+             <!-- Item Row -->
+             <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; gap:6px;">
+                  <input id="admin-give-item-id" type="text" placeholder="Item ID (e.g. dawnsword)" style="flex:2; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; font-family:monospace;">
+                  <input id="admin-give-item-level" type="number" placeholder="Lv" title="Item Level" style="flex:1; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:60px;">
+                </div>
+                <button class="btn btn-sm btn-gold" style="width:100%;" onclick="AdminSystem.doGive('ITEM')">Grant Item with Stats</button>
              </div>
              <input type="hidden" id="admin-give-target-uid">
           </div>
@@ -7989,9 +8000,16 @@
         });
 
         // Real-time Player List listener (for Admins)
-        firebase.database().ref('leaderboard').on('value', () => {
+        this._lastAdminPulse = 0;
+        firebase.database().ref('leaderboard').on('value', snap => {
+          if (!this.isAdmin) return;
+          const now = Date.now();
+          // Throttle to 1.5 seconds to prevent flashing during multiple concurrent updates
+          if (now - this._lastAdminPulse < 1500) return; 
+          this._lastAdminPulse = now;
+          
           if (document.getElementById('modal-admin')?.classList.contains('open')) {
-            this.refreshPlayerList();
+            this.refreshPlayerList(snap.val());
           }
         });
 
@@ -8116,12 +8134,16 @@
         }
       },
 
-      grantItem(itemId, targetUid = null) {
+      grantItem(itemId, targetUid = null, qty = 1, level = 1) {
         if (targetUid) {
-          this.sendRemoteCommand(targetUid, { type: 'ITEM', itemId: itemId });
+          this.sendRemoteCommand(targetUid, { type: 'ITEM', itemId: itemId, qty: qty, level: level });
         } else {
-          Combat.addToInventory(itemId, 1);
-          Notify.success(`Admin granted you item: ${itemId}`);
+          Combat.addToInventory(itemId, qty, level);
+          Notify.success(`Admin granted you ${qty}x item: ${itemId} (Lv.${level})`);
+          // Clear self inputs if they exist
+          if (document.getElementById('admin-item-input')) document.getElementById('admin-item-input').value = '';
+          if (document.getElementById('admin-item-qty')) document.getElementById('admin-item-qty').value = '';
+          if (document.getElementById('admin-item-level')) document.getElementById('admin-item-level').value = '';
           UI.refresh();
         }
       },
@@ -8211,8 +8233,8 @@
             Log.add(`🌀 <strong>Admin Gift:</strong> You have been granted ${cmd.amount} levels!`, 'levelup');
             break;
           case 'ITEM':
-            Combat.addToInventory(cmd.itemId, 1);
-            Log.add(`📦 <strong>Admin Gift:</strong> Received a new item!`, 'violet');
+            Combat.addToInventory(cmd.itemId, cmd.qty || 1, cmd.level || 1);
+            Log.add(`📦 <strong>Admin Gift:</strong> Received ${cmd.qty || 1}x ${cmd.itemId} (Lv.${cmd.level || 1})!`, 'violet');
             break;
           case 'KICK':
             AuthSystem.logout();
@@ -8222,34 +8244,48 @@
         Game.saveGame();
       },
 
-      async refreshPlayerList() {
-        const snap = await firebase.database().ref('leaderboard').once('value');
-        const data = snap.val() || {};
+      _lastAdminHtml: '',
+      async refreshPlayerList(snapData = null) {
+        let data = snapData;
+        if (!data) {
+          const snap = await firebase.database().ref('leaderboard').once('value');
+          data = snap.val() || {};
+        }
+        
         const container = document.getElementById('admin-player-list');
+        if (!container) return;
         const now = Date.now();
 
-        // Filter: Must have a UID AND have been active in the last 60 seconds
         const onlinePlayers = Object.entries(data).filter(([name, p]) => {
           return p.uid && p.ts && (now - p.ts < 60000);
-        });
+        }).sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
 
         if (onlinePlayers.length === 0) {
-          container.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:12px;">No players currently online.</div>';
+          const emptyHtml = '<div style="color:var(--text-dim); text-align:center; padding:12px;">No players currently online.</div>';
+          if (this._lastAdminHtml !== emptyHtml) {
+             this._lastAdminHtml = emptyHtml;
+             container.innerHTML = emptyHtml;
+          }
           return;
         }
 
-        container.innerHTML = onlinePlayers.map(([name, p]) => {
-          return `<div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
-            <div>
-              <div style="font-size:12px; color:var(--text-lt);">${p.icon} ${p.name} (Lv.${p.level})</div>
-              <div style="font-size:10px; color:var(--text-dim);">UID: ${p.uid || 'Unknown'}</div>
+        const html = onlinePlayers.map(([name, p]) => {
+          return `<div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:13px; color:var(--text-lt); font-family:'Cinzel',serif;">${p.name} <span style="font-size:10px;color:var(--text-dim);">[${p.uid.substring(0,8)}...]</span></div>
+              <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Lv.${p.level} ${p.class} · Faction: ${p.faction}</div>
             </div>
-            <div style="display:flex; gap:4px;">
+            <div style="display:flex; gap:6px;">
               <button class="btn btn-sm btn-gold" onclick="AdminSystem.promptGive('${p.uid}', '${p.name}')">Give</button>
-              <button class="btn btn-sm btn-red" onclick="AdminSystem.ban('${p.uid}')">Ban</button>
+              <button class="btn btn-sm btn-red" onclick="AdminSystem.banPlayer('${p.uid}', '${p.name}')">Ban</button>
             </div>
           </div>`;
         }).join('');
+
+        if (this._lastAdminHtml !== html) {
+          this._lastAdminHtml = html;
+          container.innerHTML = html;
+        }
       },
 
       promptGive(uid, name) {
@@ -8264,6 +8300,8 @@
       doGive(type) {
         const uid = document.getElementById('admin-give-target-uid').value;
         const val = document.getElementById('admin-give-amount').value.trim();
+        const itemId = document.getElementById('admin-give-item-id')?.value.trim();
+        const itemLevel = parseInt(document.getElementById('admin-give-item-level')?.value) || 1;
         const name = document.getElementById('admin-give-target-name').textContent;
         
         if (type === 'GOLD') {
@@ -8275,12 +8313,15 @@
           this.grantLevel(amt, uid);
           Notify.success(`Granted ${amt} levels to ${name}`);
         } else if (type === 'ITEM') {
-          if (!val) { Notify.error("Enter an Item ID"); return; }
-          this.grantItem(val, uid);
-          Notify.success(`Granted item [${val}] to ${name}`);
+          const qty = parseInt(val) || 1;
+          if (!itemId) { Notify.error("Enter an Item ID"); return; }
+          this.grantItem(itemId, uid, qty, itemLevel);
+          Notify.success(`Granted ${qty}x [${itemId}] (Lv.${itemLevel}) to ${name}`);
         }
-        document.getElementById('admin-give-panel').style.display = 'none';
         document.getElementById('admin-give-amount').value = '';
+        if (document.getElementById('admin-give-item-id')) document.getElementById('admin-give-item-id').value = '';
+        if (document.getElementById('admin-give-item-level')) document.getElementById('admin-give-item-level').value = '';
+        document.getElementById('admin-give-amount').focus();
       },
 
       async wipeGuilds() {
@@ -8945,21 +8986,10 @@
         if (dot) dot.style.background = color === 'green' ? '#4ade80' : color === 'yellow' ? '#fbbf24' : '#ef4444';
       },
 
+      _lastRenderId: '',
       _renderMessages() {
         const box = document.getElementById('chat-messages');
         if (!box) return;
-        
-        // Save scroll position
-        const atBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 40;
-
-        if (this._channel === 'guild' && !G.player?.guildName) {
-          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">You are not in a guild.</div>';
-          return;
-        }
-        if (this._channel === 'party' && !G.partyCode) {
-          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">You are not in a party.</div>';
-          return;
-        }
 
         const msgs = this._cache.filter(m => {
           if (this._sessionStart && m.ts < this._sessionStart) return false;
@@ -8971,12 +9001,29 @@
           return true;
         }).slice(-60);
 
+        // ⚡ OPTIMIZATION: Only update DOM if messages actually changed
+        const latestTs = msgs.length ? msgs[msgs.length - 1].ts : 0;
+        const signature = `${this._channel}-${msgs.length}-${latestTs}`;
+        if (this._lastRenderId === signature) return;
+        this._lastRenderId = signature;
+
+        const atBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 40;
+
+        if (this._channel === 'guild' && !G.player?.guildName) {
+          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">You are not in a guild.</div>';
+          return;
+        }
+        if (this._channel === 'party' && !G.partyCode) {
+          box.innerHTML = '<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">You are not in a party.</div>';
+          return;
+        }
+
         if (!msgs.length) {
           box.innerHTML = `<div style="color:var(--text-dim);font-style:italic;padding:8px;text-align:center;">No messages yet.</div>`;
           return;
         }
 
-        const html = msgs.map(m => {
+        box.innerHTML = msgs.map(m => {
           const fc = m.faction === 'saints' ? 'var(--gold)' : '#e08088';
           const fi = m.faction === 'saints' ? '☀️' : '💀';
           const time = new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -8986,15 +9033,8 @@
             + `<span style="color:var(--text-lt);">${m.text}</span></div>`;
         }).join('');
 
-        // ⚡ OPTIMIZATION: Only update DOM if HTML changed (prevents flashing)
-        if (box.innerHTML !== html) {
-          box.innerHTML = html;
-          // Smooth scroll to bottom if we were already there
-          if (atBottom) {
-             requestAnimationFrame(() => {
-                box.scrollTop = box.scrollHeight;
-             });
-          }
+        if (atBottom) {
+          requestAnimationFrame(() => { box.scrollTop = box.scrollHeight; });
         }
       },
 
@@ -9002,13 +9042,19 @@
         const input = document.getElementById('chat-input');
         if (!input) return;
         const text = input.value.trim();
-        if (!text || !G.player || !WorldServer._db) {
-          // If purely empty Enter, just clear and return (prevents weird state)
-          if (!text && input.value.length > 0) input.value = '';
+        if (!text) {
+          input.value = '';
+          return;
+        }
+        if (!G.player || !WorldServer._db) {
+          Notify.error("Chat disconnected.");
           return;
         }
 
-        input.value = ''; input.disabled = true;
+        // Clear input immediately to feel responsive, but store for retry
+        const originalText = input.value;
+        input.value = ''; 
+        
         const p = G.player;
         const msg = {
           ch: this._channel,
@@ -9023,14 +9069,18 @@
 
         try {
           const ref = WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/messages');
+          // Use transaction to prevent overwriting other players' messages
           await ref.transaction(current => {
             const msgs = Array.isArray(current) ? current : [];
             msgs.push(msg);
             if (msgs.length > 200) msgs.shift();
             return msgs;
           });
-        } catch (e) { console.error("Send fail", e); }
-        finally { input.disabled = false; input.focus(); }
+        } catch (e) { 
+          console.error("Send fail", e); 
+          input.value = originalText; // Restore content if it failed to send
+          Notify.error("Failed to send message.");
+        }
       },
 
       _updateBadges() {
