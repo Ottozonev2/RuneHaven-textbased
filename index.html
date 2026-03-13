@@ -7773,16 +7773,26 @@
         Game.loadGame(this.slotKey(slotIndex));
       },
 
-      confirmDelete(slotIndex) {
+      async confirmDelete(slotIndex) {
         const key = this.slotKey(slotIndex);
         let raw = CloudSave.user ? JSON.stringify(CloudSave.slots[key]) : null;
         if (raw === 'undefined' || !raw) raw = localStorage.getItem(key);
         if (!raw) return;
-        const p = JSON.parse(raw).player;
-        if (confirm(`Delete "${p.name}" (Lv.${p.level} ${CLASSES[p.classKey].name})? This cannot be undone.`)) {
-          localStorage.removeItem(key);
-          CloudSave.deleteSlot(key);
-          this.render();
+        
+        try {
+          const data = JSON.parse(raw);
+          const p = data.player;
+          if (confirm(`PERMANENTLY ERASE CHRONICLE?\n\nCharacter: ${p.name}\nLevel: ${p.level} ${CLASSES[p.classKey].name}\n\nThis cannot be undone and will remove the character from both local storage and the cloud.`)) {
+            // Remove from local storage first
+            localStorage.removeItem(key);
+            // Wait for cloud deletion to finish so it doesn't get restored during the next poll/render
+            await CloudSave.deleteSlot(key);
+            
+            Notify.success("Chronicle erased from existence.");
+            this.render();
+          }
+        } catch (e) {
+          console.error("Delete failed", e);
         }
       }
     };
@@ -7940,10 +7950,17 @@
         }
       },
 
-      deleteSlot(slotKey) {
+      async deleteSlot(slotKey) {
         if (!this.user) return;
         delete this.slots[slotKey];
-        firebase.database().ref(`saves/${this.user.uid}/slots/${slotKey}`).remove();
+        try {
+          // Explicitly await the deletion from the server
+          await firebase.database().ref(`saves/${this.user.uid}/slots/${slotKey}`).remove();
+          return true;
+        } catch(e) {
+          console.error("Cloud delete fail", e);
+          return false;
+        }
       },
 
       async acceptLegal() {
@@ -8000,12 +8017,28 @@
           }
         });
 
-        // Listen for kicks/bans
-        firebase.database().ref(`world/commands/${user.uid}`).on('value', snap => {
+        // Persistent Command Tracking (Across Sessions & Character Switches)
+        const storageKey = `rh_cmd_processed_${user.uid}`;
+        const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        this._processedCmds = new Set(stored);
+
+        firebase.database().ref(`world/commands/${user.uid}`).on('child_added', snap => {
+          const key = snap.key;
           const cmd = snap.val();
-          if (cmd) {
-            this.handleRemoteCommand(cmd);
-            firebase.database().ref(`world/commands/${user.uid}`).remove();
+          
+          if (cmd && !this._processedCmds.has(key)) {
+            this._processedCmds.add(key);
+            
+            // Persist the history to localStorage immediately
+            const history = Array.from(this._processedCmds).slice(-100); // Keep last 100 for safety
+            localStorage.setItem(storageKey, JSON.stringify(history));
+
+            // Only process if it's within a 24-hour window (to prevent ancient items spawning)
+            if (cmd.ts && cmd.ts > Date.now() - (3600000 * 24)) {
+              this.handleRemoteCommand(cmd);
+            }
+            // Attempt cleanup, but we're now immune if this fails
+            firebase.database().ref(`world/commands/${user.uid}/${key}`).remove().catch(()=>{});
           }
         });
 
@@ -8178,7 +8211,8 @@
       // Command Bridge
       async sendRemoteCommand(targetUid, cmd) {
         if (!targetUid || targetUid === 'undefined') return;
-        await firebase.database().ref(`world/commands/${targetUid}`).set({ ...cmd, ts: Date.now() });
+        // Use push() so commands are unique and don't overwrite/loop
+        await firebase.database().ref(`world/commands/${targetUid}`).push({ ...cmd, ts: Date.now() });
       },
 
       async kick(targetUid) {
