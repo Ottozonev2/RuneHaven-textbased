@@ -2847,28 +2847,33 @@
 
         <!-- Players Tab -->
         <div class="tab-content" id="atc-admin-players">
-          <div id="admin-give-panel" style="display:none; background:var(--bg-mid); border:2px solid var(--gold); border-radius:8px; padding:12px; margin-bottom:12px; box-shadow: 0 0 15px rgba(255,183,0,0.2);">
+          <!-- Centralized Management Panel -->
+          <div id="admin-manage-panel" style="display:none; background:var(--bg-mid); border:2px solid var(--gold); border-radius:8px; padding:12px; margin-bottom:12px; box-shadow: 0 0 15px rgba(255,183,0,0.2);">
              <div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold-lt); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:6px;">
-                <span>GRANTING TO: <strong id="admin-give-target-name" style="color:var(--text-lt);">...</strong></span>
-                <button onclick="document.getElementById('admin-give-panel').style.display='none'" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
+                <span>MANAGING: <strong id="admin-manage-target-name" style="color:var(--text-lt);">...</strong></span>
+                <button onclick="document.getElementById('admin-manage-panel').style.display='none'" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
              </div>
              
-             <!-- Gold/Level row -->
-             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; align-items:center;">
-                <input id="admin-give-amount" type="number" placeholder="Qty/Amt" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:100%;">
-                <button class="btn btn-sm btn-gold" onclick="AdminSystem.doGive('GOLD')">Give Gold</button>
-                <button class="btn btn-sm btn-violet" onclick="AdminSystem.doGive('LEVEL')">Give Levels</button>
+             <!-- Resource/Level Grants -->
+             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px; align-items:center;">
+                <input id="admin-manage-amount" type="number" placeholder="Qty/Hrs" title="Quantity or Hours" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:100%;">
+                <button class="btn btn-sm btn-gold" onclick="AdminSystem.doAction('GOLD')">Give Gold</button>
+                <button class="btn btn-sm btn-violet" onclick="AdminSystem.doAction('LEVEL')">Give Lv</button>
              </div>
              
-             <!-- Item Row -->
-             <div style="display:flex; flex-direction:column; gap:8px;">
-                <div style="display:flex; gap:6px;">
-                  <input id="admin-give-item-id" type="text" placeholder="Item ID (e.g. dawnsword)" style="flex:2; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; font-family:monospace;">
-                  <input id="admin-give-item-level" type="number" placeholder="Lv" title="Item Level" style="flex:1; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:60px;">
-                </div>
-                <button class="btn btn-sm btn-gold" style="width:100%;" onclick="AdminSystem.doGive('ITEM')">Grant Item with Stats</button>
+             <!-- Item Granting -->
+             <div style="display:grid; grid-template-columns:2fr 1fr; gap:6px; margin-bottom:10px;">
+                <input id="admin-manage-item-id" type="text" placeholder="Item ID" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; font-family:monospace;">
+                <input id="admin-manage-item-level" type="number" placeholder="Lv" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px;">
+                <button class="btn btn-sm btn-gold" style="grid-column: span 2;" onclick="AdminSystem.doAction('ITEM')">Grant Item</button>
              </div>
-             <input type="hidden" id="admin-give-target-uid">
+
+             <!-- Moderation Section -->
+             <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button class="btn btn-sm btn-red" onclick="AdminSystem.doAction('KICK')">Kick (Temp Ban)</button>
+                <button class="btn btn-sm btn-red" style="background:#400; border-color:#800;" onclick="AdminSystem.doAction('BAN')">Perma Ban Account</button>
+             </div>
+             <input type="hidden" id="admin-manage-target-uid">
           </div>
           <div id="admin-player-list" style="display:flex; flex-direction:column; gap:4px;">
             <div class="chat-empty">Seeking Outworlders...</div>
@@ -2889,31 +2894,36 @@
 
         <!-- World Tab -->
         <div class="tab-content" id="atc-admin-world">
+          <!-- Announcement -->
           <div style="margin-bottom:16px;">
-            <label
-              style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Global
-              Announcement</label>
-            <textarea id="admin-broadcast-input"
-              style="width:100%; height:80px; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); font-family:serif; resize:none;"></textarea>
-            <button class="btn btn-violet" style="width:100%; margin-top:8px;" onclick="AdminSystem.broadcast()">Blast
-              Decree</button>
+            <label style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Global Announcement</label>
+            <textarea id="admin-broadcast-input" style="width:100%; height:80px; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); font-family:serif; resize:none;"></textarea>
+            <button class="btn btn-violet" style="width:100%; margin-top:8px;" onclick="AdminSystem.broadcast()">Blast Decree</button>
+          </div>
+
+          <!-- Active Bans -->
+          <div style="margin-bottom:16px; border-top:1px dashed var(--border); padding-top:12px;">
+             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="font-size:11px; color:var(--gold-lt); text-transform:uppercase; font-family:'Cinzel',serif;">Active Blacklist</label>
+                <button class="btn btn-sm" style="font-size:9px; padding:2px 6px;" onclick="AdminSystem.refreshBlacklist()">Refresh</button>
+             </div>
+             <div id="admin-blacklist-list" style="max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
+                <div class="chat-empty">No active bans in this domain.</div>
+             </div>
+          </div>
+
+          <!-- Dangerous Actions -->
+          <div style="border-top:1px dashed var(--border); padding-top:16px;">
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeGuilds()">⚠️ WIPE ALL GUILDS</button>
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeLeaderboard()">🏆 RESET LEADERBOARD</button>
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeFactionWar()">⚔️ RESET FACTION WAR</button>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+               <button class="btn btn-violet" onclick="AdminSystem.checkDbHealth()">🧪 DB Health</button>
+               <button id="admin-maintenance-btn" class="btn btn-gold" onclick="AdminSystem.toggleMaintenance()">🔒 Maint</button>
+            </div>
           </div>
           <div style="border-top:1px dashed var(--border); padding-top:16px;">
-            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeGuilds()">⚠️
-              WIPE ALL GUILDS</button>
-            <button class="btn btn-red" style="width:100%; margin-bottom:8px;"
-              onclick="AdminSystem.wipeLeaderboard()">🏆
-              RESET LEADERBOARD</button>
-            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeFactionWar()">⚔️
-              RESET FACTION WAR</button>
-            <button class="btn btn-violet" style="width:100%; margin-bottom:8px;"
-              onclick="AdminSystem.checkDbHealth()">🧪 Database Health Check</button>
-            <button id="admin-maintenance-btn" class="btn btn-gold" style="width:100%;"
-              onclick="AdminSystem.toggleMaintenance()">🔒 Maintenance Mode</button>
-          </div>
-          <div style="border-top:1px dashed var(--border); padding-top:16px;">
-            <button class="btn btn-red" style="width:100%;" onclick="AuthSystem.logout()">Forced System Purge
-              (Logout)</button>
+            <button class="btn btn-red" style="width:100%;" onclick="AuthSystem.logout()">Forced System Purge (Logout)</button>
           </div>
         </div>
       </div>
@@ -8110,6 +8120,7 @@
         if (!this.isAdmin) return;
         UI.openModal('modal-admin');
         this.refreshPlayerList();
+        this.refreshBlacklist();
       },
 
       // Local Cheats
@@ -8168,30 +8179,6 @@
       async sendRemoteCommand(targetUid, cmd) {
         if (!targetUid || targetUid === 'undefined') return;
         await firebase.database().ref(`world/commands/${targetUid}`).set({ ...cmd, ts: Date.now() });
-      },
-
-      async ban(targetUid, hours = 24) {
-        if (!targetUid || targetUid === 'undefined') {
-          alert("Cannot ban a player without a valid Account ID (UID).");
-          return;
-        }
-        const expiry = Date.now() + (hours * 3600000);
-        await firebase.database().ref(`world/blacklist/${targetUid}`).set({ expiry });
-        await this.kick(targetUid);
-      },
-
-      async banPlayer(targetUid, name, hours = 24) {
-        if (!targetUid || targetUid === 'undefined') {
-          alert("Cannot ban a player without a valid Account ID (UID).");
-          return;
-        }
-        if (!confirm(`Are you sure you want to ban ${name} for ${hours} hours?`)) return;
-
-        const expiry = Date.now() + (hours * 3600000);
-        await firebase.database().ref(`world/blacklist/${targetUid}`).set({ expiry });
-        await this.kick(targetUid);
-        Log.add(`🚫 Banned player ${name} (${targetUid}) for ${hours} hours.`, 'system');
-        Notify.error(`Banned ${name} for ${hours} hours.`);
       },
 
       async kick(targetUid) {
@@ -8277,8 +8264,7 @@
               <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Lv.${p.level} ${p.class} · Faction: ${p.faction}</div>
             </div>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-sm btn-gold" onclick="AdminSystem.promptGive('${p.uid}', '${p.name}')">Give</button>
-              <button class="btn btn-sm btn-red" onclick="AdminSystem.banPlayer('${p.uid}', '${p.name}')">Ban</button>
+              <button class="btn btn-sm btn-gold" onclick="AdminSystem.promptManage('${p.uid}', '${p.name}')">Manage</button>
             </div>
           </div>`;
         }).join('');
@@ -8289,40 +8275,95 @@
         }
       },
 
-      promptGive(uid, name) {
-        const panel = document.getElementById('admin-give-panel');
+      promptManage(uid, name) {
+        const panel = document.getElementById('admin-manage-panel');
         if (!panel) return;
         panel.style.display = 'block';
-        document.getElementById('admin-give-target-name').textContent = name;
-        document.getElementById('admin-give-target-uid').value = uid;
-        document.getElementById('admin-give-amount').focus();
+        document.getElementById('admin-manage-target-name').textContent = name;
+        document.getElementById('admin-manage-target-uid').value = uid;
+        document.getElementById('admin-manage-amount').focus();
       },
 
-      doGive(type) {
-        const uid = document.getElementById('admin-give-target-uid').value;
-        const val = document.getElementById('admin-give-amount').value.trim();
-        const itemId = document.getElementById('admin-give-item-id')?.value.trim();
-        const itemLevel = parseInt(document.getElementById('admin-give-item-level')?.value) || 1;
-        const name = document.getElementById('admin-give-target-name').textContent;
+      async doAction(type) {
+        const uid = document.getElementById('admin-manage-target-uid').value;
+        const val = document.getElementById('admin-manage-amount').value.trim();
+        const itemId = document.getElementById('admin-manage-item-id')?.value.trim();
+        const itemLevel = parseInt(document.getElementById('admin-manage-item-level')?.value) || 1;
+        const name = document.getElementById('admin-manage-target-name').textContent;
         
-        if (type === 'GOLD') {
-          const amt = parseInt(val) || 1000;
-          this.grantGold(amt, uid);
-          Notify.success(`Granted ${amt}g to ${name}`);
-        } else if (type === 'LEVEL') {
-          const amt = parseInt(val) || 1;
-          this.grantLevel(amt, uid);
-          Notify.success(`Granted ${amt} levels to ${name}`);
-        } else if (type === 'ITEM') {
-          const qty = parseInt(val) || 1;
-          if (!itemId) { Notify.error("Enter an Item ID"); return; }
-          this.grantItem(itemId, uid, qty, itemLevel);
-          Notify.success(`Granted ${qty}x [${itemId}] (Lv.${itemLevel}) to ${name}`);
+        switch(type) {
+          case 'GOLD':
+            const gAmt = parseInt(val) || 1000;
+            this.grantGold(gAmt, uid);
+            Notify.success(`Granted ${gAmt}g to ${name}`);
+            break;
+          case 'LEVEL':
+            const lAmt = parseInt(val) || 1;
+            this.grantLevel(lAmt, uid);
+            Notify.success(`Granted ${lAmt} levels to ${name}`);
+            break;
+          case 'ITEM':
+            const iQty = parseInt(val) || 1;
+            if (!itemId) { Notify.error("Enter an Item ID"); return; }
+            this.grantItem(itemId, uid, iQty, itemLevel);
+            Notify.success(`Granted ${iQty}x [${itemId}] to ${name}`);
+            break;
+          case 'KICK':
+            const kHours = parseFloat(val) || 0.5; // Default 30 mins
+            await this.ban(uid, kHours, name);
+            Notify.error(`Kicked & Temp-Banned ${name} for ${kHours}h`);
+            break;
+          case 'BAN':
+            if (!confirm(`Permanently lock ${name}'s account?`)) return;
+            await this.ban(uid, 876000, name); // ~100 years
+            Notify.error(`ACCOUNT PERMANENTLY LOCKED: ${name}`);
+            break;
         }
-        document.getElementById('admin-give-amount').value = '';
-        if (document.getElementById('admin-give-item-id')) document.getElementById('admin-give-item-id').value = '';
-        if (document.getElementById('admin-give-item-level')) document.getElementById('admin-give-item-level').value = '';
-        document.getElementById('admin-give-amount').focus();
+        
+        // Clear common fields but keep targeting
+        document.getElementById('admin-manage-amount').value = '';
+        if (document.getElementById('admin-manage-item-id')) document.getElementById('admin-manage-item-id').value = '';
+      },
+
+      async ban(targetUid, hours, name = "Unknown") {
+        if (!targetUid || targetUid === 'undefined') return;
+        const expiry = Date.now() + (hours * 3600000);
+        await firebase.database().ref(`world/blacklist/${targetUid}`).set({ 
+          expiry, name, bannedAt: Date.now() 
+        });
+        await this.kick(targetUid);
+      },
+
+      async refreshBlacklist() {
+        const snap = await firebase.database().ref('world/blacklist').once('value');
+        const data = snap.val() || {};
+        const container = document.getElementById('admin-blacklist-list');
+        if (!container) return;
+
+        const entries = Object.entries(data).filter(([uid, b]) => uid !== '_init' && b.expiry > Date.now());
+        if (entries.length === 0) {
+          container.innerHTML = '<div class="chat-empty">No active bans in this domain.</div>';
+          return;
+        }
+
+        container.innerHTML = entries.map(([uid, b]) => {
+          const hoursLeft = ((b.expiry - Date.now()) / 3600000).toFixed(1);
+          const isPerma = hoursLeft > 10000;
+          return `<div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:8px; display:flex; align-items:center; justify-content:space-between; font-size:11px;">
+            <div>
+              <div style="color:var(--red);">${b.name || 'Anonymous'}</div>
+              <div style="color:var(--text-dim); font-size:9px;">${isPerma ? 'PERMANENT' : `${hoursLeft}h remaining`}</div>
+            </div>
+            <button class="btn btn-sm" style="font-size:9px; padding:2px 6px;" onclick="AdminSystem.unban('${uid}')">Unban</button>
+          </div>`;
+        }).join('');
+      },
+
+      async unban(uid) {
+        if (!confirm("Lift this ban?")) return;
+        await firebase.database().ref(`world/blacklist/${uid}`).remove();
+        Notify.success("Sentence lifted.");
+        this.refreshBlacklist();
       },
 
       async wipeGuilds() {
@@ -9075,17 +9116,23 @@
 
         try {
           const ref = WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/messages');
-          // Use transaction to prevent overwriting other players' messages
-          await ref.transaction(current => {
-            const msgs = Array.isArray(current) ? current : [];
-            msgs.push(msg);
-            if (msgs.length > 200) msgs.shift();
-            return msgs;
-          });
+          // Use push() instead of transaction to avoid concurrency failures
+          await ref.push(msg);
+          
+          // Cleanup old messages occasionally (from leader only to save bandwidth)
+          if (G.isPartyLeader) {
+             const snap = await ref.once('value');
+             const all = snap.val() || {};
+             const keys = Object.keys(all);
+             if (keys.length > 300) {
+                const toDelete = keys.slice(0, keys.length - 200);
+                toDelete.forEach(k => ref.child(k).remove());
+             }
+          }
         } catch (e) { 
           console.error("Send fail", e); 
-          input.value = originalText; // Restore content if it failed to send
-          Notify.error("Failed to send message.");
+          input.value = originalText;
+          Notify.error("Eryndor's winds blocked your message. (Send Failure)");
         }
       },
 
