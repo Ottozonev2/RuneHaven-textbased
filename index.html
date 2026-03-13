@@ -180,6 +180,48 @@
       }
     }
 
+    /* Notification Toasts */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10001;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      background: rgba(43, 35, 26, 0.95);
+      border: 1px solid var(--rh-border);
+      color: var(--rh-text-lt);
+      padding: 12px 20px;
+      border-radius: 4px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      min-width: 200px;
+      max-width: 320px;
+      animation: toastIn 0.3s ease forwards;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast.success { border-left: 4px solid var(--green); }
+    .toast.error { border-left: 4px solid var(--red); }
+    .toast.gold { border-left: 4px solid var(--gold); }
+    .toast.info { border-left: 4px solid var(--violet-lt); }
+    
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes toastOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
     /* Maintenance Screen */
     #screen-maintenance {
       position: fixed;
@@ -2534,6 +2576,7 @@
             <div id="chat-input-row" style="padding:8px; display:flex; gap:4px; border-top:1px solid var(--border);">
               <input id="chat-input" type="text" placeholder="Speak..."
                 style="flex:1; background:var(--bg-mid); border:1px solid var(--border); color:var(--text-lt); padding:6px; font-size:11px; border-radius:4px; outline:none;"
+                autocomplete="off" autocorrect="off" spellcheck="false"
                 onkeydown="if(event.key==='Enter')GlobalChat.send()">
               <button class="btn btn-rh btn-sm" onclick="GlobalChat.send()"
                 style="min-width:40px; min-height:30px; height:30px;">➤</button>
@@ -2801,6 +2844,21 @@
 
         <!-- Players Tab -->
         <div class="tab-content" id="atc-admin-players">
+          <div id="admin-give-panel" style="display:none; background:var(--bg-mid); border:1px solid var(--gold); border-radius:8px; padding:12px; margin-bottom:12px;">
+             <div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold-lt); margin-bottom:8px; display:flex; justify-content:space-between;">
+                <span>GRANTING TO: <span id="admin-give-target-name">...</span></span>
+                <button onclick="document.getElementById('admin-give-panel').style.display='none'" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">✕</button>
+             </div>
+             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                <button class="btn btn-sm btn-gold" onclick="AdminSystem.doGive('GOLD')">Give Gold</button>
+                <button class="btn btn-sm btn-violet" onclick="AdminSystem.doGive('LEVEL')">Give Levels</button>
+             </div>
+             <div style="display:flex; gap:6px;">
+                <input id="admin-give-amount" type="text" placeholder="Amt or Item ID" style="flex:1; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:6px; font-size:12px; border-radius:4px;">
+                <button class="btn btn-sm btn-gold" onclick="AdminSystem.doGive('ITEM')">Give Item</button>
+             </div>
+             <input type="hidden" id="admin-give-target-uid">
+          </div>
           <div id="admin-player-list" style="display:flex; flex-direction:column; gap:4px;">
             <div class="chat-empty">Seeking Outworlders...</div>
           </div>
@@ -3524,7 +3582,35 @@
     </div>
   </div>
 
+  <div class="toast-container" id="toast-container"></div>
+
   <script>
+    /* Premium Notification System */
+    const Notify = {
+      show(text, type = 'info', duration = 4000) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'gold' ? '💰' : '📣';
+        t.innerHTML = `<span>${icon}</span> <span>${this._e(text)}</span>`;
+        container.appendChild(t);
+        setTimeout(() => {
+          t.style.animation = 'toastOut 0.3s ease forwards';
+          setTimeout(() => t.remove(), 300);
+        }, duration);
+      },
+      success(text) { this.show(text, 'success'); },
+      error(text) { this.show(text, 'error'); },
+      gold(text) { this.show(text, 'gold'); },
+      info(text) { this.show(text, 'info'); },
+      alert(text) { this.show(text, 'info', 6000); }, // Replacement for alert()
+      _e(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    };
+    // Patch window.alert
+    window.originalAlert = window.alert;
+    window.alert = (msg) => Notify.alert(msg);
+
     /* PWA manifest is loaded via <link rel="manifest" href="manifest.json"> in <head> */
 
     /* ============================================================
@@ -8008,6 +8094,7 @@
         } else {
           G.player.gold += amt;
           Log.add(`💰 Admin granted <strong>${amt}g</strong>.`, 'gold');
+          Notify.gold(`Admin granted you ${amt}g!`);
           UI.refresh();
         }
       },
@@ -8017,6 +8104,7 @@
           this.sendRemoteCommand(targetUid, { type: 'LEVEL', amount: amt });
         } else {
           for (let i = 0; i < amt; i++) Combat.levelUp();
+          Notify.success(`Admin granted you ${amt} levels!`);
           UI.refresh();
         }
       },
@@ -8026,6 +8114,7 @@
           this.sendRemoteCommand(targetUid, { type: 'ITEM', itemId: itemId });
         } else {
           Combat.addToInventory(itemId, 1);
+          Notify.success(`Admin granted you item: ${itemId}`);
           UI.refresh();
         }
       },
@@ -8040,41 +8129,8 @@
 
       showAnnouncement(text) {
         AudioSystem.playSFX('trumpet');
-        // Remove existing banner if any
-        const old = document.getElementById('server-announcement-banner');
-        if (old) old.remove();
-
-        const banner = document.createElement('div');
-        banner.id = 'server-announcement-banner';
-        banner.style.position = 'fixed';
-        banner.style.top = '60px'; // Positioned slightly below the maintenance countdown
-        banner.style.left = '50%';
-        banner.style.transform = 'translateX(-50%)';
-        banner.style.background = 'var(--gold)';
-        banner.style.color = 'white';
-        banner.style.padding = '8px 24px';
-        banner.style.borderRadius = '20px';
-        banner.style.fontFamily = "'Cinzel', serif";
-        banner.style.fontWeight = 'bold';
-        banner.style.fontSize = '12px';
-        banner.style.letterSpacing = '1px';
-        banner.style.zIndex = '9998';
-        banner.style.boxShadow = '0 0 15px rgba(201, 168, 76, 0.5)';
-        banner.style.border = '1px solid var(--gold-lt)';
-        banner.style.animation = 'pulse 1.5s infinite';
-        banner.style.textAlign = 'center';
-        banner.innerHTML = `📣 <strong>DIVINE DECREE:</strong> ${this._e(text)}`;
-
-        document.body.appendChild(banner);
-
-        // Auto-dismiss after 10 seconds
-        setTimeout(() => {
-          if (banner.parentElement) {
-            banner.style.opacity = '0';
-            banner.style.transition = 'opacity 1s ease';
-            setTimeout(() => banner.remove(), 1000);
-          }
-        }, 10000);
+        Notify.alert(`📣 DIVINE DECREE: ${text}`);
+        Log.add(`📣 <strong style="color:var(--gold);">DIVINE DECREE:</strong> ${this._e(text)}`, 'system');
       },
 
       _e(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); },
@@ -8176,17 +8232,34 @@
       },
 
       promptGive(uid, name) {
-        const type = prompt(`Give to ${name}:\n1: Gold\n2: Level\n3: Item (ID)`);
-        if (type === '1') {
-          const amt = parseInt(prompt("Amount:"));
-          if (amt) this.grantGold(amt, uid);
-        } else if (type === '2') {
-          const amt = parseInt(prompt("Levels:"));
-          if (amt) this.grantLevel(amt, uid);
-        } else if (type === '3') {
-          const id = prompt("Item ID (e.g. veilblade):");
-          if (id) this.grantItem(id, uid);
+        const panel = document.getElementById('admin-give-panel');
+        if (!panel) return;
+        panel.style.display = 'block';
+        document.getElementById('admin-give-target-name').textContent = name;
+        document.getElementById('admin-give-target-uid').value = uid;
+        document.getElementById('admin-give-amount').focus();
+      },
+
+      doGive(type) {
+        const uid = document.getElementById('admin-give-target-uid').value;
+        const val = document.getElementById('admin-give-amount').value.trim();
+        const name = document.getElementById('admin-give-target-name').textContent;
+        
+        if (type === 'GOLD') {
+          const amt = parseInt(val) || 1000;
+          this.grantGold(amt, uid);
+          Notify.success(`Granted ${amt}g to ${name}`);
+        } else if (type === 'LEVEL') {
+          const amt = parseInt(val) || 1;
+          this.grantLevel(amt, uid);
+          Notify.success(`Granted ${amt} levels to ${name}`);
+        } else if (type === 'ITEM') {
+          if (!val) { Notify.error("Enter an Item ID"); return; }
+          this.grantItem(val, uid);
+          Notify.success(`Granted item [${val}] to ${name}`);
         }
+        document.getElementById('admin-give-panel').style.display = 'none';
+        document.getElementById('admin-give-amount').value = '';
       },
 
       async wipeGuilds() {
@@ -8894,8 +8967,13 @@
 
       async send() {
         const input = document.getElementById('chat-input');
+        if (!input) return;
         const text = input.value.trim();
-        if (!text || !G.player || !WorldServer._db) return;
+        if (!text || !G.player || !WorldServer._db) {
+          // If purely empty Enter, just clear and return (prevents weird state)
+          if (!text && input.value.length > 0) input.value = '';
+          return;
+        }
 
         input.value = ''; input.disabled = true;
         const p = G.player;
