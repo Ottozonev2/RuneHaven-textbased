@@ -8257,7 +8257,8 @@
         const now = Date.now();
 
         const onlinePlayers = Object.entries(data).filter(([name, p]) => {
-          return p.uid && p.ts && (now - p.ts < 60000);
+          // Increased tolerance to 3 minutes to handle clock skew / lag
+          return p.uid && p.ts && (now - p.ts < 180000);
         }).sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
 
         if (onlinePlayers.length === 0) {
@@ -8604,8 +8605,9 @@
           }
           this._sendPulse();
           // Global presence pulse for Admin Player List
+          // Frequency increased to 5s for better real-time feel
           WorldServer.submitScore();
-        }, 10000);
+        }, 5000);
 
         this._sessionStart = Date.now();
         this._initialized = true;
@@ -8699,7 +8701,8 @@
           const now = Date.now();
           const newMembers = {};
           Object.entries(partyData.members || {}).forEach(([name, mData]) => {
-            if (now - mData.ts < 60000) {
+            // Increased tolerance to 3 minutes for party presence sync
+            if (Math.abs(now - mData.ts) < 180000) {
               newMembers[name] = { ...mData, receivedAt: now };
             }
           });
@@ -8991,15 +8994,18 @@
         const box = document.getElementById('chat-messages');
         if (!box) return;
 
+        const now = Date.now();
         const msgs = this._cache.filter(m => {
-          if (this._sessionStart && m.ts < this._sessionStart) return false;
+          // Remove session start filter to prevent clock-skew from wiping chat.
+          // Instead, show messages from the last 2 hours to keep it relevant but persistent.
+          if (m.ts < now - (3600000 * 2)) return false; 
           if (!m.text || m.text.startsWith('/')) return false;
           const mch = m.ch || 'global';
           if (mch !== this._channel) return false;
-          if (this._channel === 'guild' && m.guild !== G.player.guildName) return false;
-          if (this._channel === 'party' && m.party !== G.partyCode) return false;
+          if (this._channel === 'guild' && G.player && m.guild !== G.player.guildName) return false;
+          if (this._channel === 'party' && G.partyCode && m.party !== G.partyCode) return false;
           return true;
-        }).slice(-60);
+        }).slice(-100);
 
         // ⚡ OPTIMIZATION: Only update DOM if messages actually changed
         const latestTs = msgs.length ? msgs[msgs.length - 1].ts : 0;
