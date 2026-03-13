@@ -7988,6 +7988,13 @@
           }
         });
 
+        // Real-time Player List listener (for Admins)
+        firebase.database().ref('leaderboard').on('value', () => {
+          if (document.getElementById('modal-admin')?.classList.contains('open')) {
+            this.refreshPlayerList();
+          }
+        });
+
         // Listen for Maintenance Mode
         this._maintenanceInterval = null;
         this._lastShout = 0;
@@ -8149,6 +8156,20 @@
         const expiry = Date.now() + (hours * 3600000);
         await firebase.database().ref(`world/blacklist/${targetUid}`).set({ expiry });
         await this.kick(targetUid);
+      },
+
+      async banPlayer(targetUid, name, hours = 24) {
+        if (!targetUid || targetUid === 'undefined') {
+          alert("Cannot ban a player without a valid Account ID (UID).");
+          return;
+        }
+        if (!confirm(`Are you sure you want to ban ${name} for ${hours} hours?`)) return;
+
+        const expiry = Date.now() + (hours * 3600000);
+        await firebase.database().ref(`world/blacklist/${targetUid}`).set({ expiry });
+        await this.kick(targetUid);
+        Log.add(`🚫 Banned player ${name} (${targetUid}) for ${hours} hours.`, 'system');
+        Notify.error(`Banned ${name} for ${hours} hours.`);
       },
 
       async kick(targetUid) {
@@ -8927,6 +8948,8 @@
       _renderMessages() {
         const box = document.getElementById('chat-messages');
         if (!box) return;
+        
+        // Save scroll position
         const atBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 40;
 
         if (this._channel === 'guild' && !G.player?.guildName) {
@@ -8953,7 +8976,7 @@
           return;
         }
 
-        box.innerHTML = msgs.map(m => {
+        const html = msgs.map(m => {
           const fc = m.faction === 'saints' ? 'var(--gold)' : '#e08088';
           const fi = m.faction === 'saints' ? '☀️' : '💀';
           const time = new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -8962,7 +8985,17 @@
             + `<span style="color:var(--text-dim);font-size:10px;"> Lv${m.level} ${m.cls} · ${time}</span><br>`
             + `<span style="color:var(--text-lt);">${m.text}</span></div>`;
         }).join('');
-        if (atBottom) box.scrollTop = box.scrollHeight;
+
+        // ⚡ OPTIMIZATION: Only update DOM if HTML changed (prevents flashing)
+        if (box.innerHTML !== html) {
+          box.innerHTML = html;
+          // Smooth scroll to bottom if we were already there
+          if (atBottom) {
+             requestAnimationFrame(() => {
+                box.scrollTop = box.scrollHeight;
+             });
+          }
+        }
       },
 
       async send() {
