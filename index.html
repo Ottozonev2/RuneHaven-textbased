@@ -8248,6 +8248,8 @@
 
       handleRemoteCommand(cmd) {
         const p = G.player;
+        if (!p || !cmd) return;
+
         switch (cmd.type) {
           case 'GOLD':
             p.gold += cmd.amount;
@@ -8268,7 +8270,7 @@
             p.gold = 0;
             p.inventory = [];
             p.stash = [];
-            Log.add("⚡ <strong style="color:var(--red);">DIVINE RETRIBUTION:</strong> Your wealth and belongings have been stripped by the gods.", "error");
+            Log.add("⚡ <strong style='color:var(--red);'>DIVINE RETRIBUTION:</strong> Your wealth and belongings have been stripped by the gods.", "error");
             break;
         }
         UI.refresh();
