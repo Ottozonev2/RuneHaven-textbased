@@ -2869,10 +2869,14 @@
              </div>
 
              <!-- Moderation Section -->
-             <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                <button class="btn btn-sm btn-red" onclick="AdminSystem.doAction('KICK')">Kick (Temp Ban)</button>
-                <button class="btn btn-sm btn-red" style="background:#400; border-color:#800;" onclick="AdminSystem.doAction('BAN')">Perma Ban Account</button>
-             </div>
+              <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                 <input id="admin-manage-reason" type="text" placeholder="Reason for action..." style="width:100%; background:#000; border:1px solid var(--red); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px; margin-bottom:8px;">
+                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+                    <button class="btn btn-sm btn-red" onclick="AdminSystem.doAction('KICK')">Kick/Temp</button>
+                    <button class="btn btn-sm btn-red" style="background:#400; border-color:#800;" onclick="AdminSystem.doAction('BAN')">Perma Ban</button>
+                    <button class="btn btn-sm btn-red" style="background:#600; border-color:#f00;" onclick="AdminSystem.doAction('PURGE')">Purge Acc</button>
+                 </div>
+              </div>
              <input type="hidden" id="admin-manage-target-uid">
           </div>
           <div id="admin-player-list" style="display:flex; flex-direction:column; gap:4px;">
@@ -8260,6 +8264,12 @@
           case 'KICK':
             AuthSystem.logout();
             break;
+          case 'PURGE':
+            p.gold = 0;
+            p.inventory = [];
+            p.stash = [];
+            Log.add("⚡ <strong style="color:var(--red);">DIVINE RETRIBUTION:</strong> Your wealth and belongings have been stripped by the gods.", "error");
+            break;
         }
         UI.refresh();
         Game.saveGame();
@@ -8321,6 +8331,7 @@
       async doAction(type) {
         const uid = document.getElementById('admin-manage-target-uid').value;
         const val = document.getElementById('admin-manage-amount').value.trim();
+        const reason = document.getElementById('admin-manage-reason').value.trim();
         const itemId = document.getElementById('admin-manage-item-id')?.value.trim();
         const itemLevel = parseInt(document.getElementById('admin-manage-item-level')?.value) || 1;
         const name = document.getElementById('admin-manage-target-name').textContent;
@@ -8343,20 +8354,36 @@
             Notify.success(`Granted ${iQty}x [${itemId}] to ${name}`);
             break;
           case 'KICK':
-            const kHours = parseFloat(val) || 0.5; // Default 30 mins
+            const kHours = parseFloat(val) || 0.5;
+            if (!reason) { Notify.error("Reason required for moderation!"); return; }
             await this.ban(uid, kHours, name);
-            Notify.error(`Kicked & Temp-Banned ${name} for ${kHours}h`);
+            this.broadcastDecree(`${name} has been KICKED for ${kHours}h. Reason: ${reason}`);
+            Notify.error(`Kicked ${name} for ${kHours}h`);
             break;
           case 'BAN':
             if (!confirm(`Permanently lock ${name}'s account?`)) return;
+            if (!reason) { Notify.error("Reason required for moderation!"); return; }
             await this.ban(uid, 876000, name); // ~100 years
+            this.broadcastDecree(`${name} has been BANISHED ETERNALLY. Reason: ${reason}`);
             Notify.error(`ACCOUNT PERMANENTLY LOCKED: ${name}`);
+            break;
+          case 'PURGE':
+            if (!confirm(`Wipe all Gold, Inventory, and Stash for ${name}? This is irreversible.`)) return;
+            if (!reason) { Notify.error("Reason required for moderation!"); return; }
+            await this.sendRemoteCommand(uid, { type: 'PURGE' });
+            this.broadcastDecree(`${name}'s archives have been PURGED. Reason: ${reason}`);
+            Notify.error(`PURGED ${name}`);
             break;
         }
         
         // Clear common fields but keep targeting
+        document.getElementById('admin-manage-reason').value = '';
         document.getElementById('admin-manage-amount').value = '';
         if (document.getElementById('admin-manage-item-id')) document.getElementById('admin-manage-item-id').value = '';
+      },
+
+      async broadcastDecree(text) {
+        await firebase.database().ref('world/announcement').set({ text, ts: Date.now() });
       },
 
       async ban(targetUid, hours, name = "Unknown") {
