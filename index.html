@@ -2866,12 +2866,12 @@
                  <input id="admin-manage-item-id" type="text" placeholder="Item ID" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px; font-family:monospace;">
                  <input id="admin-manage-item-level" type="number" placeholder="Lv" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px;">
                  <select id="admin-manage-item-rarity" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px;">
-                    <option value="white">Common</option>
-                    <option value="green">Uncommon</option>
-                    <option value="blue">Rare</option>
-                    <option value="violet">Epic</option>
-                    <option value="gold">Legendary</option>
-                    <option value="crimson">Mythic</option>
+                    <option value="common">Common</option>
+                    <option value="uncommon">Uncommon</option>
+                    <option value="rare">Rare</option>
+                    <option value="epic">Epic</option>
+                    <option value="legendary">Legendary</option>
+                    <option value="mythic">Mythic</option>
                  </select>
                  <button class="btn btn-sm btn-gold" style="grid-column: span 3;" onclick="AdminSystem.doAction('ITEM')">Grant Item</button>
               </div>
@@ -3829,10 +3829,10 @@
     const RARITIES = {
       common: { name: 'Common', color: '#ffffff', mult: 1.0, rolls: 1 },
       uncommon: { name: 'Uncommon', color: '#4a9c6e', mult: 1.2, rolls: 2 },
-      magic: { name: 'Magic', color: '#4a70cf', mult: 1.5, rolls: 3 },
-      rare: { name: 'Rare', color: '#2a3a8a', mult: 1.8, rolls: 4 },
-      epic: { name: 'Epic', color: '#9060d8', mult: 2.2, rolls: 5 },
-      legendary: { name: 'Legendary', color: '#c9a84c', mult: 2.7, rolls: 6 }
+      rare: { name: 'Rare', color: '#4a70cf', mult: 1.5, rolls: 3 },
+      epic: { name: 'Epic', color: '#9060d8', mult: 2.0, rolls: 4 },
+      legendary: { name: 'Legendary', color: '#c9a84c', mult: 2.7, rolls: 5 },
+      mythic: { name: 'Mythic', color: '#c94050', mult: 3.5, rolls: 7 }
     };
 
     /* ============================================================
@@ -4670,10 +4670,10 @@
         // Higher rarities randomly roll bonus stat dimensions to feel unique
         let extraStatsCount = 0;
         if (rarity === 'uncommon' && Math.random() < 0.5) extraStatsCount = 1;
-        else if (rarity === 'magic') extraStatsCount = 1;
-        else if (rarity === 'rare') extraStatsCount = 1 + Math.floor(Math.random() * 2);
+        else if (rarity === 'rare') extraStatsCount = 1;
         else if (rarity === 'epic') extraStatsCount = 2 + Math.floor(Math.random() * 2);
         else if (rarity === 'legendary') extraStatsCount = 3 + Math.floor(Math.random() * 2);
+        else if (rarity === 'mythic') extraStatsCount = 5 + Math.floor(Math.random() * 3);
 
         const availableStats = combatStats.filter(stat => !s[stat]);
         for (let i = 0; i < extraStatsCount && availableStats.length > 0; i++) {
@@ -7795,6 +7795,12 @@
           const data = JSON.parse(raw);
           const p = data.player;
           if (confirm(`PERMANENTLY ERASE CHRONICLE?\n\nCharacter: ${p.name}\nLevel: ${p.level} ${CLASSES[p.classKey].name}\n\nThis cannot be undone and will remove the character from both local storage and the cloud.`)) {
+            // If deleting active slot, clear it to prevent re-saves
+            if (G.activeSaveSlot === key) {
+              G.activeSaveSlot = null;
+              G.player = null;
+            }
+            
             // Remove from local storage first
             localStorage.removeItem(key);
             // Wait for cloud deletion to finish so it doesn't get restored during the next poll/render
@@ -8190,12 +8196,13 @@
         }
       },
 
-      grantItem(itemId, targetUid = null, qty = 1, level = 1, rarity = 'white') {
+      grantItem(itemId, targetUid = null, qty = 1, level = 1, rarity = 'common') {
         if (targetUid) {
           this.sendRemoteCommand(targetUid, { type: 'ITEM', itemId: itemId, qty: qty, level: level, rarity: rarity });
         } else {
           Combat.addToInventory(itemId, qty, level, rarity);
-          Notify.success(`Admin granted you ${qty}x item: ${itemId} (Lv.${level}, ${rarity})`);
+          const rarName = RARITIES[rarity]?.name || 'Common';
+          Notify.success(`Admin granted you ${qty}x ${itemId} (${rarName}, Lv.${level})`);
           // Clear self inputs if they exist
           const inputs = ['admin-item-input', 'admin-item-qty', 'admin-item-level'];
           inputs.forEach(id => {
@@ -8268,8 +8275,10 @@
             Log.add(`🌀 <strong>Admin Gift:</strong> You have been granted ${cmd.amount} levels!`, 'levelup');
             break;
           case 'ITEM':
-            Combat.addToInventory(cmd.itemId, cmd.qty || 1, cmd.level || 1, cmd.rarity || 'white');
-            Log.add(`📦 <strong>Admin Gift:</strong> Received ${cmd.qty || 1}x ${cmd.itemId} (Lv.${cmd.level || 1}, ${cmd.rarity || 'white'})!`, 'violet');
+            Combat.addToInventory(cmd.itemId, cmd.qty || 1, cmd.level || 1, cmd.rarity || 'common');
+            const rName = RARITIES[cmd.rarity]?.name || 'Common';
+            const rColor = RARITIES[cmd.rarity]?.color || '#fff';
+            Log.add(`📦 <strong>Admin Gift:</strong> Received ${cmd.qty || 1}x <span style="color:${rColor}">${cmd.itemId}</span> (Lv.${cmd.level || 1}, ${rName})!`, 'loot');
             break;
           case 'KICK':
             AuthSystem.logout();
