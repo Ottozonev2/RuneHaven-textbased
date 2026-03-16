@@ -8454,8 +8454,18 @@
       async checkOwnership(isSilent = false) {
         if (!AuthSystem.user) return;
         try {
-          const snap = await firebase.database().ref(`world/ownership/${AuthSystem.user.uid}`).once('value');
-          this.isOwned = snap.val() === true;
+          // 1. Check direct ownership
+          const ownSnap = await firebase.database().ref(`world/ownership/${AuthSystem.user.uid}`).once('value');
+          this.isOwned = ownSnap.val() === true;
+
+          // 2. Fallback: Check if user is an Admin
+          if (!this.isOwned) {
+            const adminSnap = await firebase.database().ref(`world/admins/${AuthSystem.user.uid}`).once('value');
+            if (adminSnap.exists() && adminSnap.val() === true) {
+              this.isOwned = true;
+              console.log("Admin Bypass: Ownership granted via Admin status.");
+            }
+          }
 
           if (this.isOwned) {
             // Success: Proceed to character select
