@@ -794,6 +794,7 @@
       border-bottom: 2px solid var(--border);
       cursor: crosshair;
     }
+
     #three-canvas {
       position: absolute;
       top: 0;
@@ -2344,8 +2345,18 @@
     }
 
     @keyframes updateLogoPulse {
-      0%, 100% { opacity: 0.8; transform: scale(0.98); }
-      50% { opacity: 1; transform: scale(1.02); filter: brightness(1.2); }
+
+      0%,
+      100% {
+        opacity: 0.8;
+        transform: scale(0.98);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.02);
+        filter: brightness(1.2);
+      }
     }
 
     .update-status {
@@ -2407,11 +2418,20 @@
      ============================================================ -->
   <div id="screen-title" class="screen active">
     <!-- Landing Navigation -->
-    <nav style="position:absolute; top:0; left:0; width:100%; height:60px; display:flex; align-items:center; justify-content:center; gap:30px; z-index:1000; background:linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); padding:0 20px;">
-      <a href="#" style="color:var(--gold-lt); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;" onclick="Landing.showSection('game')">GAME</a>
-      <a href="#" style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;" onclick="Landing.showSection('about')" id="nav-about">ABOUT</a>
-      <a href="#" style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;" onclick="Landing.showSection('updates')" id="nav-updates">UPDATES</a>
-      <a href="#" style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;" onclick="Landing.showSection('contact')" id="nav-contact">CONTACT</a>
+    <nav
+      style="position:absolute; top:0; left:0; width:100%; height:60px; display:flex; align-items:center; justify-content:center; gap:30px; z-index:1000; background:linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); padding:0 20px;">
+      <a href="#"
+        style="color:var(--gold-lt); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;"
+        onclick="Landing.showSection('game')">GAME</a>
+      <a href="#"
+        style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;"
+        onclick="Landing.showSection('about')" id="nav-about">ABOUT</a>
+      <a href="#"
+        style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;"
+        onclick="Landing.showSection('updates')" id="nav-updates">UPDATES</a>
+      <a href="#"
+        style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;"
+        onclick="Landing.showSection('contact')" id="nav-contact">CONTACT</a>
     </nav>
 
     <!-- Cloud Auth Header -->
@@ -2460,16 +2480,23 @@
     </div>
 
     <!-- About Us Section -->
-    <div id="landing-section-about" class="landing-content" style="display:none; padding-top:100px; max-width:600px; margin:0 auto; text-align:center;">
-      <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; margin-bottom:20px;">OUR JOURNEY</div>
-      <div style="color:var(--text-dim); font-size:14px; line-height:1.8; margin-bottom:30px;">
-        Rune Haven was born from a passion for classic text-based RPGs and a desire to merge deep, lore-driven storytelling with modern web technologies.
-        Based in the shattered lands of the Outworld, our development team is dedicated to creating a living world that responds to player choices.
-        <br><br>
-        Since the <strong>Shattered Summoning</strong>, we have committed ourselves to expanding Eryndor, one update at a time.
-        Rune Haven is not just a game; it is a collaborative experience between developers and the brave souls who brave the Veil.
+    <div id="landing-section-about" class="landing-content"
+      style="display:none; padding-top:100px; max-width:600px; margin:0 auto; text-align:center;">
+      <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; margin-bottom:20px;">OUR JOURNEY
       </div>
-      <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:18px; margin-bottom:15px;">THE OUTWORLDER TEAM</div>
+      <div style="color:var(--text-dim); font-size:14px; line-height:1.8; margin-bottom:30px;">
+        Rune Haven was born from a passion for classic text-based RPGs and a desire to merge deep, lore-driven
+        storytelling with modern web technologies.
+        Based in the shattered lands of the Outworld, our development team is dedicated to creating a living world that
+        responds to player choices.
+        <br><br>
+        Since the <strong>Shattered Summoning</strong>, we have committed ourselves to expanding Eryndor, one update at
+        a time.
+        Rune Haven is not just a game; it is a collaborative experience between developers and the brave souls who brave
+        the Veil.
+      </div>
+      <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:18px; margin-bottom:15px;">THE
+        OUTWORLDER TEAM</div>
       <div style="display:flex; justify-content:center; gap:20px; color:var(--text-lt); font-size:12px;">
         <div>Architect: Rune1472</div>
         <div>Scribe: Deepmind AI</div>
@@ -2478,11 +2505,15 @@
     </div>
 
     <!-- Latest Updates Section -->
-    <div id="landing-section-updates" class="landing-content" style="display:none; padding-top:100px; max-width:600px; margin:0 auto;">
-      <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; text-align:center; margin-bottom:30px;">LATEST CHRONICLES</div>
+    <div id="landing-section-updates" class="landing-content"
+      style="display:none; padding-top:100px; max-width:600px; margin:0 auto;">
+      <div
+        style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; text-align:center; margin-bottom:30px;">
+        LATEST CHRONICLES</div>
       <div style="display:flex; flex-direction:column; gap:20px;">
         <div style="background:var(--bg-mid); border:1px solid var(--border); padding:20px; border-radius:8px;">
-          <div style="color:var(--gold); font-family:'Cinzel',serif; font-size:16px; margin-bottom:8px;">v3.9: THE TREASURY UNVEILED</div>
+          <div style="color:var(--gold); font-family:'Cinzel',serif; font-size:16px; margin-bottom:8px;">v3.9: THE
+            TREASURY UNVEILED</div>
           <div style="color:var(--text-dim); font-size:12px; line-height:1.5;">
             - Implemented secure monetization bridge via Cloudflare Workers.<br>
             - Added the Rune Exchange modal for premium resource conversion.<br>
@@ -2491,8 +2522,10 @@
           </div>
           <div style="text-align:right; color:var(--text-dim); font-size:10px; margin-top:10px;">March 16, 2026</div>
         </div>
-        <div style="background:var(--bg-mid); border:1px solid var(--border); padding:20px; border-radius:8px; opacity:0.7;">
-          <div style="color:var(--text-lt); font-family:'Cinzel',serif; font-size:16px; margin-bottom:8px;">v3.8: VEIL BREACH REFINEMENTS</div>
+        <div
+          style="background:var(--bg-mid); border:1px solid var(--border); padding:20px; border-radius:8px; opacity:0.7;">
+          <div style="color:var(--text-lt); font-family:'Cinzel',serif; font-size:16px; margin-bottom:8px;">v3.8: VEIL
+            BREACH REFINEMENTS</div>
           <div style="color:var(--text-dim); font-size:12px; line-height:1.5;">
             - Integrated Three.js for 3D world navigation.<br>
             - Added dynamic lighting and environment effects.<br>
@@ -2504,21 +2537,27 @@
     </div>
 
     <!-- Contact Us Section -->
-    <div id="landing-section-contact" class="landing-content" style="display:none; padding-top:100px; max-width:500px; margin:0 auto; text-align:center;">
+    <div id="landing-section-contact" class="landing-content"
+      style="display:none; padding-top:100px; max-width:500px; margin:0 auto; text-align:center;">
       <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; margin-bottom:20px;">REACH OUT</div>
       <div style="color:var(--text-dim); font-size:14px; margin-bottom:30px;">
         Have feedback, discovered a bug, or just want to send word from your side of the Veil? Use the channels below.
       </div>
       <div style="display:flex; flex-direction:column; gap:15px;">
-        <a href="mailto:contact@runehaven.com" style="background:var(--bg-mid); border:1px solid var(--border); padding:15px; border-radius:8px; color:var(--text-lt); text-decoration:none; font-family:'Cinzel',serif;">
+        <a href="mailto:contact@runehaven.com"
+          style="background:var(--bg-mid); border:1px solid var(--border); padding:15px; border-radius:8px; color:var(--text-lt); text-decoration:none; font-family:'Cinzel',serif;">
           📧 SEND AN OWL (EMAIL)
         </a>
-        <a href="https://discord.gg/runehaven" target="_blank" style="background:var(--bg-mid); border:1px solid var(--border); padding:15px; border-radius:8px; color:var(--violet-lt); text-decoration:none; font-family:'Cinzel',serif;">
+        <a href="https://discord.gg/runehaven" target="_blank"
+          style="background:var(--bg-mid); border:1px solid var(--border); padding:15px; border-radius:8px; color:var(--violet-lt); text-decoration:none; font-family:'Cinzel',serif;">
           💬 JOIN THE COUNCIL (DISCORD)
         </a>
-        <div style="margin-top:20px; padding:20px; background:rgba(255,183,0,0.05); border:1px solid var(--gold-dk); border-radius:8px;">
-          <div style="font-size:12px; color:var(--gold); font-family:'Cinzel',serif; margin-bottom:10px;">FORGE FEEDBACK</div>
-          <input type="text" placeholder="Your Message..." style="width:100%; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:10px; margin-bottom:10px; font-size:12px;">
+        <div
+          style="margin-top:20px; padding:20px; background:rgba(255,183,0,0.05); border:1px solid var(--gold-dk); border-radius:8px;">
+          <div style="font-size:12px; color:var(--gold); font-family:'Cinzel',serif; margin-bottom:10px;">FORGE FEEDBACK
+          </div>
+          <input type="text" placeholder="Your Message..."
+            style="width:100%; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:10px; margin-bottom:10px; font-size:12px;">
           <button class="btn btn-sm btn-gold" style="width:100%;">SEND DECREE</button>
         </div>
       </div>
@@ -2537,7 +2576,8 @@
 
     <div id="auth-box"
       style="width:100%; max-width:320px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.5); position:relative;">
-      <button onclick="Landing.hideLogin()" style="position:absolute; top:12px; right:12px; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:18px;">✕</button>
+      <button onclick="Landing.hideLogin()"
+        style="position:absolute; top:12px; right:12px; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:18px;">✕</button>
       <div id="auth-title"
         style="font-family:'Cinzel',serif; color:var(--gold); font-size:18px; margin-bottom:20px; text-align:center;">
         Sign In</div>
@@ -2574,7 +2614,8 @@
   <div id="screen-charselect" class="screen">
     <div
       style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--bg-panel);">
-      <div style="font-family:'Cinzel',serif;color:var(--gold-lt);font-size:16px;letter-spacing:2px;">🌀 Chronicles of Eryndor</div>
+      <div style="font-family:'Cinzel',serif;color:var(--gold-lt);font-size:16px;letter-spacing:2px;">🌀 Chronicles of
+        Eryndor</div>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-sm" onclick="Game.showTitle()">&#8592; Back</button>
         <button class="btn btn-sm btn-red" onclick="AuthSystem.logout()">Logout</button>
@@ -2590,70 +2631,100 @@
   <!-- ============================================================
      OWNERSHIP VERIFICATION
      ============================================================ -->
-  <div id="screen-verification" class="screen" style="align-items:center; justify-content:center; text-align:center; padding:40px; background-image: radial-gradient(circle at center, rgba(201, 168, 76, 0.05) 0%, transparent 70%);">
+  <div id="screen-verification" class="screen"
+    style="align-items:center; justify-content:center; text-align:center; padding:40px; background-image: radial-gradient(circle at center, rgba(201, 168, 76, 0.05) 0%, transparent 70%);">
     <div class="title-emblem" style="font-size:64px; margin-bottom:20px;">🌀</div>
-    <div class="maintenance-title" style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:24px; margin-bottom:10px;">Verify Ownership</div>
-    <div class="maintenance-msg" style="color:var(--text-dim); font-size:14px; margin-bottom:30px; line-height:1.6; max-width:400px; margin-left:auto; margin-right:auto;">
-      You do not currently own access to this game. Purchase the game to begin playing your chronicle and saving your progress.
+    <div class="maintenance-title"
+      style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:24px; margin-bottom:10px;">Verify Ownership
+    </div>
+    <div class="maintenance-msg"
+      style="color:var(--text-dim); font-size:14px; margin-bottom:30px; line-height:1.6; max-width:400px; margin-left:auto; margin-right:auto;">
+      You do not currently own access to this game. Purchase the game to begin playing your chronicle and saving your
+      progress.
     </div>
     <button class="btn btn-gold btn-lg" onclick="MonetizationSystem.showPurchase()">Purchase Game — $5</button>
-    <button class="btn btn-sm" style="margin-top:20px; border:none; text-decoration:underline; font-size:12px; color:var(--text-dim);" onclick="AuthSystem.logout()">Sign Out</button>
+    <button class="btn btn-sm"
+      style="margin-top:20px; border:none; text-decoration:underline; font-size:12px; color:var(--text-dim);"
+      onclick="AuthSystem.logout()">Sign Out</button>
   </div>
 
   <!-- ============================================================
      PURCHASE SCREEN
      ============================================================ -->
-  <div id="screen-purchase" class="screen" style="overflow-y:auto; padding:20px 20px calc(20px + var(--safe-bottom)); background:var(--bg);">
-    <div class="create-title" style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; text-align:center; margin-top:20px;">The Outworlder's Treasury</div>
-    <div class="create-subtitle" style="text-align:center; color:var(--text-dim); margin-bottom:20px;">Unlock full access and power your journey in Eryndor</div>
+  <div id="screen-purchase" class="screen"
+    style="overflow-y:auto; padding:20px 20px calc(20px + var(--safe-bottom)); background:var(--bg);">
+    <div class="create-title"
+      style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; text-align:center; margin-top:20px;">The
+      Outworlder's Treasury</div>
+    <div class="create-subtitle" style="text-align:center; color:var(--text-dim); margin-bottom:20px;">Unlock full
+      access and power your journey in Eryndor</div>
 
     <!-- Early Access Disclaimer -->
-    <div style="max-width:600px; margin:0 auto 30px; background:rgba(255,165,0,0.05); border:1px solid rgba(255,165,0,0.3); border-radius:8px; padding:15px; display:flex; gap:12px; align-items:flex-start;">
+    <div
+      style="max-width:600px; margin:0 auto 30px; background:rgba(255,165,0,0.05); border:1px solid rgba(255,165,0,0.3); border-radius:8px; padding:15px; display:flex; gap:12px; align-items:flex-start;">
       <div style="font-size:20px;">⚠️</div>
       <div style="font-size:11px; color:var(--text-dim); line-height:1.5;">
-        <strong style="color:var(--gold-lt); display:block; margin-bottom:2px; font-family:'Cinzel',serif;">EARLY ACCESS NOTICE</strong>
-        Rune Haven is currently in Early Access. By purchasing, you acknowledge that the project is subject to significant changes, balance updates, or potential shutdown if development becomes unsustainable. No refunds are available for digital goods or licenses.
+        <strong style="color:var(--gold-lt); display:block; margin-bottom:2px; font-family:'Cinzel',serif;">EARLY ACCESS
+          NOTICE</strong>
+        Rune Haven is currently in Early Access. By purchasing, you acknowledge that the project is subject to
+        significant changes, balance updates, or potential shutdown if development becomes unsustainable. No refunds are
+        available for digital goods or licenses.
       </div>
     </div>
 
     <div style="max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:20px;">
       <!-- Base Game -->
-      <div style="background:var(--bg-mid); border:2px solid var(--gold); border-radius:12px; padding:30px; text-align:center; box-shadow: 0 0 30px rgba(201, 168, 76, 0.1);">
-        <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:20px; margin-bottom:10px;">RUNE HAVEN: FULL ACCESS</div>
+      <div
+        style="background:var(--bg-mid); border:2px solid var(--gold); border-radius:12px; padding:30px; text-align:center; box-shadow: 0 0 30px rgba(201, 168, 76, 0.1);">
+        <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:20px; margin-bottom:10px;">RUNE HAVEN:
+          FULL ACCESS</div>
         <div style="font-size:13px; color:var(--text-dim); margin-bottom:25px; line-height:1.6;">
-          Everything you need to experience the dark world of Eryndor. Full access to all locations, level caps removed, and priority server access.
+          Everything you need to experience the dark world of Eryndor. Full access to all locations, level caps removed,
+          and priority server access.
         </div>
         <div style="font-size:32px; color:var(--gold); font-family:'Cinzel',serif; margin-bottom:20px;">$5.00</div>
-        <button class="btn btn-gold btn-lg" style="width:100%;" onclick="MonetizationSystem.purchaseGame()">Unlock Game Access</button>
+        <button class="btn btn-gold btn-lg" style="width:100%;" onclick="MonetizationSystem.purchaseGame()">Unlock Game
+          Access</button>
       </div>
 
       <!-- Rune Packs Title -->
-      <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:18px; text-align:center; margin-top:20px; letter-spacing:2px;">💎 PURCHASE RUNES 💎</div>
+      <div
+        style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:18px; text-align:center; margin-top:20px; letter-spacing:2px;">
+        💎 PURCHASE RUNES 💎</div>
 
       <!-- Rune Packs -->
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:15px;">
-        <div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:10px; padding:20px; text-align:center;">
+        <div
+          style="background:var(--bg-mid); border:1px solid var(--border); border-radius:10px; padding:20px; text-align:center;">
           <div style="font-size:32px; margin-bottom:10px;">💎</div>
           <div style="font-family:'Cinzel',serif; color:var(--text-lt); font-size:14px;">Minor Case</div>
           <div style="font-size:12px; color:var(--violet-lt); font-weight:bold; margin-bottom:15px;">100 Runes</div>
-          <button class="btn btn-sm btn-gold" style="width:100%;" onclick="MonetizationSystem.purchaseRunes(1, 100)">$1.00</button>
+          <button class="btn btn-sm btn-gold" style="width:100%;"
+            onclick="MonetizationSystem.purchaseRunes(1, 100)">$1.00</button>
         </div>
-        <div style="background:var(--bg-mid); border:2px solid var(--rh-gold); border-radius:10px; padding:20px; text-align:center; position:relative; transform:scale(1.05);">
-          <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:10px; font-weight:bold; padding:3px 12px; border-radius:20px; font-family:'Cinzel',serif; box-shadow:0 4px 10px rgba(0,0,0,0.5);">POPULAR</div>
+        <div
+          style="background:var(--bg-mid); border:2px solid var(--rh-gold); border-radius:10px; padding:20px; text-align:center; position:relative; transform:scale(1.05);">
+          <div
+            style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:10px; font-weight:bold; padding:3px 12px; border-radius:20px; font-family:'Cinzel',serif; box-shadow:0 4px 10px rgba(0,0,0,0.5);">
+            POPULAR</div>
           <div style="font-size:32px; margin-bottom:10px;">✨💎</div>
           <div style="font-family:'Cinzel',serif; color:var(--text-lt); font-size:14px;">Rune Cache</div>
           <div style="font-size:12px; color:var(--violet-lt); font-weight:bold; margin-bottom:15px;">600 Runes</div>
-          <button class="btn btn-sm btn-gold" style="width:100%;" onclick="MonetizationSystem.purchaseRunes(5, 600)">$5.00</button>
+          <button class="btn btn-sm btn-gold" style="width:100%;"
+            onclick="MonetizationSystem.purchaseRunes(5, 600)">$5.00</button>
         </div>
-        <div style="background:var(--bg-mid); border:1px solid var(--violet-lt); border-radius:10px; padding:20px; text-align:center;">
+        <div
+          style="background:var(--bg-mid); border:1px solid var(--violet-lt); border-radius:10px; padding:20px; text-align:center;">
           <div style="font-size:32px; margin-bottom:10px;">🔱💎</div>
           <div style="font-family:'Cinzel',serif; color:var(--text-lt); font-size:14px;">King's Vault</div>
           <div style="font-size:12px; color:var(--violet-lt); font-weight:bold; margin-bottom:15px;">1400 Runes</div>
-          <button class="btn btn-sm btn-gold" style="width:100%;" onclick="MonetizationSystem.purchaseRunes(10, 1400)">$10.00</button>
+          <button class="btn btn-sm btn-gold" style="width:100%;"
+            onclick="MonetizationSystem.purchaseRunes(10, 1400)">$10.00</button>
         </div>
       </div>
 
-      <button class="btn btn-sm" style="margin-top:20px; align-self:center;" onclick="MonetizationSystem.backToVerification()">← Return to Verification</button>
+      <button class="btn btn-sm" style="margin-top:20px; align-self:center;"
+        onclick="MonetizationSystem.backToVerification()">← Return to Verification</button>
     </div>
   </div>
 
@@ -2729,11 +2800,15 @@
         <span class="topbar-faction" id="top-faction">—</span>
       </div>
       <div class="topbar-btns">
-        <div style="display:flex; align-items:center; background:rgba(144,96,216,0.1); border:1px solid var(--violet-lt); border-radius:4px; padding:0 4px; gap:4px; margin-right:4px;">
-          <span style="color:var(--violet-lt); font-weight:bold; font-size:11px;">💎 <span id="top-runes-val">0</span></span>
-          <button class="btn btn-sm btn-violet" style="min-height:20px; height:20px; padding:0 4px; font-size:12px;" onclick="MonetizationSystem.showStore()" title="Get Runes">+</button>
+        <div
+          style="display:flex; align-items:center; background:rgba(144,96,216,0.1); border:1px solid var(--violet-lt); border-radius:4px; padding:0 4px; gap:4px; margin-right:4px;">
+          <span style="color:var(--violet-lt); font-weight:bold; font-size:11px;">💎 <span
+              id="top-runes-val">0</span></span>
+          <button class="btn btn-sm btn-violet" style="min-height:20px; height:20px; padding:0 4px; font-size:12px;"
+            onclick="MonetizationSystem.showStore()" title="Get Runes">+</button>
         </div>
-        <button class="btn btn-sm btn-gold" onclick="MonetizationSystem.openExchange()" title="Convert Runes">💎 Exchange</button>
+        <button class="btn btn-sm btn-gold" onclick="MonetizationSystem.openExchange()" title="Convert Runes">💎
+          Exchange</button>
         <button class="btn btn-sm" onclick="UI.openModal('modal-settings')" title="Audio Settings">🔊</button>
         <button class="btn btn-sm btn-gold" onclick="GlobalChat.openParty()" title="Party Management">⚔️ Party</button>
         <button class="btn btn-sm btn-gold" onclick="Game.saveGame()" title="Save Game">💾</button>
@@ -3088,40 +3163,55 @@
   <!-- In-Game Rune Purchase Modal -->
   <div class="modal-overlay" id="modal-purchase-runes" style="z-index: 2200;">
     <div class="modal" style="max-width:480px; padding:0; overflow:hidden;">
-      <div style="padding:20px; background:var(--bg-mid); border-bottom:1px solid var(--violet-lt); display:flex; justify-content:space-between; align-items:center;">
+      <div
+        style="padding:20px; background:var(--bg-mid); border-bottom:1px solid var(--violet-lt); display:flex; justify-content:space-between; align-items:center;">
         <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:18px;">💎 THE RUNE FORGE</div>
-        <button onclick="UI.closeModal('modal-purchase-runes')" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:20px;">✕</button>
+        <button onclick="UI.closeModal('modal-purchase-runes')"
+          style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:20px;">✕</button>
       </div>
-      
+
       <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
-        <div style="text-align:center; padding:12px; background:rgba(144,96,216,0.05); border:1px solid rgba(144,96,216,0.2); border-radius:8px;">
-          <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Current Balance</div>
-          <div style="font-size:24px; color:var(--violet-lt); font-family:'Cinzel',serif;">💎 <span class="rune-balance-display">0</span></div>
+        <div
+          style="text-align:center; padding:12px; background:rgba(144,96,216,0.05); border:1px solid rgba(144,96,216,0.2); border-radius:8px;">
+          <div
+            style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">
+            Current Balance</div>
+          <div style="font-size:24px; color:var(--violet-lt); font-family:'Cinzel',serif;">💎 <span
+              class="rune-balance-display">0</span></div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
           <!-- Pack 1 -->
-          <div style="background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:15px; text-align:center; cursor:pointer;" onclick="MonetizationSystem.purchaseRunes('runes_1')">
+          <div
+            style="background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:15px; text-align:center; cursor:pointer;"
+            onclick="MonetizationSystem.purchaseRunes('runes_1')">
             <div style="font-size:24px; margin-bottom:8px;">💎</div>
             <div style="font-size:12px; font-weight:bold; color:var(--violet-lt);">100 Runes</div>
             <div style="font-size:10px; color:var(--gold); margin-top:4px;">$1.00</div>
           </div>
           <!-- Pack 5 -->
-          <div style="background:var(--bg-panel); border:2px solid var(--gold); border-radius:8px; padding:15px; text-align:center; cursor:pointer; position:relative;" onclick="MonetizationSystem.purchaseRunes('runes_5')">
-            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:8px; font-weight:bold; padding:2px 8px; border-radius:10px;">BEST VALUE</div>
+          <div
+            style="background:var(--bg-panel); border:2px solid var(--gold); border-radius:8px; padding:15px; text-align:center; cursor:pointer; position:relative;"
+            onclick="MonetizationSystem.purchaseRunes('runes_5')">
+            <div
+              style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:8px; font-weight:bold; padding:2px 8px; border-radius:10px;">
+              BEST VALUE</div>
             <div style="font-size:24px; margin-bottom:8px;">✨💎</div>
             <div style="font-size:12px; font-weight:bold; color:var(--violet-lt);">600 Runes</div>
             <div style="font-size:10px; color:var(--gold); margin-top:4px;">$5.00</div>
           </div>
           <!-- Pack 10 -->
-          <div style="background:var(--bg-panel); border:1px solid var(--violet-lt); border-radius:8px; padding:15px; text-align:center; cursor:pointer;" onclick="MonetizationSystem.purchaseRunes('runes_10')">
+          <div
+            style="background:var(--bg-panel); border:1px solid var(--violet-lt); border-radius:8px; padding:15px; text-align:center; cursor:pointer;"
+            onclick="MonetizationSystem.purchaseRunes('runes_10')">
             <div style="font-size:24px; margin-bottom:8px;">🔱💎</div>
             <div style="font-size:12px; font-weight:bold; color:var(--violet-lt);">1300 Runes</div>
             <div style="font-size:10px; color:var(--gold); margin-top:4px;">$10.00</div>
           </div>
         </div>
 
-        <div style="font-size:10px; color:var(--text-dim); font-style:italic; text-align:center; border-top:1px solid var(--border); padding-top:12px;">
+        <div
+          style="font-size:10px; color:var(--text-dim); font-style:italic; text-align:center; border-top:1px solid var(--border); padding-top:12px;">
           Runes are used for resource exchange and cosmetics. No refunds available on digital essence.
         </div>
       </div>
@@ -3132,14 +3222,20 @@
   <div class="modal-overlay" id="modal-runes" style="z-index: 2100;">
     <div class="modal" style="max-width:450px;">
       <div class="modal-title" style="color:var(--violet-lt); font-family:'Cinzel',serif;">💎 RUNE EXCHANGE</div>
-      <div style="text-align:center; margin-bottom:20px; padding:15px; background:rgba(144,96,216,0.05); border:1px solid var(--violet-lt); border-radius:8px;">
-        <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Your Balance</div>
-        <div style="font-size:32px; color:var(--violet-lt); font-family:'Cinzel',serif; font-weight:bold;">💎 <span class="rune-balance-display">0</span></div>
+      <div
+        style="text-align:center; margin-bottom:20px; padding:15px; background:rgba(144,96,216,0.05); border:1px solid var(--violet-lt); border-radius:8px;">
+        <div
+          style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">
+          Your Balance</div>
+        <div style="font-size:32px; color:var(--violet-lt); font-family:'Cinzel',serif; font-weight:bold;">💎 <span
+            class="rune-balance-display">0</span></div>
       </div>
 
       <div style="display:flex; flex-direction:column; gap:12px;">
         <!-- Exchange Options -->
-        <button class="btn btn-gold" style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;" onclick="MonetizationSystem.exchange('gold')">
+        <button class="btn btn-gold"
+          style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;"
+          onclick="MonetizationSystem.exchange('gold')">
           <div>
             <div style="font-size:14px; color:var(--text-lt); font-family:'Cinzel',serif;">Coins of Solmara</div>
             <div style="font-size:10px; color:var(--text-dim);">Exchange 100 Runes for 🪙 10,000 Gold</div>
@@ -3147,7 +3243,9 @@
           <div style="font-size:14px; font-weight:bold;">100 💎</div>
         </button>
 
-        <button class="btn btn-rh" style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;" onclick="MonetizationSystem.exchange('materials')">
+        <button class="btn btn-rh"
+          style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;"
+          onclick="MonetizationSystem.exchange('materials')">
           <div>
             <div style="font-size:14px; color:var(--text-lt); font-family:'Cinzel',serif;">Artisan's Bundle</div>
             <div style="font-size:10px; color:var(--text-dim);">Exchange 250 Runes for rare crafting materials</div>
@@ -3155,7 +3253,9 @@
           <div style="font-size:14px; font-weight:bold;">250 💎</div>
         </button>
 
-        <button class="btn btn-blue" style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;" onclick="MonetizationSystem.exchange('sp')">
+        <button class="btn btn-blue"
+          style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;"
+          onclick="MonetizationSystem.exchange('sp')">
           <div>
             <div style="font-size:14px; color:var(--text-lt); font-family:'Cinzel',serif;">Ancient Wisdom</div>
             <div style="font-size:10px; color:var(--text-dim);">Exchange 500 Runes for 5 Stat Points</div>
@@ -3165,7 +3265,8 @@
       </div>
 
       <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
-        <button class="btn btn-sm btn-gold" onclick="MonetizationSystem.showPurchase(); UI.closeModal('modal-runes');">Get More Runes</button>
+        <button class="btn btn-sm btn-gold"
+          onclick="MonetizationSystem.showPurchase(); UI.closeModal('modal-runes');">Get More Runes</button>
         <button class="btn btn-sm" onclick="UI.closeModal('modal-runes')">Close</button>
       </div>
     </div>
@@ -3238,11 +3339,14 @@
               <button class="btn btn-sm btn-gold" onclick="AdminSystem.doAction('GOLD')">Give Gold</button>
               <button class="btn btn-sm btn-blue" onclick="AdminSystem.doAction('RUNES')">Give Runes</button>
               <button class="btn btn-sm btn-violet" onclick="AdminSystem.doAction('LEVEL')">Give Lv</button>
-              <div style="grid-column: span 3; background:#000; border:1px solid var(--violet-lt); border-radius:4px; padding:8px; text-align:center; margin-top:4px;">
+              <div
+                style="grid-column: span 3; background:#000; border:1px solid var(--violet-lt); border-radius:4px; padding:8px; text-align:center; margin-top:4px;">
                 <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Player Runes</div>
-                <div style="font-size:16px; color:var(--violet-lt); font-family:'Cinzel',serif;">💎 <span id="admin-manage-target-runes">0</span></div>
+                <div style="font-size:16px; color:var(--violet-lt); font-family:'Cinzel',serif;">💎 <span
+                    id="admin-manage-target-runes">0</span></div>
               </div>
-              <button class="btn btn-sm btn-gold" style="grid-column: span 3;" onclick="AdminSystem.doAction('OWNERSHIP')">Grant Ownership License</button>
+              <button class="btn btn-sm btn-gold" style="grid-column: span 3;"
+                onclick="AdminSystem.doAction('OWNERSHIP')">Grant Ownership License</button>
             </div>
 
             <!-- Item Granting -->
@@ -5235,7 +5339,7 @@
         document.getElementById('top-level').textContent = p.level;
         document.getElementById('top-hp').textContent = `${p.hp}/${maxHp}`;
         document.getElementById('top-gold').textContent = p.gold;
-        
+
         // Update Rune Balance Displays
         const runeBal = p.runes || 0;
         document.querySelectorAll('.rune-balance-display').forEach(el => el.textContent = runeBal);
@@ -6205,12 +6309,12 @@
         if (vp) {
           vp.addEventListener('click', () => vp.focus());
           vp.addEventListener('pointerdown', e => {
-              if (G.inCombat) return;
-              const rect = vp.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-              G.world.targetX = x;
-              G.world.targetY = y;
+            if (G.inCombat) return;
+            const rect = vp.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            G.world.targetX = x;
+            G.world.targetY = y;
           });
         }
         window.addEventListener('keydown', e => this.handleKey(e));
@@ -6225,9 +6329,9 @@
         this.startSync();
         this.updateTerrain();
         this.generateDecor();
-        
+
         if (typeof THREE !== 'undefined') this.init3D();
-        
+
         Log.add('🗺️ World View initialized. Click to move.', 'system');
         setTimeout(() => this.render(), 100);
       },
@@ -6268,25 +6372,25 @@
       animate3D() {
         if (!this._three.renderer) return;
         requestAnimationFrame(() => this.animate3D());
-        
+
         // Target Movement Logic
         if (!G.inCombat && G.world.targetX !== undefined && G.world.targetY !== undefined) {
-            const dx = G.world.targetX - G.world.x;
-            const dy = G.world.targetY - G.world.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const speed = 4; // Velocity per frame
-            
-            if (dist > speed) {
-                const vx = (dx / dist) * speed;
-                const vy = (dy / dist) * speed;
-                this.move(vx, vy);
-            } else {
-                G.world.x = G.world.targetX;
-                G.world.y = G.world.targetY;
-                G.world.targetX = undefined;
-                G.world.targetY = undefined;
-                this.render();
-            }
+          const dx = G.world.targetX - G.world.x;
+          const dy = G.world.targetY - G.world.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const speed = 4; // Velocity per frame
+
+          if (dist > speed) {
+            const vx = (dx / dist) * speed;
+            const vy = (dy / dist) * speed;
+            this.move(vx, vy);
+          } else {
+            G.world.x = G.world.targetX;
+            G.world.y = G.world.targetY;
+            G.world.targetX = undefined;
+            G.world.targetY = undefined;
+            this.render();
+          }
         }
 
         this._three.renderer.render(this._three.scene, this._three.camera);
@@ -6357,34 +6461,34 @@
 
           this.decor.push({ x, y, assetType, type, size: s, flip });
         }
-        
+
         // Update 3D Decor
         if (this._three.scene) {
-            this._three.decor.forEach(obj => this._three.scene.remove(obj));
-            this._three.decor = [];
-            
-            this.decor.forEach(d => {
-                let mesh;
-                if (d.assetType === 'tree') {
-                    const geometry = new THREE.ConeGeometry(d.size/6, d.size, 8);
-                    const material = new THREE.MeshPhongMaterial({ color: 0x243414 });
-                    mesh = new THREE.Mesh(geometry, material);
-                } else if (d.assetType === 'building') {
-                    const geometry = new THREE.BoxGeometry(d.size * 0.8, d.size/1.5, d.size * 0.8);
-                    const material = new THREE.MeshPhongMaterial({ color: 0x4e4435 });
-                    mesh = new THREE.Mesh(geometry, material);
-                } else {
-                    const geometry = new THREE.DodecahedronGeometry(d.size/4);
-                    const material = new THREE.MeshPhongMaterial({ color: 0x555555 });
-                    mesh = new THREE.Mesh(geometry, material);
-                }
-                
-                const tx = d.x - (2000 / 2);
-                const tz = d.y - (2000 / 2);
-                mesh.position.set(tx, d.size/2.5, tz);
-                this._three.scene.add(mesh);
-                this._three.decor.push(mesh);
-            });
+          this._three.decor.forEach(obj => this._three.scene.remove(obj));
+          this._three.decor = [];
+
+          this.decor.forEach(d => {
+            let mesh;
+            if (d.assetType === 'tree') {
+              const geometry = new THREE.ConeGeometry(d.size / 6, d.size, 8);
+              const material = new THREE.MeshPhongMaterial({ color: 0x243414 });
+              mesh = new THREE.Mesh(geometry, material);
+            } else if (d.assetType === 'building') {
+              const geometry = new THREE.BoxGeometry(d.size * 0.8, d.size / 1.5, d.size * 0.8);
+              const material = new THREE.MeshPhongMaterial({ color: 0x4e4435 });
+              mesh = new THREE.Mesh(geometry, material);
+            } else {
+              const geometry = new THREE.DodecahedronGeometry(d.size / 4);
+              const material = new THREE.MeshPhongMaterial({ color: 0x555555 });
+              mesh = new THREE.Mesh(geometry, material);
+            }
+
+            const tx = d.x - (2000 / 2);
+            const tz = d.y - (2000 / 2);
+            mesh.position.set(tx, d.size / 2.5, tz);
+            this._three.scene.add(mesh);
+            this._three.decor.push(mesh);
+          });
         }
       },
 
@@ -6429,12 +6533,12 @@
         Object.values(terrainMap).forEach(t => grid.classList.remove('terrain-' + t));
         const terrain = terrainMap[loc] || 'dungeon';
         grid.classList.add('terrain-' + terrain);
-        
+
         // Sync 3D Plane Color
         if (this._three.plane) {
-            const colors = { solmara: 0x3e3529, ash: 0x333333, snow: 0xeeeeee, swamp: 0x1a2a1a, desert: 0x5a4a2a, forest: 0x2a3a1a, crimson: 0x4a0000, dungeon: 0x111111 };
-            const c = colors[terrain] || 0x111111;
-            this._three.plane.material.color.setHex(c);
+          const colors = { solmara: 0x3e3529, ash: 0x333333, snow: 0xeeeeee, swamp: 0x1a2a1a, desert: 0x5a4a2a, forest: 0x2a3a1a, crimson: 0x4a0000, dungeon: 0x111111 };
+          const c = colors[terrain] || 0x111111;
+          this._three.plane.material.color.setHex(c);
         }
       },
 
@@ -6485,20 +6589,20 @@
         const vph = vp.clientHeight || vp.offsetHeight || 400;
 
         if (!G.world.x || !G.world.y) { G.world.x = vpw / 2; G.world.y = vph / 2; }
-        
+
         // CAMERA SYNC
         if (this._three.camera) {
-            const tx = G.world.x - (vpw / 2);
-            const tz = G.world.y - (vph / 2);
-            this._three.camera.position.x = tx;
-            this._three.camera.position.z = tz + 500;
-            this._three.camera.lookAt(tx, 0, tz);
-            
-            if (!this._three.playerSprite) {
-                this._three.playerSprite = this.create3DSprite(G.player.classKey);
-                this._three.scene.add(this._three.playerSprite);
-            }
-            this._three.playerSprite.position.set(tx, 40, tz);
+          const tx = G.world.x - (vpw / 2);
+          const tz = G.world.y - (vph / 2);
+          this._three.camera.position.x = tx;
+          this._three.camera.position.z = tz + 500;
+          this._three.camera.lookAt(tx, 0, tz);
+
+          if (!this._three.playerSprite) {
+            this._three.playerSprite = this.create3DSprite(G.player.classKey);
+            this._three.scene.add(this._three.playerSprite);
+          }
+          this._three.playerSprite.position.set(tx, 40, tz);
         }
 
         // Legacy DOM Sync
@@ -6524,16 +6628,16 @@
           eEl.style.transform = `translate(${data.x}px, ${data.y}px)`;
           const eImg = this.getClassImage(data.classKey);
           eEl.innerHTML = `<div class="entity-avatar"><img src="${eImg}"></div><div class="entity-name">${data.name}</div>`;
-          
+
           // 3D Sync
           if (this._three.scene) {
-              if (!this._three.entities[uid]) {
-                  this._three.entities[uid] = this.create3DSprite(data.classKey);
-                  this._three.scene.add(this._three.entities[uid]);
-              }
-              const etx = data.x - (vpw / 2);
-              const etz = data.y - (vph / 2);
-              this._three.entities[uid].position.set(etx, 40, etz);
+            if (!this._three.entities[uid]) {
+              this._three.entities[uid] = this.create3DSprite(data.classKey);
+              this._three.scene.add(this._three.entities[uid]);
+            }
+            const etx = data.x - (vpw / 2);
+            const etz = data.y - (vph / 2);
+            this._three.entities[uid].position.set(etx, 40, etz);
           }
         }
       },
@@ -6920,7 +7024,7 @@
           }
         }
         G.targetIndex = 0;
-        G.inCombat = true; 
+        G.inCombat = true;
         if (G.world) { G.world.targetX = undefined; G.world.targetY = undefined; }
         G.playerDefending = false; G.combatBuffs = {}; G.cooldowns = {}; G.turnCount = 0; G.canAct = true;
 
@@ -8013,12 +8117,12 @@
     };
 
     const Game = {
-      _show(id) { 
+      _show(id) {
         document.querySelectorAll('.screen').forEach(s => {
           s.classList.remove('active');
           s.style.display = ''; // Clear any inline display
-        }); 
-        document.getElementById(id).classList.add('active'); 
+        });
+        document.getElementById(id).classList.add('active');
       },
 
       showTitle() { AudioSystem.playBGM('Mainmenu.wav'); this._show('screen-title'); if (typeof GlobalChat !== 'undefined') GlobalChat.clear(); },
@@ -8342,7 +8446,7 @@
     };
 
     /* ============================================================
-       MONETIZATION SYSTEM
+       MONETIZATION SYSTEM    
        ============================================================ */
     const MonetizationSystem = {
       isOwned: false,
@@ -8352,7 +8456,7 @@
         try {
           const snap = await firebase.database().ref(`world/ownership/${AuthSystem.user.uid}`).once('value');
           this.isOwned = snap.val() === true;
-          
+
           if (this.isOwned) {
             // Success: Proceed to character select
             Game._show('screen-charselect');
@@ -8389,7 +8493,7 @@
         try {
           // Get a fresh token from Firebase
           const token = await AuthSystem.user.getIdToken();
-          
+
           const response = await fetch('/api/license', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -8444,11 +8548,13 @@
 
         const options = {
           'gold': { cost: 100, apply: () => { p.gold += 10000; Log.add("💎 Exchange Complete: +🪙 10,000 Gold", "success"); } },
-          'materials': { cost: 250, apply: () => { 
-            Combat.addToInventory('ironPlate', 2, p.level, 'rare');
-            Combat.addToInventory('arcaneLoop', 1, p.level, 'epic');
-            Log.add("💎 Exchange Complete: Artisan's Bundle received.", "success"); 
-          } },
+          'materials': {
+            cost: 250, apply: () => {
+              Combat.addToInventory('ironPlate', 2, p.level, 'rare');
+              Combat.addToInventory('arcaneLoop', 1, p.level, 'epic');
+              Log.add("💎 Exchange Complete: Artisan's Bundle received.", "success");
+            }
+          },
           'sp': { cost: 500, apply: () => { p.statPoints = (p.statPoints || 0) + 5; Log.add("💎 Exchange Complete: +5 Stat Points", "success"); } }
         };
 
@@ -8479,7 +8585,7 @@
         sections.forEach(s => {
           const el = document.getElementById(`landing-section-${s}`);
           if (el) el.style.display = 'none';
-          
+
           // Reset navigation links color
           const nav = document.getElementById(`nav-${s}`);
           if (nav) nav.style.color = 'var(--text-dim)';
@@ -8488,7 +8594,7 @@
         // Show target section
         const target = document.getElementById(`landing-section-${sectionId}`);
         if (target) target.style.display = (sectionId === 'game') ? 'block' : 'block'; // Match your layout (flex/block)
-        
+
         // Highlight active nav
         const activeNav = document.getElementById(`nav-${sectionId}`);
         if (activeNav) activeNav.style.color = 'var(--gold-lt)';
@@ -8558,7 +8664,7 @@
             console.log("Firebase Auth Success:", user.email);
             CloudSave.handleAuth(user);
             Landing.hideLogin();
-            
+
             // If user is on landing, don't automatically redirect them away unless they click play
             // But we do want to check ownership in the background
             MonetizationSystem.checkOwnership(true); // Added flag to silent check
@@ -10706,10 +10812,10 @@
         this.fillEl = document.getElementById('update-progress-fill');
         this.statusEl = document.getElementById('update-status');
         this.overlayEl = document.getElementById('mobile-update-overlay');
-        
+
         // Initial jump
         this.set(15, 'Communing with the ley lines...');
-        
+
         // Simulate loading assets
         setTimeout(() => this.set(40, 'Fetching shards of Eryndor...'), 600);
         setTimeout(() => this.set(70, 'Woven into reality...'), 1200);
@@ -10720,7 +10826,7 @@
         this.progress = Math.max(this.progress, val);
         if (this.fillEl) this.fillEl.style.width = this.progress + '%';
         if (status && this.statusEl) this.statusEl.textContent = status;
-        
+
         if (this.progress >= 100) {
           setTimeout(() => this.finish(), 800);
         }
