@@ -2425,48 +2425,6 @@
       <div id="user-button-container"></div>
     </div>
 
-    <!-- Login Screen -->
-    <div id="screen-login" class="screen full-screen active"
-      style="background:var(--bg); align-items:center; justify-content:center; z-index:9000; position:fixed; top:0; left:0; width:100%; height:100%;">
-      <div
-        style="font-family:'Cinzel',serif; font-size:42px; color:var(--gold-lt); text-shadow:0 0 15px var(--gold); margin-bottom:10px;">
-        RUNE HAVEN</div>
-      <div
-        style="font-size:13px; color:var(--text-dim); margin-bottom:30px; letter-spacing:3px; text-transform:uppercase;">
-        Outworlder Authentication</div>
-
-      <div id="auth-box"
-        style="width:100%; max-width:320px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.5); position:relative;">
-        <button onclick="Landing.hideLogin()" style="position:absolute; top:12px; right:12px; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:18px;">✕</button>
-        <div id="auth-title"
-          style="font-family:'Cinzel',serif; color:var(--gold); font-size:18px; margin-bottom:20px; text-align:center;">
-          Sign In</div>
-
-        <div style="margin-bottom:16px;">
-          <label
-            style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Email
-            Address</label>
-          <input type="email" id="auth-email"
-            style="width:100%; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); outline:none; font-family:'Courier Prime',monospace;">
-        </div>
-
-        <div style="margin-bottom:24px;">
-          <label
-            style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Password</label>
-          <input type="password" id="auth-pass"
-            style="width:100%; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); outline:none; font-family:'Courier Prime',monospace;">
-        </div>
-
-        <button id="auth-btn-primary" class="btn btn-rh" style="width:100%; margin-bottom:12px;"
-          onclick="AuthSystem.primaryAction()">Authenticate</button>
-        <div id="auth-toggle" style="text-align:center; font-size:12px; color:var(--text-dim); cursor:pointer;"
-          onclick="AuthSystem.toggleMode()">New Outworlder? <span style="color:var(--gold);">Register here</span></div>
-      </div>
-
-      <div id="auth-error"
-        style="margin-top:20px; color:var(--red); font-size:12px; display:none; text-align:center; max-width:300px;">
-      </div>
-    </div>
     <!-- Main Game Landing -->
     <div id="landing-section-game" class="landing-content active">
       <div class="title-world" style="margin-top: min(45vh, 400px); text-shadow: 0 0 10px #000;">World of Eryndor</div>
@@ -2564,6 +2522,49 @@
           <button class="btn btn-sm btn-gold" style="width:100%;">SEND DECREE</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Login Screen -->
+  <div id="screen-login" class="screen full-screen"
+    style="background:var(--bg); align-items:center; justify-content:center; z-index:9000; position:fixed; top:0; left:0; width:100%; height:100%;">
+    <div
+      style="font-family:'Cinzel',serif; font-size:42px; color:var(--gold-lt); text-shadow:0 0 15px var(--gold); margin-bottom:10px;">
+      RUNE HAVEN</div>
+    <div
+      style="font-size:13px; color:var(--text-dim); margin-bottom:30px; letter-spacing:3px; text-transform:uppercase;">
+      Outworlder Authentication</div>
+
+    <div id="auth-box"
+      style="width:100%; max-width:320px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.5); position:relative;">
+      <button onclick="Landing.hideLogin()" style="position:absolute; top:12px; right:12px; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:18px;">✕</button>
+      <div id="auth-title"
+        style="font-family:'Cinzel',serif; color:var(--gold); font-size:18px; margin-bottom:20px; text-align:center;">
+        Sign In</div>
+
+      <div style="margin-bottom:16px;">
+        <label
+          style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Email
+          Address</label>
+        <input type="email" id="auth-email"
+          style="width:100%; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); outline:none; font-family:'Courier Prime',monospace;">
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label
+          style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Password</label>
+        <input type="password" id="auth-pass"
+          style="width:100%; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); outline:none; font-family:'Courier Prime',monospace;">
+      </div>
+
+      <button id="auth-btn-primary" class="btn btn-rh" style="width:100%; margin-bottom:12px;"
+        onclick="AuthSystem.primaryAction()">Authenticate</button>
+      <div id="auth-toggle" style="text-align:center; font-size:12px; color:var(--text-dim); cursor:pointer;"
+        onclick="AuthSystem.toggleMode()">New Outworlder? <span style="color:var(--gold);">Register here</span></div>
+    </div>
+
+    <div id="auth-error"
+      style="margin-top:20px; color:var(--red); font-size:12px; display:none; text-align:center; max-width:300px;">
     </div>
   </div>
 
@@ -8012,7 +8013,13 @@
     };
 
     const Game = {
-      _show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+      _show(id) { 
+        document.querySelectorAll('.screen').forEach(s => {
+          s.classList.remove('active');
+          s.style.display = ''; // Clear any inline display
+        }); 
+        document.getElementById(id).classList.add('active'); 
+      },
 
       showTitle() { AudioSystem.playBGM('Mainmenu.wav'); this._show('screen-title'); if (typeof GlobalChat !== 'undefined') GlobalChat.clear(); },
 
@@ -8340,7 +8347,7 @@
     const MonetizationSystem = {
       isOwned: false,
 
-      async checkOwnership() {
+      async checkOwnership(isSilent = false) {
         if (!AuthSystem.user) return;
         try {
           const snap = await firebase.database().ref(`world/ownership/${AuthSystem.user.uid}`).once('value');
@@ -8351,12 +8358,16 @@
             Game._show('screen-charselect');
             CharSelect.render();
           } else {
-            // Failure: Redirect to verification
-            Game._show('screen-verification');
+            // Failure: Redirect to verification if not silent
+            if (!isSilent) {
+              Game._show('screen-verification');
+            }
           }
         } catch (e) {
           console.error("Ownership check failed:", e);
-          Game._show('screen-verification');
+          if (!isSilent) {
+            Game._show('screen-verification');
+          }
         }
       },
 
@@ -8488,7 +8499,6 @@
       showLogin() {
         const login = document.getElementById('screen-login');
         if (login) {
-          login.style.display = 'flex';
           login.classList.add('active');
         }
       },
@@ -8496,8 +8506,8 @@
       hideLogin() {
         const login = document.getElementById('screen-login');
         if (login) {
-          login.style.display = 'none';
           login.classList.remove('active');
+          login.style.display = ''; // Clear inline display if any
         }
       },
 
@@ -8508,7 +8518,7 @@
         if (user) {
           container.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
-              <button class="btn btn-rh btn-lg" onclick="CharSelect.show()">&#127760; Play Rune Haven</button>
+              <button class="btn btn-rh btn-lg" onclick="MonetizationSystem.checkOwnership(false)">&#127760; Play Rune Haven</button>
               <div style="display:flex; align-items:center; gap:12px;">
                 <div style="font-size:10px; color:var(--text-dim);">Logged in as <span style="color:var(--gold-lt);">${user.email}</span></div>
                 <button class="btn btn-sm btn-red" style="font-size:9px; padding:2px 8px;" onclick="AuthSystem.logout()">Logout</button>
@@ -8537,7 +8547,7 @@
 
           if (user) {
             // Check blacklist
-            const snap = await firebase.database().get(firebase.database().ref(`world/blacklist/${user.uid}`));
+            const snap = await firebase.database().ref(`world/blacklist/${user.uid}`).once('value');
             const ban = snap.val();
             if (ban && ban.expiry > Date.now()) {
               const date = new Date(ban.expiry).toLocaleString();
@@ -8547,6 +8557,7 @@
             }
             console.log("Firebase Auth Success:", user.email);
             CloudSave.handleAuth(user);
+            Landing.hideLogin();
             
             // If user is on landing, don't automatically redirect them away unless they click play
             // But we do want to check ownership in the background
@@ -8599,6 +8610,9 @@
           } else {
             await firebase.auth().createUserWithEmailAndPassword(email, pass);
           }
+          // On success, the UI will transition via onAuthStateChanged
+          btn.textContent = originalText;
+          btn.disabled = false;
         } catch (e) {
           console.error("Firebase Auth Error:", e);
           err.textContent = e.message;
