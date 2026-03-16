@@ -5306,7 +5306,7 @@
       showEnemyPanel(enemies) {
         const area = document.getElementById('viewport-enemy-ui');
         if (!area) return;
-        if (!enemies || enemies.length === 0) { area.style.display = 'none'; area.innerHTML = ''; this.updateMobileCombatHUD(); return; }
+        if (!enemies || enemies.length === 0 || window.innerWidth < 768) { area.style.display = 'none'; area.innerHTML = ''; this.updateMobileCombatHUD(); return; }
         area.style.display = 'flex';
         area.style.flexDirection = 'column';
         area.style.gap = '8px';
@@ -5497,13 +5497,17 @@
           return;
         }
 
-        UI.setActions([
-          { label: '🧭 Explore', fn: "Explore.triggerExplore()", cls: 'btn-green btn-lg', tooltip: 'Search the area for enemies or loot.' },
+        const actions = [];
+        if (window.innerWidth >= 768) {
+          actions.push({ label: '🧭 Explore', fn: "Explore.triggerExplore()", cls: 'btn-green btn-lg', tooltip: 'Search the area for enemies or loot.' });
+        }
+        actions.push(
           { label: '📝 Zone Notes', fn: "WorldServer.openZoneNotes()", cls: 'btn-gold btn-sm' },
           { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' },
           { label: '🏛️ Solmara', fn: "Explore.travel('solmara')", cls: '' },
           { label: '💾 Save', fn: "Game.saveGame()", cls: 'btn-sm' }
-        ]);
+        );
+        UI.setActions(actions);
       },
 
       triggerExplore() {
@@ -6040,7 +6044,8 @@
         const texture = new THREE.TextureLoader().load(img || 'paladin.png');
         const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
         const sprite = new THREE.Sprite(material);
-        sprite.scale.set(80, 80, 1);
+        const isMobile = window.innerWidth < 768;
+        sprite.scale.set(isMobile ? 60 : 80, isMobile ? 60 : 80, 1);
         return sprite;
       },
 

@@ -2510,6 +2510,67 @@
   </div>
 
   <!-- ============================================================
+     OWNERSHIP VERIFICATION
+     ============================================================ -->
+  <div id="screen-verification" class="screen" style="align-items:center; justify-content:center; text-align:center; padding:40px; background-image: radial-gradient(circle at center, rgba(201, 168, 76, 0.05) 0%, transparent 70%);">
+    <div class="title-emblem" style="font-size:64px; margin-bottom:20px;">🌀</div>
+    <div class="maintenance-title" style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:24px; margin-bottom:10px;">Verify Ownership</div>
+    <div class="maintenance-msg" style="color:var(--text-dim); font-size:14px; margin-bottom:30px; line-height:1.6; max-width:400px; margin-left:auto; margin-right:auto;">
+      You do not currently own access to this game. Purchase the game to begin playing your chronicle and saving your progress.
+    </div>
+    <button class="btn btn-gold btn-lg" onclick="MonetizationSystem.showPurchase()">Purchase Game — $5</button>
+    <button class="btn btn-sm" style="margin-top:20px; border:none; text-decoration:underline; font-size:12px; color:var(--text-dim);" onclick="AuthSystem.logout()">Sign Out</button>
+  </div>
+
+  <!-- ============================================================
+     PURCHASE SCREEN
+     ============================================================ -->
+  <div id="screen-purchase" class="screen" style="overflow-y:auto; padding:20px 20px calc(20px + var(--safe-bottom)); background:var(--bg);">
+    <div class="create-title" style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; text-align:center; margin-top:20px;">The Outworlder's Treasury</div>
+    <div class="create-subtitle" style="text-align:center; color:var(--text-dim); margin-bottom:40px;">Unlock full access and power your journey in Eryndor</div>
+
+    <div style="max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:20px;">
+      <!-- Base Game -->
+      <div style="background:var(--bg-mid); border:2px solid var(--gold); border-radius:12px; padding:30px; text-align:center; box-shadow: 0 0 30px rgba(201, 168, 76, 0.1);">
+        <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:20px; margin-bottom:10px;">RUNE HAVEN: FULL ACCESS</div>
+        <div style="font-size:13px; color:var(--text-dim); margin-bottom:25px; line-height:1.6;">
+          Everything you need to experience the dark world of Eryndor. Full access to all locations, level caps removed, and priority server access.
+        </div>
+        <div style="font-size:32px; color:var(--gold); font-family:'Cinzel',serif; margin-bottom:20px;">$5.00</div>
+        <button class="btn btn-gold btn-lg" style="width:100%;" onclick="MonetizationSystem.purchaseBaseGame()">Unlock Game Access</button>
+      </div>
+
+      <!-- Rune Packs Title -->
+      <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:18px; text-align:center; margin-top:20px; letter-spacing:2px;">💎 PURCHASE RUNES 💎</div>
+
+      <!-- Rune Packs -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:15px;">
+        <div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:10px; padding:20px; text-align:center;">
+          <div style="font-size:32px; margin-bottom:10px;">💎</div>
+          <div style="font-family:'Cinzel',serif; color:var(--text-lt); font-size:14px;">Minor Case</div>
+          <div style="font-size:12px; color:var(--violet-lt); font-weight:bold; margin-bottom:15px;">100 Runes</div>
+          <button class="btn btn-sm btn-gold" style="width:100%;" onclick="MonetizationSystem.purchaseRunes(1, 100)">$1.00</button>
+        </div>
+        <div style="background:var(--bg-mid); border:2px solid var(--rh-gold); border-radius:10px; padding:20px; text-align:center; position:relative; transform:scale(1.05);">
+          <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:10px; font-weight:bold; padding:3px 12px; border-radius:20px; font-family:'Cinzel',serif; box-shadow:0 4px 10px rgba(0,0,0,0.5);">POPULAR</div>
+          <div style="font-size:32px; margin-bottom:10px;">✨💎</div>
+          <div style="font-family:'Cinzel',serif; color:var(--text-lt); font-size:14px;">Rune Cache</div>
+          <div style="font-size:12px; color:var(--violet-lt); font-weight:bold; margin-bottom:15px;">600 Runes</div>
+          <button class="btn btn-sm btn-gold" style="width:100%;" onclick="MonetizationSystem.purchaseRunes(5, 600)">$5.00</button>
+        </div>
+        <div style="background:var(--bg-mid); border:1px solid var(--violet-lt); border-radius:10px; padding:20px; text-align:center;">
+          <div style="font-size:32px; margin-bottom:10px;">🔱💎</div>
+          <div style="font-family:'Cinzel',serif; color:var(--text-lt); font-size:14px;">King's Vault</div>
+          <div style="font-size:12px; color:var(--violet-lt); font-weight:bold; margin-bottom:15px;">1400 Runes</div>
+          <button class="btn btn-sm btn-gold" style="width:100%;" onclick="MonetizationSystem.purchaseRunes(10, 1400)">$10.00</button>
+        </div>
+      </div>
+
+      <button class="btn btn-sm" style="margin-top:20px; align-self:center;" onclick="MonetizationSystem.backToVerification()">← Return to Verification</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
      CHARACTER CREATION
      ============================================================ -->
   <div id="screen-create" class="screen">
@@ -2578,9 +2639,11 @@
         <div class="topbar-stat">Lv <span id="top-level">1</span></div>
         <div class="topbar-stat">HP <span id="top-hp">—</span></div>
         <div class="topbar-stat">🪙<span id="top-gold">0</span></div>
+        <div class="topbar-stat" style="color:var(--violet-lt); font-weight:bold;">💎<span id="top-runes">0</span></div>
         <span class="topbar-faction" id="top-faction">—</span>
       </div>
       <div class="topbar-btns">
+        <button class="btn btn-sm btn-gold" onclick="MonetizationSystem.openConversion()" title="Convert Runes">💎 Exchange</button>
         <button class="btn btn-sm" onclick="UI.openModal('modal-settings')" title="Audio Settings">🔊</button>
         <button class="btn btn-sm btn-gold" onclick="GlobalChat.openParty()" title="Party Management">⚔️ Party</button>
         <button class="btn btn-sm btn-gold" onclick="Game.saveGame()" title="Save Game">💾</button>
@@ -2932,6 +2995,49 @@
     </div>
   </div>
 
+  <!-- Rune Exchange Modal -->
+  <div class="modal-overlay" id="modal-runes" style="z-index: 2100;">
+    <div class="modal" style="max-width:450px;">
+      <div class="modal-title" style="color:var(--violet-lt); font-family:'Cinzel',serif;">💎 RUNE EXCHANGE</div>
+      <div style="text-align:center; margin-bottom:20px; padding:15px; background:rgba(144,96,216,0.05); border:1px solid var(--violet-lt); border-radius:8px;">
+        <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Your Balance</div>
+        <div style="font-size:32px; color:var(--violet-lt); font-family:'Cinzel',serif; font-weight:bold;">💎 <span id="rune-modal-balance">0</span></div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <!-- Exchange Options -->
+        <button class="btn btn-gold" style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;" onclick="MonetizationSystem.exchange('gold')">
+          <div>
+            <div style="font-size:14px; color:var(--text-lt); font-family:'Cinzel',serif;">Coins of Solmara</div>
+            <div style="font-size:10px; color:var(--text-dim);">Exchange 100 Runes for 🪙 10,000 Gold</div>
+          </div>
+          <div style="font-size:14px; font-weight:bold;">100 💎</div>
+        </button>
+
+        <button class="btn btn-rh" style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;" onclick="MonetizationSystem.exchange('materials')">
+          <div>
+            <div style="font-size:14px; color:var(--text-lt); font-family:'Cinzel',serif;">Artisan's Bundle</div>
+            <div style="font-size:10px; color:var(--text-dim);">Exchange 250 Runes for rare crafting materials</div>
+          </div>
+          <div style="font-size:14px; font-weight:bold;">250 💎</div>
+        </button>
+
+        <button class="btn btn-blue" style="display:flex; justify-content:space-between; align-items:center; padding:15px; text-align:left;" onclick="MonetizationSystem.exchange('sp')">
+          <div>
+            <div style="font-size:14px; color:var(--text-lt); font-family:'Cinzel',serif;">Ancient Wisdom</div>
+            <div style="font-size:10px; color:var(--text-dim);">Exchange 500 Runes for 5 Stat Points</div>
+          </div>
+          <div style="font-size:14px; font-weight:bold;">500 💎</div>
+        </button>
+      </div>
+
+      <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-sm btn-gold" onclick="MonetizationSystem.showPurchase(); UI.closeModal('modal-runes');">Get More Runes</button>
+        <button class="btn btn-sm" onclick="UI.closeModal('modal-runes')">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Admin Modal -->
   <div class="modal-overlay" id="modal-admin">
     <div class="modal"
@@ -2958,6 +3064,7 @@
         <div class="tab-content active" id="atc-admin-self">
           <div style="display:flex; flex-direction:column; gap:12px;">
             <button class="btn btn-rh" onclick="AdminSystem.grantGold(10000)">Give 10,000 Gold</button>
+            <button class="btn btn-blue" onclick="AdminSystem.grantRunes(1000)">Give 1,000 Runes</button>
             <button class="btn btn-rh" onclick="AdminSystem.grantLevel(5)">Give 5 Levels</button>
             <div
               style="display:flex; flex-direction:column; gap:8px; background:var(--bg-mid); border:1px solid var(--border); border-radius:8px; padding:12px;">
@@ -2997,6 +3104,8 @@
                 style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:100%;">
               <button class="btn btn-sm btn-gold" onclick="AdminSystem.doAction('GOLD')">Give Gold</button>
               <button class="btn btn-sm btn-violet" onclick="AdminSystem.doAction('LEVEL')">Give Lv</button>
+              <button class="btn btn-sm btn-blue" onclick="AdminSystem.doAction('RUNES')">Give Runes</button>
+              <button class="btn btn-sm btn-gold" style="grid-column: span 3;" onclick="AdminSystem.doAction('OWNERSHIP')">Grant Ownership License</button>
             </div>
 
             <!-- Item Granting -->
@@ -4989,6 +5098,14 @@
         document.getElementById('top-level').textContent = p.level;
         document.getElementById('top-hp').textContent = `${p.hp}/${maxHp}`;
         document.getElementById('top-gold').textContent = p.gold;
+        
+        // Update Rune Balance Displays
+        const runeBal = p.runes || 0;
+        const rbEl = document.getElementById('top-runes');
+        if (rbEl) rbEl.textContent = runeBal;
+        const rmbEl = document.getElementById('rune-modal-balance');
+        if (rmbEl) rmbEl.textContent = runeBal;
+
         const tf = document.getElementById('top-faction');
         tf.textContent = p.faction === 'saints' ? '☀ Covenant' : '💀 Dominion';
         tf.className = 'topbar-faction ' + factionClass(p.faction);
@@ -5306,7 +5423,7 @@
       showEnemyPanel(enemies) {
         const area = document.getElementById('viewport-enemy-ui');
         if (!area) return;
-        if (!enemies || enemies.length === 0) { area.style.display = 'none'; area.innerHTML = ''; this.updateMobileCombatHUD(); return; }
+        if (!enemies || enemies.length === 0 || window.innerWidth < 768) { area.style.display = 'none'; area.innerHTML = ''; this.updateMobileCombatHUD(); return; }
         area.style.display = 'flex';
         area.style.flexDirection = 'column';
         area.style.gap = '8px';
@@ -5497,13 +5614,17 @@
           return;
         }
 
-        UI.setActions([
-          { label: '🧭 Explore', fn: "Explore.triggerExplore()", cls: 'btn-green btn-lg', tooltip: 'Search the area for enemies or loot.' },
+        const actions = [];
+        if (window.innerWidth >= 768) {
+          actions.push({ label: '🧭 Explore', fn: "Explore.triggerExplore()", cls: 'btn-green btn-lg', tooltip: 'Search the area for enemies or loot.' });
+        }
+        actions.push(
           { label: '📝 Zone Notes', fn: "WorldServer.openZoneNotes()", cls: 'btn-gold btn-sm' },
           { label: '🗺 Map', fn: "Explore.openMap()", cls: 'btn-sm' },
           { label: '🏛️ Solmara', fn: "Explore.travel('solmara')", cls: '' },
           { label: '💾 Save', fn: "Game.saveGame()", cls: 'btn-sm' }
-        ]);
+        );
+        UI.setActions(actions);
       },
 
       triggerExplore() {
@@ -6040,7 +6161,8 @@
         const texture = new THREE.TextureLoader().load(img || 'paladin.png');
         const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
         const sprite = new THREE.Sprite(material);
-        sprite.scale.set(80, 80, 1);
+        const isMobile = window.innerWidth < 768;
+        sprite.scale.set(isMobile ? 60 : 80, isMobile ? 60 : 80, 1);
         return sprite;
       },
 
@@ -8078,6 +8200,125 @@
     };
 
     /* ============================================================
+       MONETIZATION SYSTEM
+       ============================================================ */
+    const MonetizationSystem = {
+      isOwned: false,
+
+      async checkOwnership() {
+        if (!AuthSystem.user) return;
+        try {
+          const snap = await firebase.database().ref(`world/ownership/${AuthSystem.user.uid}`).once('value');
+          this.isOwned = snap.val() === true;
+          
+          if (this.isOwned) {
+            // Success: Proceed to character select
+            Game._show('screen-charselect');
+            CharSelect.render();
+          } else {
+            // Failure: Redirect to verification
+            Game._show('screen-verification');
+          }
+        } catch (e) {
+          console.error("Ownership check failed:", e);
+          Game._show('screen-verification');
+        }
+      },
+
+      showPurchase() {
+        Game._show('screen-purchase');
+      },
+
+      async purchaseGame() {
+        if (!AuthSystem.user) return;
+        // Simulation of real payment initiation
+        const ok = confirm("This would connect to a payment provider ($5.00). Proceed to secure checkout?");
+        if (!ok) return;
+
+        Log.add("🔒 Contacting secure terminal...", "system");
+
+        try {
+          // Get a fresh token from Firebase
+          const token = await AuthSystem.user.getIdToken();
+          
+          const response = await fetch('/api/license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              uid: AuthSystem.user.uid,
+              token: token
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            this.isOwned = true;
+            Log.add("📜 <strong>License Acquired!</strong> Welcome to Eryndor.", "gold");
+            this.checkOwnership();
+          } else {
+            throw new Error(result.error || "Grant failed");
+          }
+        } catch (e) {
+          console.error("Purchase API failed:", e);
+          alert("Purchase failed: " + e.message);
+        }
+      },
+
+      async purchaseRunes(packageId) {
+        if (!AuthSystem.user || !G.player) return;
+        const packages = {
+          'runes_1': { price: 1, amount: 100 },
+          'runes_5': { price: 5, amount: 600 },
+          'runes_10': { price: 10, amount: 1300 }
+        };
+        const pack = packages[packageId];
+        if (!pack) return;
+
+        const ok = confirm(`Purchase ${pack.amount} Runes for $${pack.price}.00?`);
+        if (!ok) return;
+
+        G.player.runes = (G.player.runes || 0) + pack.amount;
+        Log.add(`💎 <strong>Rune Pack Acquired:</strong> +${pack.amount} Runes!`, 'gold');
+        UI.refresh();
+        Game.saveGame();
+      },
+
+      openExchange() {
+        if (!G.player) return;
+        UI.openModal('modal-runes');
+      },
+
+      exchange(type) {
+        const p = G.player;
+        if (!p) return;
+
+        const options = {
+          'gold': { cost: 100, apply: () => { p.gold += 10000; Log.add("💎 Exchange Complete: +🪙 10,000 Gold", "success"); } },
+          'materials': { cost: 250, apply: () => { 
+            Combat.addToInventory('ironPlate', 2, p.level, 'rare');
+            Combat.addToInventory('arcaneLoop', 1, p.level, 'epic');
+            Log.add("💎 Exchange Complete: Artisan's Bundle received.", "success"); 
+          } },
+          'sp': { cost: 500, apply: () => { p.statPoints = (p.statPoints || 0) + 5; Log.add("💎 Exchange Complete: +5 Stat Points", "success"); } }
+        };
+
+        const opt = options[type];
+        if (!opt) return;
+
+        if ((p.runes || 0) < opt.cost) {
+          alert("Not enough Runes for this exchange!");
+          return;
+        }
+
+        p.runes -= opt.cost;
+        opt.apply();
+        UI.refresh();
+        Game.saveGame();
+      }
+    };
+
+    /* ============================================================
        AUTH SYSTEM — Firebase Auth
        ============================================================ */
     const AuthSystem = {
@@ -8098,9 +8339,8 @@
               return;
             }
             console.log("Firebase Auth Success:", user.email);
-            document.getElementById('screen-login').style.display = 'none';
-            document.getElementById('screen-login').classList.remove('active');
             CloudSave.handleAuth(user);
+            MonetizationSystem.checkOwnership();
           } else {
             console.log("Firebase Auth: No user logged in.");
             document.getElementById('screen-login').style.display = 'flex';
@@ -8475,6 +8715,29 @@
         }
       },
 
+      grantRunes(amt, targetUid = null) {
+        if (targetUid) {
+          this.sendRemoteCommand(targetUid, { type: 'GRANT_RUNES', amount: amt });
+        } else {
+          G.player.runes = (G.player.runes || 0) + amt;
+          Log.add(`💎 Admin granted <strong>${amt} Runes</strong>.`, 'gold');
+          Notify.success(`Admin granted you ${amt} Runes!`);
+          UI.refresh();
+          Game.autosave();
+        }
+      },
+
+      async grantOwnership(targetUid) {
+        if (!targetUid || targetUid === 'undefined') return;
+        try {
+          await firebase.database().ref(`world/ownership/${targetUid}`).set(true);
+          await this.sendRemoteCommand(targetUid, { type: 'GRANT_OWNERSHIP' });
+          Log.add(`📜 Granted ownership license to player.`, 'success');
+        } catch (e) {
+          console.error("Grant ownership failed:", e);
+        }
+      },
+
       // Global Moderation
       async broadcast() {
         const text = document.getElementById('admin-broadcast-input').value.trim();
@@ -8550,6 +8813,13 @@
             p.inventory = [];
             p.stash = [];
             Log.add('⚡ <strong style="color:var(--red);">DIVINE RETRIBUTION:</strong> Your wealth and belongings have been stripped by the gods.', 'error');
+            break;
+          case 'GRANT_RUNES':
+            p.runes = (p.runes || 0) + cmd.amount;
+            Log.add(`💎 <strong>Admin Gift:</strong> Received ${cmd.amount} Runes!`, 'gold');
+            break;
+          case 'GRANT_OWNERSHIP':
+            Log.add(`📜 <strong>Admin Gift:</strong> A Lifetime License has been granted to your account!`, 'gold');
             break;
         }
         UI.refresh();
@@ -8655,6 +8925,15 @@
             await this.sendRemoteCommand(uid, { type: 'PURGE' });
             this.broadcastDecree(`${name}'s archives have been PURGED. Reason: ${reason}`);
             Notify.error(`PURGED ${name}`);
+            break;
+          case 'RUNES':
+            const rAmt = parseInt(val) || 100;
+            this.grantRunes(rAmt, uid);
+            Notify.success(`Granted ${rAmt} Runes to ${name}`);
+            break;
+          case 'OWNERSHIP':
+            await this.grantOwnership(uid);
+            Notify.success(`Granted Ownership License to ${name}`);
             break;
         }
 
