@@ -1,5 +1,10 @@
 {
+  "name": "rune-haven",
+  "version": "1.0.0",
   "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
     "firebase": "^12.10.0"
   }
 }

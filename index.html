@@ -21,6 +21,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
     /* ============================================================
@@ -37,7 +38,7 @@
       --rh-text-lt: #ffcc00;
       --rh-text-dim: #998877;
       --rh-gold: #c9a84c;
-      
+
       --bg: var(--rh-bg);
       --bg-panel: var(--rh-panel);
       --bg-mid: #2b231a;
@@ -55,7 +56,7 @@
       --green-dk: #2a6040;
       --blue: #3264ff;
       --blue-dk: #1a3a8a;
-      
+
       --text: #ffffff;
       --text-dim: #aaaaaa;
       --text-lt: #ffffff;
@@ -65,7 +66,7 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-right: env(safe-area-inset-right, 0px);
-      
+
       --panel-bg-img: url('hud_bg.png');
     }
 
@@ -191,13 +192,14 @@
       gap: 10px;
       pointer-events: none;
     }
+
     .toast {
       background: rgba(43, 35, 26, 0.95);
       border: 1px solid var(--rh-border);
       color: var(--rh-text-lt);
       padding: 12px 20px;
       border-radius: 4px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       font-family: 'Cinzel', serif;
       font-size: 13px;
       min-width: 200px;
@@ -208,18 +210,45 @@
       align-items: center;
       gap: 10px;
     }
-    .toast.success { border-left: 4px solid var(--green); }
-    .toast.error { border-left: 4px solid var(--red); }
-    .toast.gold { border-left: 4px solid var(--gold); }
-    .toast.info { border-left: 4px solid var(--violet-lt); }
-    
-    @keyframes toastIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+
+    .toast.success {
+      border-left: 4px solid var(--green);
     }
+
+    .toast.error {
+      border-left: 4px solid var(--red);
+    }
+
+    .toast.gold {
+      border-left: 4px solid var(--gold);
+    }
+
+    .toast.info {
+      border-left: 4px solid var(--violet-lt);
+    }
+
+    @keyframes toastIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
     @keyframes toastOut {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(100%); opacity: 0; }
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
     }
 
     /* Maintenance Screen */
@@ -755,7 +784,7 @@
       /* 4 Columns */
       min-height: 340px;
       z-index: 100;
-      box-shadow: inset 2px 2px 15px rgba(0,0,0,0.9), 0 -4px 20px rgba(0,0,0,0.6);
+      box-shadow: inset 2px 2px 15px rgba(0, 0, 0, 0.9), 0 -4px 20px rgba(0, 0, 0, 0.6);
     }
 
     #world-viewport {
@@ -763,6 +792,15 @@
       background: #000;
       overflow: hidden;
       border-bottom: 2px solid var(--border);
+      cursor: crosshair;
+    }
+    #three-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
     }
 
     .dash-col {
@@ -1127,17 +1165,17 @@
 
     .hp-fill {
       background: linear-gradient(180deg, #e05060, #8a2030);
-      border-bottom: 1px solid rgba(0,0,0,0.5);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.5);
     }
 
     .mp-fill {
       background: linear-gradient(180deg, #5080e0, #1a3a8a);
-      border-bottom: 1px solid rgba(0,0,0,0.5);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.5);
     }
 
     .xp-fill {
       background: linear-gradient(180deg, #e0b050, #7a6230);
-      border-bottom: 1px solid rgba(0,0,0,0.5);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.5);
     }
 
     .stat-grid {
@@ -2136,7 +2174,7 @@
       background: transparent !important;
       border: none !important;
       /* Default glow for other players */
-      filter: drop-shadow(0 0 3px rgba(255,255,255,0.3));
+      filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
     }
 
     #world-player .entity-avatar {
@@ -2483,6 +2521,7 @@
 
     <div class="game-body">
       <div id="world-viewport" tabindex="0">
+        <canvas id="three-canvas"></canvas>
         <!-- The visual map and players will be rendered here -->
         <div id="world-grid"></div>
         <div id="world-entities-layer"></div>
@@ -2851,14 +2890,21 @@
           <div style="display:flex; flex-direction:column; gap:12px;">
             <button class="btn btn-rh" onclick="AdminSystem.grantGold(10000)">Give 10,000 Gold</button>
             <button class="btn btn-rh" onclick="AdminSystem.grantLevel(5)">Give 5 Levels</button>
-            <div style="display:flex; flex-direction:column; gap:8px; background:var(--bg-mid); border:1px solid var(--border); border-radius:8px; padding:12px;">
-              <div style="font-size:10px; color:var(--gold-lt); font-family:'Cinzel',serif; margin-bottom:4px;">GRANT ITEM TO SELF</div>
+            <div
+              style="display:flex; flex-direction:column; gap:8px; background:var(--bg-mid); border:1px solid var(--border); border-radius:8px; padding:12px;">
+              <div style="font-size:10px; color:var(--gold-lt); font-family:'Cinzel',serif; margin-bottom:4px;">GRANT
+                ITEM TO SELF</div>
               <div style="display:flex; gap:8px;">
-                <input id="admin-item-input" type="text" placeholder="Item ID (e.g. veilblade)" style="flex:2; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-family:monospace; font-size:12px;">
-                <input id="admin-item-level" type="number" placeholder="Lv" title="Item Level" style="flex:1; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-size:12px; width:50px;">
-                <input id="admin-item-qty" type="number" placeholder="Qty" title="Amount" style="flex:1; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-size:12px; width:50px;">
+                <input id="admin-item-input" type="text" placeholder="Item ID (e.g. veilblade)"
+                  style="flex:2; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-family:monospace; font-size:12px;">
+                <input id="admin-item-level" type="number" placeholder="Lv" title="Item Level"
+                  style="flex:1; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-size:12px; width:50px;">
+                <input id="admin-item-qty" type="number" placeholder="Qty" title="Amount"
+                  style="flex:1; background:#000; border:1px solid var(--border); border-radius:4px; padding:8px; color:var(--text-lt); font-size:12px; width:50px;">
               </div>
-              <button class="btn btn-gold" style="width:100%;" onclick="AdminSystem.grantItem(document.getElementById('admin-item-input').value, null, parseInt(document.getElementById('admin-item-qty').value)||1, parseInt(document.getElementById('admin-item-level').value)||1)">Grant To Self</button>
+              <button class="btn btn-gold" style="width:100%;"
+                onclick="AdminSystem.grantItem(document.getElementById('admin-item-input').value, null, parseInt(document.getElementById('admin-item-qty').value)||1, parseInt(document.getElementById('admin-item-level').value)||1)">Grant
+                To Self</button>
             </div>
           </div>
         </div>
@@ -2866,44 +2912,56 @@
         <!-- Players Tab -->
         <div class="tab-content" id="atc-admin-players">
           <!-- Centralized Management Panel -->
-          <div id="admin-manage-panel" style="display:none; background:var(--bg-mid); border:2px solid var(--gold); border-radius:8px; padding:12px; margin-bottom:12px; box-shadow: 0 0 15px rgba(255,183,0,0.2);">
-             <div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold-lt); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:6px;">
-                <span>MANAGING: <strong id="admin-manage-target-name" style="color:var(--text-lt);">...</strong></span>
-                <button onclick="document.getElementById('admin-manage-panel').style.display='none'" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
-             </div>
-             
-             <!-- Resource/Level Grants -->
-             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px; align-items:center;">
-                <input id="admin-manage-amount" type="number" placeholder="Qty/Hrs" title="Quantity or Hours" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:100%;">
-                <button class="btn btn-sm btn-gold" onclick="AdminSystem.doAction('GOLD')">Give Gold</button>
-                <button class="btn btn-sm btn-violet" onclick="AdminSystem.doAction('LEVEL')">Give Lv</button>
-             </div>
-             
-             <!-- Item Granting -->
-              <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:6px; margin-bottom:10px;">
-                 <input id="admin-manage-item-id" type="text" placeholder="Item ID" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px; font-family:monospace;">
-                 <input id="admin-manage-item-level" type="number" placeholder="Lv" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px;">
-                 <select id="admin-manage-item-rarity" style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px;">
-                    <option value="common">Common</option>
-                    <option value="uncommon">Uncommon</option>
-                    <option value="rare">Rare</option>
-                    <option value="epic">Epic</option>
-                    <option value="legendary">Legendary</option>
-                    <option value="mythic">Mythic</option>
-                 </select>
-                 <button class="btn btn-sm btn-gold" style="grid-column: span 3;" onclick="AdminSystem.doAction('ITEM')">Grant Item</button>
-              </div>
+          <div id="admin-manage-panel"
+            style="display:none; background:var(--bg-mid); border:2px solid var(--gold); border-radius:8px; padding:12px; margin-bottom:12px; box-shadow: 0 0 15px rgba(255,183,0,0.2);">
+            <div
+              style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold-lt); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:6px;">
+              <span>MANAGING: <strong id="admin-manage-target-name" style="color:var(--text-lt);">...</strong></span>
+              <button onclick="document.getElementById('admin-manage-panel').style.display='none'"
+                style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:16px;">✕</button>
+            </div>
 
-              <!-- Moderation Section -->
-              <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                 <input id="admin-manage-reason" type="text" placeholder="Reason for action..." style="width:100%; background:#000; border:1px solid var(--red); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px; margin-bottom:8px;">
-                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
-                    <button class="btn btn-sm btn-red" onclick="AdminSystem.doAction('KICK')">Kick/Temp</button>
-                    <button class="btn btn-sm btn-red" style="background:#400; border-color:#800;" onclick="AdminSystem.doAction('BAN')">Perma Ban</button>
-                    <button class="btn btn-sm btn-red" style="background:#600; border-color:#f00;" onclick="AdminSystem.doAction('PURGE')">Purge Acc</button>
-                 </div>
+            <!-- Resource/Level Grants -->
+            <div
+              style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px; align-items:center;">
+              <input id="admin-manage-amount" type="number" placeholder="Qty/Hrs" title="Quantity or Hours"
+                style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:100%;">
+              <button class="btn btn-sm btn-gold" onclick="AdminSystem.doAction('GOLD')">Give Gold</button>
+              <button class="btn btn-sm btn-violet" onclick="AdminSystem.doAction('LEVEL')">Give Lv</button>
+            </div>
+
+            <!-- Item Granting -->
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:6px; margin-bottom:10px;">
+              <input id="admin-manage-item-id" type="text" placeholder="Item ID"
+                style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px; font-family:monospace;">
+              <input id="admin-manage-item-level" type="number" placeholder="Lv"
+                style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px;">
+              <select id="admin-manage-item-rarity"
+                style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px;">
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="epic">Epic</option>
+                <option value="legendary">Legendary</option>
+                <option value="mythic">Mythic</option>
+              </select>
+              <button class="btn btn-sm btn-gold" style="grid-column: span 3;"
+                onclick="AdminSystem.doAction('ITEM')">Grant Item</button>
+            </div>
+
+            <!-- Moderation Section -->
+            <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+              <input id="admin-manage-reason" type="text" placeholder="Reason for action..."
+                style="width:100%; background:#000; border:1px solid var(--red); color:var(--text-lt); padding:8px; font-size:11px; border-radius:4px; margin-bottom:8px;">
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+                <button class="btn btn-sm btn-red" onclick="AdminSystem.doAction('KICK')">Kick/Temp</button>
+                <button class="btn btn-sm btn-red" style="background:#400; border-color:#800;"
+                  onclick="AdminSystem.doAction('BAN')">Perma Ban</button>
+                <button class="btn btn-sm btn-red" style="background:#600; border-color:#f00;"
+                  onclick="AdminSystem.doAction('PURGE')">Purge Acc</button>
               </div>
-             <input type="hidden" id="admin-manage-target-uid">
+            </div>
+            <input type="hidden" id="admin-manage-target-uid">
           </div>
           <div id="admin-player-list" style="display:flex; flex-direction:column; gap:4px;">
             <div class="chat-empty">Seeking Outworlders...</div>
@@ -2926,34 +2984,47 @@
         <div class="tab-content" id="atc-admin-world">
           <!-- Announcement -->
           <div style="margin-bottom:16px;">
-            <label style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Global Announcement</label>
-            <textarea id="admin-broadcast-input" style="width:100%; height:80px; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); font-family:serif; resize:none;"></textarea>
-            <button class="btn btn-violet" style="width:100%; margin-top:8px;" onclick="AdminSystem.broadcast()">Blast Decree</button>
+            <label
+              style="display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Global
+              Announcement</label>
+            <textarea id="admin-broadcast-input"
+              style="width:100%; height:80px; background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; color:var(--text-lt); font-family:serif; resize:none;"></textarea>
+            <button class="btn btn-violet" style="width:100%; margin-top:8px;" onclick="AdminSystem.broadcast()">Blast
+              Decree</button>
           </div>
 
           <!-- Active Bans -->
           <div style="margin-bottom:16px; border-top:1px dashed var(--border); padding-top:12px;">
-             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <label style="font-size:11px; color:var(--gold-lt); text-transform:uppercase; font-family:'Cinzel',serif;">Active Blacklist</label>
-                <button class="btn btn-sm" style="font-size:9px; padding:2px 6px;" onclick="AdminSystem.refreshBlacklist()">Refresh</button>
-             </div>
-             <div id="admin-blacklist-list" style="max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
-                <div class="chat-empty">No active bans in this domain.</div>
-             </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <label
+                style="font-size:11px; color:var(--gold-lt); text-transform:uppercase; font-family:'Cinzel',serif;">Active
+                Blacklist</label>
+              <button class="btn btn-sm" style="font-size:9px; padding:2px 6px;"
+                onclick="AdminSystem.refreshBlacklist()">Refresh</button>
+            </div>
+            <div id="admin-blacklist-list"
+              style="max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
+              <div class="chat-empty">No active bans in this domain.</div>
+            </div>
           </div>
 
           <!-- Dangerous Actions -->
           <div style="border-top:1px dashed var(--border); padding-top:16px;">
-            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeGuilds()">⚠️ WIPE ALL GUILDS</button>
-            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeLeaderboard()">🏆 RESET LEADERBOARD</button>
-            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeFactionWar()">⚔️ RESET FACTION WAR</button>
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeGuilds()">⚠️
+              WIPE ALL GUILDS</button>
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;"
+              onclick="AdminSystem.wipeLeaderboard()">🏆 RESET LEADERBOARD</button>
+            <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="AdminSystem.wipeFactionWar()">⚔️
+              RESET FACTION WAR</button>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-               <button class="btn btn-violet" onclick="AdminSystem.checkDbHealth()">🧪 DB Health</button>
-               <button id="admin-maintenance-btn" class="btn btn-gold" onclick="AdminSystem.toggleMaintenance()">🔒 Maint</button>
+              <button class="btn btn-violet" onclick="AdminSystem.checkDbHealth()">🧪 DB Health</button>
+              <button id="admin-maintenance-btn" class="btn btn-gold" onclick="AdminSystem.toggleMaintenance()">🔒
+                Maint</button>
             </div>
           </div>
           <div style="border-top:1px dashed var(--border); padding-top:16px;">
-            <button class="btn btn-red" style="width:100%;" onclick="AuthSystem.logout()">Forced System Purge (Logout)</button>
+            <button class="btn btn-red" style="width:100%;" onclick="AuthSystem.logout()">Forced System Purge
+              (Logout)</button>
           </div>
         </div>
       </div>
@@ -3340,8 +3411,7 @@
       <div class="modal-title" id="zonenotes-title">📝 Zone Notes</div>
       <div id="zonenotes-list"
         style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
-      <div
-        style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold-lt);margin-bottom:6px;letter-spacing:1px;">
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold-lt);margin-bottom:6px;letter-spacing:1px;">
         LEAVE A NOTE</div>
       <textarea id="zonenotes-input" maxlength="120" placeholder="Leave a message for other Outworlders... (120 chars)"
         style="width:100%;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-lt);padding:10px;font-family:'IM Fell English',serif;font-size:13px;border-radius:4px;resize:none;height:60px;outline:none;"></textarea>
@@ -3656,7 +3726,7 @@
       gold(text) { this.show(text, 'gold'); },
       info(text) { this.show(text, 'info'); },
       alert(text) { this.show(text, 'info', 6000); }, // Replacement for alert()
-      _e(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+      _e(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
     };
     // Patch window.alert
     window.originalAlert = window.alert;
@@ -5795,20 +5865,114 @@
     const World = {
       _lastSync: 0,
       _syncRef: null,
+      _three: {
+        renderer: null,
+        scene: null,
+        camera: null,
+        playerSprite: null,
+        entities: {},
+        decor: []
+      },
 
       init() {
         const vp = document.getElementById('world-viewport');
         if (vp) {
           vp.addEventListener('click', () => vp.focus());
+          vp.addEventListener('pointerdown', e => {
+              if (G.inCombat) return;
+              const rect = vp.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              G.world.targetX = x;
+              G.world.targetY = y;
+          });
         }
         window.addEventListener('keydown', e => this.handleKey(e));
-        window.addEventListener('resize', () => this.render());
+        window.addEventListener('resize', () => {
+          this.render();
+          if (this._three.renderer && vp) {
+            this._three.renderer.setSize(vp.clientWidth, vp.clientHeight);
+            this._three.camera.aspect = vp.clientWidth / vp.clientHeight;
+            this._three.camera.updateProjectionMatrix();
+          }
+        });
         this.startSync();
         this.updateTerrain();
         this.generateDecor();
-        Log.add('🗺️ World View initialized. Use <strong>WASD</strong> or <strong>Arrows</strong> to move.', 'system');
-
+        
+        if (typeof THREE !== 'undefined') this.init3D();
+        
+        Log.add('🗺️ World View initialized. Click to move.', 'system');
         setTimeout(() => this.render(), 100);
+      },
+
+      init3D() {
+        const canvas = document.getElementById('three-canvas');
+        const vp = document.getElementById('world-viewport');
+        if (!canvas || !vp) return;
+
+        this._three.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        this._three.renderer.setSize(vp.clientWidth, vp.clientHeight);
+        this._three.renderer.setPixelRatio(window.devicePixelRatio);
+
+        this._three.scene = new THREE.Scene();
+        this._three.camera = new THREE.PerspectiveCamera(45, vp.clientWidth / vp.clientHeight, 0.1, 5000);
+        this._three.camera.position.set(0, 600, 600);
+        this._three.camera.lookAt(0, 0, 0);
+
+        const geometry = new THREE.PlaneGeometry(2000, 2000);
+        const material = new THREE.MeshPhongMaterial({ color: 0x1a150f, side: THREE.DoubleSide });
+        const plane = new THREE.Mesh(geometry, material);
+        plane.rotation.x = -Math.PI / 2;
+        this._three.scene.add(plane);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        this._three.scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        dirLight.position.set(200, 500, 200);
+        this._three.scene.add(dirLight);
+
+        const gridHelper = new THREE.GridHelper(2000, 40, 0x5d4a37, 0x2b231a);
+        gridHelper.position.y = 1;
+        this._three.scene.add(gridHelper);
+
+        this.animate3D();
+      },
+
+      animate3D() {
+        if (!this._three.renderer) return;
+        requestAnimationFrame(() => this.animate3D());
+        
+        // Target Movement Logic
+        if (!G.inCombat && G.world.targetX !== undefined && G.world.targetY !== undefined) {
+            const dx = G.world.targetX - G.world.x;
+            const dy = G.world.targetY - G.world.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const speed = 4; // Velocity per frame
+            
+            if (dist > speed) {
+                const vx = (dx / dist) * speed;
+                const vy = (dy / dist) * speed;
+                this.move(vx, vy);
+            } else {
+                G.world.x = G.world.targetX;
+                G.world.y = G.world.targetY;
+                G.world.targetX = undefined;
+                G.world.targetY = undefined;
+                this.render();
+            }
+        }
+
+        this._three.renderer.render(this._three.scene, this._three.camera);
+      },
+
+      create3DSprite(classKey) {
+        const img = this.getClassImage(classKey);
+        const texture = new THREE.TextureLoader().load(img || 'paladin.png');
+        const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(80, 80, 1);
+        return sprite;
       },
 
       decor: [],
@@ -5858,20 +6022,47 @@
           const flip = rng() > 0.5 ? -1 : 1;
           const s = Math.floor(scale * 100);
 
-
           let assetType = 'rock';
           if (['🌲', '🌳', '🌿', '🌵', '🍄', '🥀'].includes(type)) assetType = 'tree';
           if (['🏘️', '🛖', '🏚️', '🏰', '⛲', '🛡️'].includes(type)) assetType = 'building';
-
 
           if (['⚰️', '💀', '🏺', '🌌', '✨', '🌀', '☄️', '🔥', '🩸'].includes(type)) assetType = 'rock';
 
           this.decor.push({ x, y, assetType, type, size: s, flip });
         }
+        
+        // Update 3D Decor
+        if (this._three.scene) {
+            this._three.decor.forEach(obj => this._three.scene.remove(obj));
+            this._three.decor = [];
+            
+            this.decor.forEach(d => {
+                let mesh;
+                if (d.assetType === 'tree') {
+                    const geometry = new THREE.ConeGeometry(d.size/6, d.size, 8);
+                    const material = new THREE.MeshPhongMaterial({ color: 0x243414 });
+                    mesh = new THREE.Mesh(geometry, material);
+                } else if (d.assetType === 'building') {
+                    const geometry = new THREE.BoxGeometry(d.size * 0.8, d.size/1.5, d.size * 0.8);
+                    const material = new THREE.MeshPhongMaterial({ color: 0x4e4435 });
+                    mesh = new THREE.Mesh(geometry, material);
+                } else {
+                    const geometry = new THREE.DodecahedronGeometry(d.size/4);
+                    const material = new THREE.MeshPhongMaterial({ color: 0x555555 });
+                    mesh = new THREE.Mesh(geometry, material);
+                }
+                
+                const tx = d.x - (2000 / 2);
+                const tz = d.y - (2000 / 2);
+                mesh.position.set(tx, d.size/2.5, tz);
+                this._three.scene.add(mesh);
+                this._three.decor.push(mesh);
+            });
+        }
       },
 
       renderDecor(layer) {
-        return;
+        // Keeping legacy for now
         let dc = document.getElementById('world-decor-container');
         if (!dc) {
           dc = document.createElement('div');
@@ -5885,11 +6076,9 @@
             el.className = 'decor-object';
             el.style.left = d.x + 'px';
             el.style.top = d.y + 'px';
-
             const shadow = document.createElement('div');
             shadow.className = 'decor-shadow';
             el.appendChild(shadow);
-
             const icon = document.createElement('img');
             icon.className = 'decor-icon';
             icon.src = `assets/${d.assetType}.png`;
@@ -5897,16 +6086,6 @@
             icon.style.height = 'auto';
             icon.style.transform = `scaleX(${d.flip})`;
             icon.style.pointerEvents = 'none';
-
-
-            if (d.assetType === 'tree') {
-              icon.style.filter = 'brightness(0.5) contrast(1.2)';
-            } else if (d.assetType === 'building') {
-              icon.style.filter = 'brightness(0.6) contrast(1.3)';
-            } else {
-              icon.style.filter = 'brightness(0.6) sepia(0.2)';
-            }
-
             el.appendChild(icon);
             dc.appendChild(el);
           });
@@ -5918,45 +6097,33 @@
         if (!grid) return;
         const loc = G.location;
         const terrainMap = {
-          solmara: 'solmara',
-          ashfall: 'ash',
-          frostvein: 'snow',
-          blackMarsh: 'swamp',
-          emberfallWastes: 'desert',
-          hollowWilds: 'forest',
-          bloodspire: 'crimson',
-          catacombs: 'dungeon',
-          voidPeaks: 'voidpeaks',
-          abyssalVoid: 'abyssalvoid',
-          voidrift: 'voidrift',
-          primalrift: 'primalrift',
-          abyssagate: 'abyssagate',
-          velkaris: 'velkaris'
+          solmara: 'solmara', ashfall: 'ash', frostvein: 'snow', blackMarsh: 'swamp', emberfallWastes: 'desert', hollowWilds: 'forest', bloodspire: 'crimson', catacombs: 'dungeon', voidPeaks: 'voidpeaks', abyssalVoid: 'abyssalvoid', voidrift: 'voidrift', primalrift: 'primalrift', abyssagate: 'abyssagate', velkaris: 'velkaris'
         };
-
         Object.values(terrainMap).forEach(t => grid.classList.remove('terrain-' + t));
-
         const terrain = terrainMap[loc] || 'dungeon';
         grid.classList.add('terrain-' + terrain);
-
+        
+        // Sync 3D Plane Color
+        if (this._three.plane) {
+            const colors = { solmara: 0x3e3529, ash: 0x333333, snow: 0xeeeeee, swamp: 0x1a2a1a, desert: 0x5a4a2a, forest: 0x2a3a1a, crimson: 0x4a0000, dungeon: 0x111111 };
+            const c = colors[terrain] || 0x111111;
+            this._three.plane.material.color.setHex(c);
+        }
       },
 
       handleKey(e) {
+        // WASD disabled in favor of click-to-move
         return;
       },
 
       move(dx, dy) {
         G.world.x += dx;
         G.world.y += dy;
-
         const vp = document.getElementById('world-viewport');
         const vpw = vp ? (vp.clientWidth || vp.offsetWidth || 800) : 800;
         const vph = vp ? (vp.clientHeight || vp.offsetHeight || 400) : 400;
-
-
         G.world.x = Math.max(20, Math.min(vpw - 20, G.world.x));
         G.world.y = Math.max(20, Math.min(vph - 20, G.world.y));
-
         this.render();
         this.checkEncounters(dx, dy);
         this.throttledSync();
@@ -5971,29 +6138,14 @@
           if (!loc.isTown && !loc.isDungeon && Math.random() < (loc.encounterChance || 0.4)) {
             const key = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
             Log.add('⚠️ <strong>Ambush!</strong> Something emerges from the shadows...', 'death');
-
             setTimeout(() => Combat.start(key), 300);
-
-
-            if (Math.random() < 0.2) {
-              setTimeout(() => Explore.explore(), 600);
-            }
           }
         }
       },
 
       getClassImage(classKey) {
-        const mapping = {
-          'paladin': 'paladin.png',
-          'inquisitor': 'inquisitor.png',
-          'cleric': 'cleric.png',
-          'lightbinder': 'lightbrinder.png',
-          'necromancer': 'necromancer.png',
-          'warlock': 'warloc.png',
-          'barbarian': 'Barb.png',
-          'assassin': 'assasin.png'
-        };
-        return mapping[classKey] || null;
+        const mapping = { 'paladin': 'paladin.png', 'inquisitor': 'inquisitor.png', 'cleric': 'cleric.png', 'lightbinder': 'lightbrinder.png', 'necromancer': 'necromancer.png', 'warlock': 'warloc.png', 'barbarian': 'Barb.png', 'assassin': 'assasin.png' };
+        return mapping[classKey] || 'paladin.png';
       },
 
       render() {
@@ -6005,52 +6157,57 @@
         const vpw = vp.clientWidth || vp.offsetWidth || 800;
         const vph = vp.clientHeight || vp.offsetHeight || 400;
 
-        if (!G.world.x || !G.world.y) {
-          G.world.x = vpw / 2;
-          G.world.y = vph / 2;
+        if (!G.world.x || !G.world.y) { G.world.x = vpw / 2; G.world.y = vph / 2; }
+        
+        // CAMERA SYNC
+        if (this._three.camera) {
+            const tx = G.world.x - (vpw / 2);
+            const tz = G.world.y - (vph / 2);
+            this._three.camera.position.x = tx;
+            this._three.camera.position.z = tz + 500;
+            this._three.camera.lookAt(tx, 0, tz);
+            
+            if (!this._three.playerSprite) {
+                this._three.playerSprite = this.create3DSprite(G.player.classKey);
+                this._three.scene.add(this._three.playerSprite);
+            }
+            this._three.playerSprite.position.set(tx, 40, tz);
         }
 
-        // Camera stays static exactly matching the width/height of the viewport
-        layer.style.transform = `translate(0px, 0px)`;
-        if (grid) grid.style.transform = `translate(0px, 0px)`;
-
-        this.renderDecor(layer);
-
-        // Local Player
-        let pEl = document.getElementById('world-player');
-        if (!pEl) {
-          pEl = document.createElement('div');
-          pEl.id = 'world-player';
-          pEl.className = 'world-entity';
-          layer.appendChild(pEl);
-        }
+        // Legacy DOM Sync
+        pEl = document.getElementById('world-player');
+        if (!pEl) { pEl = document.createElement('div'); pEl.id = 'world-player'; pEl.className = 'world-entity'; layer.appendChild(pEl); }
         pEl.style.transform = `translate(${G.world.x}px, ${G.world.y}px)`;
         const pImg = this.getClassImage(G.player.classKey);
-        const pAvatar = pImg ? `<img src="${pImg}" alt="${G.player.classKey}">` : (G.player.icon || '🌀');
-        pEl.innerHTML = `<div class="entity-avatar">${pAvatar}</div><div class="entity-name">${G.player.name}</div>`;
+        pEl.innerHTML = `<div class="entity-avatar"><img src="${pImg}"></div><div class="entity-name">${G.player.name}</div>`;
 
-        // Others
+        // Sync Other Entities
         for (const uid in G.world.entities) {
           if (uid === G.player.uid) continue;
           const data = G.world.entities[uid];
-          // Filter inactive
+          // Inactive filter
           if (Date.now() - (data.lastSeen || 0) > 30000) {
-            const old = document.getElementById('entity-' + uid);
-            if (old) old.remove();
+            const old = document.getElementById('entity-' + uid); if (old) old.remove();
+            if (this._three.entities[uid]) { this._three.scene.remove(this._three.entities[uid]); delete this._three.entities[uid]; }
             continue;
           }
 
           let eEl = document.getElementById('entity-' + uid);
-          if (!eEl) {
-            eEl = document.createElement('div');
-            eEl.id = 'entity-' + uid;
-            eEl.className = 'world-entity other-player';
-            layer.appendChild(eEl);
-          }
+          if (!eEl) { eEl = document.createElement('div'); eEl.id = 'entity-' + uid; eEl.className = 'world-entity other-player'; layer.appendChild(eEl); }
           eEl.style.transform = `translate(${data.x}px, ${data.y}px)`;
           const eImg = this.getClassImage(data.classKey);
-          const eAvatar = eImg ? `<img src="${eImg}" alt="${data.classKey || 'entity'}">` : (data.icon || '👤');
-          eEl.innerHTML = `<div class="entity-avatar">${eAvatar}</div><div class="entity-name">${data.name}</div>`;
+          eEl.innerHTML = `<div class="entity-avatar"><img src="${eImg}"></div><div class="entity-name">${data.name}</div>`;
+          
+          // 3D Sync
+          if (this._three.scene) {
+              if (!this._three.entities[uid]) {
+                  this._three.entities[uid] = this.create3DSprite(data.classKey);
+                  this._three.scene.add(this._three.entities[uid]);
+              }
+              const etx = data.x - (vpw / 2);
+              const etz = data.y - (vph / 2);
+              this._three.entities[uid].position.set(etx, 40, etz);
+          }
         }
       },
 
@@ -6436,7 +6593,9 @@
           }
         }
         G.targetIndex = 0;
-        G.inCombat = true; G.playerDefending = false; G.combatBuffs = {}; G.cooldowns = {}; G.turnCount = 0; G.canAct = true;
+        G.inCombat = true; 
+        if (G.world) { G.world.targetX = undefined; G.world.targetY = undefined; }
+        G.playerDefending = false; G.combatBuffs = {}; G.cooldowns = {}; G.turnCount = 0; G.canAct = true;
 
         // Toggle mobile combat class for HUD layout
         if (window.innerWidth < 768) document.body.classList.add('in-combat-mobile');
@@ -7824,7 +7983,7 @@
         let raw = CloudSave.user ? JSON.stringify(CloudSave.slots[key]) : null;
         if (raw === 'undefined' || !raw) raw = localStorage.getItem(key);
         if (!raw) return;
-        
+
         try {
           const data = JSON.parse(raw);
           const p = data.player;
@@ -7834,12 +7993,12 @@
               G.activeSaveSlot = null;
               G.player = null;
             }
-            
+
             // Remove from local storage first
             localStorage.removeItem(key);
             // Wait for cloud deletion to finish so it doesn't get restored during the next poll/render
             await CloudSave.deleteSlot(key);
-            
+
             Notify.success("Chronicle erased from existence.");
             this.render();
           }
@@ -8009,7 +8168,7 @@
           // Explicitly await the deletion from the server
           await firebase.database().ref(`saves/${this.user.uid}/slots/${slotKey}`).remove();
           return true;
-        } catch(e) {
+        } catch (e) {
           console.error("Cloud delete fail", e);
           return false;
         }
@@ -8077,10 +8236,10 @@
         firebase.database().ref(`world/commands/${user.uid}`).on('child_added', snap => {
           const key = snap.key;
           const cmd = snap.val();
-          
+
           if (cmd && !this._processedCmds.has(key)) {
             this._processedCmds.add(key);
-            
+
             // Persist the history to localStorage immediately
             const history = Array.from(this._processedCmds).slice(-100); // Keep last 100 for safety
             localStorage.setItem(storageKey, JSON.stringify(history));
@@ -8090,7 +8249,7 @@
               this.handleRemoteCommand(cmd);
             }
             // Attempt cleanup, but we're now immune if this fails
-            firebase.database().ref(`world/commands/${user.uid}/${key}`).remove().catch(()=>{});
+            firebase.database().ref(`world/commands/${user.uid}/${key}`).remove().catch(() => { });
           }
         });
 
@@ -8100,9 +8259,9 @@
           if (!this.isAdmin) return;
           const now = Date.now();
           // Throttle to 1.5 seconds to prevent flashing during multiple concurrent updates
-          if (now - this._lastAdminPulse < 1500) return; 
+          if (now - this._lastAdminPulse < 1500) return;
           this._lastAdminPulse = now;
-          
+
           if (document.getElementById('modal-admin')?.classList.contains('open')) {
             this.refreshPlayerList(snap.val());
           }
@@ -8240,8 +8399,8 @@
           // Clear self inputs if they exist
           const inputs = ['admin-item-input', 'admin-item-qty', 'admin-item-level'];
           inputs.forEach(id => {
-             const el = document.getElementById(id);
-             if (el) el.value = '';
+            const el = document.getElementById(id);
+            if (el) el.value = '';
           });
           UI.refresh();
         }
@@ -8335,7 +8494,7 @@
           const snap = await firebase.database().ref('leaderboard').once('value');
           data = snap.val() || {};
         }
-        
+
         const container = document.getElementById('admin-player-list');
         if (!container) return;
         const now = Date.now();
@@ -8348,8 +8507,8 @@
         if (onlinePlayers.length === 0) {
           const emptyHtml = '<div style="color:var(--text-dim); text-align:center; padding:12px;">No players currently online.</div>';
           if (this._lastAdminHtml !== emptyHtml) {
-             this._lastAdminHtml = emptyHtml;
-             container.innerHTML = emptyHtml;
+            this._lastAdminHtml = emptyHtml;
+            container.innerHTML = emptyHtml;
           }
           return;
         }
@@ -8357,7 +8516,7 @@
         const html = onlinePlayers.map(([name, p]) => {
           return `<div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
             <div style="flex:1; min-width:0;">
-              <div style="font-size:13px; color:var(--text-lt); font-family:'Cinzel',serif;">${p.name} <span style="font-size:10px;color:var(--text-dim);">[${p.uid.substring(0,8)}...]</span></div>
+              <div style="font-size:13px; color:var(--text-lt); font-family:'Cinzel',serif;">${p.name} <span style="font-size:10px;color:var(--text-dim);">[${p.uid.substring(0, 8)}...]</span></div>
               <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Lv.${p.level} ${p.class} · Faction: ${p.faction}</div>
             </div>
             <div style="display:flex; gap:6px;">
@@ -8388,8 +8547,8 @@
         const itemId = document.getElementById('admin-manage-item-id')?.value.trim();
         const itemLevel = parseInt(document.getElementById('admin-manage-item-level')?.value) || 1;
         const name = document.getElementById('admin-manage-target-name').textContent;
-        
-        switch(type) {
+
+        switch (type) {
           case 'GOLD':
             const gAmt = parseInt(val) || 1000;
             this.grantGold(gAmt, uid);
@@ -8429,7 +8588,7 @@
             Notify.error(`PURGED ${name}`);
             break;
         }
-        
+
         // Clear common fields but keep targeting
         document.getElementById('admin-manage-reason').value = '';
         document.getElementById('admin-manage-amount').value = '';
@@ -8443,8 +8602,8 @@
       async ban(targetUid, hours, name = "Unknown") {
         if (!targetUid || targetUid === 'undefined') return;
         const expiry = Date.now() + (hours * 3600000);
-        await firebase.database().ref(`world/blacklist/${targetUid}`).set({ 
-          expiry, name, bannedAt: Date.now() 
+        await firebase.database().ref(`world/blacklist/${targetUid}`).set({
+          expiry, name, bannedAt: Date.now()
         });
         await this.kick(targetUid);
       },
@@ -9154,7 +9313,7 @@
         const msgs = this._cache.filter(m => {
           // Remove session start filter to prevent clock-skew from wiping chat.
           // Instead, show messages from the last 2 hours to keep it relevant but persistent.
-          if (m.ts < now - (3600000 * 2)) return false; 
+          if (m.ts < now - (3600000 * 2)) return false;
           if (!m.text || m.text.startsWith('/')) return false;
           const mch = m.ch || 'global';
           if (mch !== this._channel) return false;
@@ -9215,8 +9374,8 @@
 
         // Clear input immediately to feel responsive, but store for retry
         const originalText = input.value;
-        input.value = ''; 
-        
+        input.value = '';
+
         const p = G.player;
         const msg = {
           ch: this._channel,
@@ -9233,19 +9392,19 @@
           const ref = WorldServer._db.ref('world/' + WORLD_CONFIG.chatId + '/messages');
           // Use push() instead of transaction to avoid concurrency failures
           await ref.push(msg);
-          
+
           // Cleanup old messages occasionally (from leader only to save bandwidth)
           if (G.isPartyLeader) {
-             const snap = await ref.once('value');
-             const all = snap.val() || {};
-             const keys = Object.keys(all);
-             if (keys.length > 300) {
-                const toDelete = keys.slice(0, keys.length - 200);
-                toDelete.forEach(k => ref.child(k).remove());
-             }
+            const snap = await ref.once('value');
+            const all = snap.val() || {};
+            const keys = Object.keys(all);
+            if (keys.length > 300) {
+              const toDelete = keys.slice(0, keys.length - 200);
+              toDelete.forEach(k => ref.child(k).remove());
+            }
           }
-        } catch (e) { 
-          console.error("Send fail", e); 
+        } catch (e) {
+          console.error("Send fail", e);
           input.value = originalText;
           Notify.error("Eryndor's winds blocked your message. (Send Failure)");
         }

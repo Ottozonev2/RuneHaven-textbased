@@ -1,0 +1,9 @@
+{
+  "appId": "com.runehaven.app",
+  "appName": "Rune Haven",
+  "webDir": "www",
+  "server": {
+    "url": "https://runehaventextrpg.runehaven1472.workers.dev/",
+    "cleartext": true
+  }
+}
