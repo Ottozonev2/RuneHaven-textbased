@@ -1,9 +1,9 @@
 name = "runehaventextrpg"
 compatibility_date = "2024-03-20"
-pages_build_output_dir = "."
+pages_build_output_dir = "www"
 
 [assets]
-directory = "."
+directory = "www"
 
 [[kv_namespaces]]
 binding = "SAVES_KV"

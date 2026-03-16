@@ -2312,10 +2312,79 @@
     .party-xp-fill {
       background: #e0b050;
     }
+
+    /* Mobile Update Overlay */
+    #mobile-update-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 20000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: opacity 1s ease-out, visibility 1s;
+    }
+
+    #mobile-update-overlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .update-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 32px;
+      color: var(--gold-lt);
+      text-shadow: 0 0 20px var(--gold);
+      margin-bottom: 40px;
+      letter-spacing: 4px;
+      animation: updateLogoPulse 3s infinite ease-in-out;
+    }
+
+    @keyframes updateLogoPulse {
+      0%, 100% { opacity: 0.8; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1.02); filter: brightness(1.2); }
+    }
+
+    .update-status {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .update-progress-container {
+      width: 240px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .update-progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dk), var(--gold), var(--gold-lt));
+      box-shadow: 0 0 10px var(--gold);
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 
 <body>
+
+  <div id="mobile-update-overlay">
+    <div class="update-logo">RUNE HAVEN</div>
+    <div class="update-status" id="update-status">Checking for updates...</div>
+    <div class="update-progress-container">
+      <div class="update-progress-fill" id="update-progress-fill"></div>
+    </div>
+  </div>
 
   <div id="maintenance-countdown">⚠️ SHUTDOWN IN: 60s</div>
 
@@ -10118,9 +10187,50 @@
     }
 
     /* ============================================================
+       MOBILE UPDATE LOGIC
+       ============================================================ */
+    const MobileUpdate = {
+      progress: 0,
+      fillEl: null,
+      statusEl: null,
+      overlayEl: null,
+
+      init() {
+        this.fillEl = document.getElementById('update-progress-fill');
+        this.statusEl = document.getElementById('update-status');
+        this.overlayEl = document.getElementById('mobile-update-overlay');
+        
+        // Initial jump
+        this.set(15, 'Communing with the ley lines...');
+        
+        // Simulate loading assets
+        setTimeout(() => this.set(40, 'Fetching shards of Eryndor...'), 600);
+        setTimeout(() => this.set(70, 'Woven into reality...'), 1200);
+        setTimeout(() => this.set(100, 'Welcome, Outworlder.'), 1800);
+      },
+
+      set(val, status) {
+        this.progress = Math.max(this.progress, val);
+        if (this.fillEl) this.fillEl.style.width = this.progress + '%';
+        if (status && this.statusEl) this.statusEl.textContent = status;
+        
+        if (this.progress >= 100) {
+          setTimeout(() => this.finish(), 800);
+        }
+      },
+
+      finish() {
+        if (this.overlayEl) {
+          this.overlayEl.classList.add('fade-out');
+        }
+      }
+    };
+
+    /* ============================================================
        INIT
        ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
+      MobileUpdate.init();
       AuthSystem.init();
       Game.showTitle();
       GlobalChat.init();
