@@ -2406,9 +2406,17 @@
      TITLE SCREEN
      ============================================================ -->
   <div id="screen-title" class="screen active">
+    <!-- Landing Navigation -->
+    <nav style="position:absolute; top:0; left:0; width:100%; height:60px; display:flex; align-items:center; justify-content:center; gap:30px; z-index:1000; background:linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); padding:0 20px;">
+      <a href="#" style="color:var(--gold-lt); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;" onclick="Landing.showSection('game')">GAME</a>
+      <a href="#" style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;" onclick="Landing.showSection('about')" id="nav-about">ABOUT</a>
+      <a href="#" style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;" onclick="Landing.showSection('updates')" id="nav-updates">UPDATES</a>
+      <a href="#" style="color:var(--text-dim); text-decoration:none; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;" onclick="Landing.showSection('contact')" id="nav-contact">CONTACT</a>
+    </nav>
+
     <!-- Cloud Auth Header -->
     <div id="auth-header"
-      style="position:absolute; top:12px; right:12px; z-index:100; display:flex; align-items:center; gap:10px;">
+      style="position:absolute; top:12px; right:12px; z-index:2000; display:flex; align-items:center; gap:10px;">
       <div id="user-info"
         style="color:var(--text-dim); font-size:11px; font-family:'Cinzel',serif; text-align:right; display:none;">
         <div style="color:var(--gold-lt); font-weight:bold;" id="user-email"></div>
@@ -2428,7 +2436,8 @@
         Outworlder Authentication</div>
 
       <div id="auth-box"
-        style="width:100%; max-width:320px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+        style="width:100%; max-width:320px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.5); position:relative;">
+        <button onclick="Landing.hideLogin()" style="position:absolute; top:12px; right:12px; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:18px;">✕</button>
         <div id="auth-title"
           style="font-family:'Cinzel',serif; color:var(--gold); font-size:18px; margin-bottom:20px; text-align:center;">
           Sign In</div>
@@ -2458,37 +2467,103 @@
         style="margin-top:20px; color:var(--red); font-size:12px; display:none; text-align:center; max-width:300px;">
       </div>
     </div>
-    <div class="title-world" style="margin-top: min(45vh, 400px); text-shadow: 0 0 10px #000;">World of Eryndor</div>
-    <div class="title-story">
-      The Veil between worlds is broken. Amber lightning tears the sky.
-      The dead walk freely and entire kingdoms have warped into unnatural waste-lands.
-      You are an <em>Outworlder</em> — a soul dragged through the Veil during the
-      failed Shattered Summoning — cast into the dying world of <strong>Eryndor</strong>
-      with no memory of how or why.
-      <br><br>
-      Two great factions war for the soul of this world. The <em>Luminous Covenant</em>
-      would reopen the Veil and restore the gods. The <em>Ashen Dominion</em> worships
-      the <em>Devouring King</em> — the entity that slipped through during the summoning.
-      <br><br>
-      Choose your allegiance. Shape the fate of Eryndor.
+    <!-- Main Game Landing -->
+    <div id="landing-section-game" class="landing-content active">
+      <div class="title-world" style="margin-top: min(45vh, 400px); text-shadow: 0 0 10px #000;">World of Eryndor</div>
+      <div class="title-story">
+        The Veil between worlds is broken. Amber lightning tears the sky.
+        The dead walk freely and entire kingdoms have warped into unnatural waste-lands.
+        You are an <em>Outworlder</em> — a soul dragged through the Veil during the
+        failed Shattered Summoning — cast into the dying world of <strong>Eryndor</strong>
+        with no memory of how or why.
+        <br><br>
+        Two great factions war for the soul of this world. The <em>Luminous Covenant</em>
+        would reopen the Veil and restore the gods. The <em>Ashen Dominion</em> worships
+        the <em>Devouring King</em> — the entity that slipped through during the summoning.
+        <br><br>
+        Choose your allegiance. Shape the fate of Eryndor.
+      </div>
+      <div class="faction-row">
+        <span class="faction-pill faction-saints">☀ The Luminous Covenant</span>
+        <span class="faction-pill faction-demons">💀 The Ashen Dominion</span>
+      </div>
+      <div class="title-btns" id="landing-auth-btns">
+        <!-- Dynamically populated by AuthSystem -->
+        <button class="btn btn-rh btn-lg" onclick="Landing.showLogin()">&#127760; Login to Play</button>
+      </div>
+      <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
+        v3.9 &middot; Rune Haven &middot; Mobile &amp; Desktop
+      </div>
+      <div
+        style="margin-top:10px; color:var(--text-dim); font-size:9px; max-width:440px; margin-left:auto; margin-right:auto; opacity:0.6; line-height:1.4; font-family:serif; font-style:italic;">
+        This project utilizes AI-assisted development. All core systems, game balance, and content are human-refined to
+        ensure a handcrafted, premium experience.
+      </div>
     </div>
-    <div class="faction-row">
-      <span class="faction-pill faction-saints">☀ The Luminous Covenant</span>
-      <span class="faction-pill faction-demons">💀 The Ashen Dominion</span>
+
+    <!-- About Us Section -->
+    <div id="landing-section-about" class="landing-content" style="display:none; padding-top:100px; max-width:600px; margin:0 auto; text-align:center;">
+      <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; margin-bottom:20px;">OUR JOURNEY</div>
+      <div style="color:var(--text-dim); font-size:14px; line-height:1.8; margin-bottom:30px;">
+        Rune Haven was born from a passion for classic text-based RPGs and a desire to merge deep, lore-driven storytelling with modern web technologies.
+        Based in the shattered lands of the Outworld, our development team is dedicated to creating a living world that responds to player choices.
+        <br><br>
+        Since the <strong>Shattered Summoning</strong>, we have committed ourselves to expanding Eryndor, one update at a time.
+        Rune Haven is not just a game; it is a collaborative experience between developers and the brave souls who brave the Veil.
+      </div>
+      <div style="font-family:'Cinzel',serif; color:var(--violet-lt); font-size:18px; margin-bottom:15px;">THE OUTWORLDER TEAM</div>
+      <div style="display:flex; justify-content:center; gap:20px; color:var(--text-lt); font-size:12px;">
+        <div>Architect: Rune1472</div>
+        <div>Scribe: Deepmind AI</div>
+        <div>Warden: The Community</div>
+      </div>
     </div>
-    <div class="title-btns">
-      <button class="btn btn-rh btn-lg" onclick="CharSelect.show()">&#127760; Enter Eryndor</button>
+
+    <!-- Latest Updates Section -->
+    <div id="landing-section-updates" class="landing-content" style="display:none; padding-top:100px; max-width:600px; margin:0 auto;">
+      <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; text-align:center; margin-bottom:30px;">LATEST CHRONICLES</div>
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div style="background:var(--bg-mid); border:1px solid var(--border); padding:20px; border-radius:8px;">
+          <div style="color:var(--gold); font-family:'Cinzel',serif; font-size:16px; margin-bottom:8px;">v3.9: THE TREASURY UNVEILED</div>
+          <div style="color:var(--text-dim); font-size:12px; line-height:1.5;">
+            - Implemented secure monetization bridge via Cloudflare Workers.<br>
+            - Added the Rune Exchange modal for premium resource conversion.<br>
+            - Updated landing page with lore and contact sections.<br>
+            - Optimized mobile UI and player model scaling.
+          </div>
+          <div style="text-align:right; color:var(--text-dim); font-size:10px; margin-top:10px;">March 16, 2026</div>
+        </div>
+        <div style="background:var(--bg-mid); border:1px solid var(--border); padding:20px; border-radius:8px; opacity:0.7;">
+          <div style="color:var(--text-lt); font-family:'Cinzel',serif; font-size:16px; margin-bottom:8px;">v3.8: VEIL BREACH REFINEMENTS</div>
+          <div style="color:var(--text-dim); font-size:12px; line-height:1.5;">
+            - Integrated Three.js for 3D world navigation.<br>
+            - Added dynamic lighting and environment effects.<br>
+            - Implemented multi-character slot system.
+          </div>
+          <div style="text-align:right; color:var(--text-dim); font-size:10px; margin-top:10px;">March 10, 2026</div>
+        </div>
+      </div>
     </div>
-    <div style="margin-top:12px;">
-      <button class="btn btn-sm btn-gold" onclick="UI.openModal('modal-updates')">📜 Latest Updates</button>
-    </div>
-    <div style="margin-top:20px;color:var(--text-dim);font-size:11px;font-style:italic;">
-      v3.9 &middot; Rune Haven &middot; Mobile &amp; Desktop
-    </div>
-    <div
-      style="margin-top:10px; color:var(--text-dim); font-size:9px; max-width:440px; margin-left:auto; margin-right:auto; opacity:0.6; line-height:1.4; font-family:serif; font-style:italic;">
-      This project utilizes AI-assisted development. All core systems, game balance, and content are human-refined to
-      ensure a handcrafted, premium experience.
+
+    <!-- Contact Us Section -->
+    <div id="landing-section-contact" class="landing-content" style="display:none; padding-top:100px; max-width:500px; margin:0 auto; text-align:center;">
+      <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:28px; margin-bottom:20px;">REACH OUT</div>
+      <div style="color:var(--text-dim); font-size:14px; margin-bottom:30px;">
+        Have feedback, discovered a bug, or just want to send word from your side of the Veil? Use the channels below.
+      </div>
+      <div style="display:flex; flex-direction:column; gap:15px;">
+        <a href="mailto:contact@runehaven.com" style="background:var(--bg-mid); border:1px solid var(--border); padding:15px; border-radius:8px; color:var(--text-lt); text-decoration:none; font-family:'Cinzel',serif;">
+          📧 SEND AN OWL (EMAIL)
+        </a>
+        <a href="https://discord.gg/runehaven" target="_blank" style="background:var(--bg-mid); border:1px solid var(--border); padding:15px; border-radius:8px; color:var(--violet-lt); text-decoration:none; font-family:'Cinzel',serif;">
+          💬 JOIN THE COUNCIL (DISCORD)
+        </a>
+        <div style="margin-top:20px; padding:20px; background:rgba(255,183,0,0.05); border:1px solid var(--gold-dk); border-radius:8px;">
+          <div style="font-size:12px; color:var(--gold); font-family:'Cinzel',serif; margin-bottom:10px;">FORGE FEEDBACK</div>
+          <input type="text" placeholder="Your Message..." style="width:100%; background:#000; border:1px solid var(--border); color:var(--text-lt); padding:10px; margin-bottom:10px; font-size:12px;">
+          <button class="btn btn-sm btn-gold" style="width:100%;">SEND DECREE</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2498,9 +2573,11 @@
   <div id="screen-charselect" class="screen">
     <div
       style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--bg-panel);">
-      <div style="font-family:'Cinzel',serif;color:var(--gold-lt);font-size:16px;letter-spacing:2px;">🌀 Chronicles of
-        Eryndor</div>
-      <button class="btn btn-sm" onclick="Game.showTitle()">&#8592; Back</button>
+      <div style="font-family:'Cinzel',serif;color:var(--gold-lt);font-size:16px;letter-spacing:2px;">🌀 Chronicles of Eryndor</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" onclick="Game.showTitle()">&#8592; Back</button>
+        <button class="btn btn-sm btn-red" onclick="AuthSystem.logout()">Logout</button>
+      </div>
     </div>
     <div style="overflow-y:auto;flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:14px;">
       <div style="color:var(--text-dim);font-style:italic;font-size:12px;text-align:center;margin-bottom:4px;">Select a
@@ -2648,11 +2725,14 @@
         <div class="topbar-stat">Lv <span id="top-level">1</span></div>
         <div class="topbar-stat">HP <span id="top-hp">—</span></div>
         <div class="topbar-stat">🪙<span id="top-gold">0</span></div>
-        <div class="topbar-stat" style="color:var(--violet-lt); font-weight:bold;">💎<span id="top-runes">0</span></div>
         <span class="topbar-faction" id="top-faction">—</span>
       </div>
       <div class="topbar-btns">
-        <button class="btn btn-sm btn-gold" onclick="MonetizationSystem.openConversion()" title="Convert Runes">💎 Exchange</button>
+        <div style="display:flex; align-items:center; background:rgba(144,96,216,0.1); border:1px solid var(--violet-lt); border-radius:4px; padding:0 4px; gap:4px; margin-right:4px;">
+          <span style="color:var(--violet-lt); font-weight:bold; font-size:11px;">💎 <span id="top-runes-val">0</span></span>
+          <button class="btn btn-sm btn-violet" style="min-height:20px; height:20px; padding:0 4px; font-size:12px;" onclick="MonetizationSystem.showStore()" title="Get Runes">+</button>
+        </div>
+        <button class="btn btn-sm btn-gold" onclick="MonetizationSystem.openExchange()" title="Convert Runes">💎 Exchange</button>
         <button class="btn btn-sm" onclick="UI.openModal('modal-settings')" title="Audio Settings">🔊</button>
         <button class="btn btn-sm btn-gold" onclick="GlobalChat.openParty()" title="Party Management">⚔️ Party</button>
         <button class="btn btn-sm btn-gold" onclick="Game.saveGame()" title="Save Game">💾</button>
@@ -3004,13 +3084,56 @@
     </div>
   </div>
 
+  <!-- In-Game Rune Purchase Modal -->
+  <div class="modal-overlay" id="modal-purchase-runes" style="z-index: 2200;">
+    <div class="modal" style="max-width:480px; padding:0; overflow:hidden;">
+      <div style="padding:20px; background:var(--bg-mid); border-bottom:1px solid var(--violet-lt); display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-family:'Cinzel',serif; color:var(--gold-lt); font-size:18px;">💎 THE RUNE FORGE</div>
+        <button onclick="UI.closeModal('modal-purchase-runes')" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:20px;">✕</button>
+      </div>
+      
+      <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+        <div style="text-align:center; padding:12px; background:rgba(144,96,216,0.05); border:1px solid rgba(144,96,216,0.2); border-radius:8px;">
+          <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Current Balance</div>
+          <div style="font-size:24px; color:var(--violet-lt); font-family:'Cinzel',serif;">💎 <span class="rune-balance-display">0</span></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <!-- Pack 1 -->
+          <div style="background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:15px; text-align:center; cursor:pointer;" onclick="MonetizationSystem.purchaseRunes('runes_1')">
+            <div style="font-size:24px; margin-bottom:8px;">💎</div>
+            <div style="font-size:12px; font-weight:bold; color:var(--violet-lt);">100 Runes</div>
+            <div style="font-size:10px; color:var(--gold); margin-top:4px;">$1.00</div>
+          </div>
+          <!-- Pack 5 -->
+          <div style="background:var(--bg-panel); border:2px solid var(--gold); border-radius:8px; padding:15px; text-align:center; cursor:pointer; position:relative;" onclick="MonetizationSystem.purchaseRunes('runes_5')">
+            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:8px; font-weight:bold; padding:2px 8px; border-radius:10px;">BEST VALUE</div>
+            <div style="font-size:24px; margin-bottom:8px;">✨💎</div>
+            <div style="font-size:12px; font-weight:bold; color:var(--violet-lt);">600 Runes</div>
+            <div style="font-size:10px; color:var(--gold); margin-top:4px;">$5.00</div>
+          </div>
+          <!-- Pack 10 -->
+          <div style="background:var(--bg-panel); border:1px solid var(--violet-lt); border-radius:8px; padding:15px; text-align:center; cursor:pointer;" onclick="MonetizationSystem.purchaseRunes('runes_10')">
+            <div style="font-size:24px; margin-bottom:8px;">🔱💎</div>
+            <div style="font-size:12px; font-weight:bold; color:var(--violet-lt);">1300 Runes</div>
+            <div style="font-size:10px; color:var(--gold); margin-top:4px;">$10.00</div>
+          </div>
+        </div>
+
+        <div style="font-size:10px; color:var(--text-dim); font-style:italic; text-align:center; border-top:1px solid var(--border); padding-top:12px;">
+          Runes are used for resource exchange and cosmetics. No refunds available on digital essence.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Rune Exchange Modal -->
   <div class="modal-overlay" id="modal-runes" style="z-index: 2100;">
     <div class="modal" style="max-width:450px;">
       <div class="modal-title" style="color:var(--violet-lt); font-family:'Cinzel',serif;">💎 RUNE EXCHANGE</div>
       <div style="text-align:center; margin-bottom:20px; padding:15px; background:rgba(144,96,216,0.05); border:1px solid var(--violet-lt); border-radius:8px;">
         <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Your Balance</div>
-        <div style="font-size:32px; color:var(--violet-lt); font-family:'Cinzel',serif; font-weight:bold;">💎 <span id="rune-modal-balance">0</span></div>
+        <div style="font-size:32px; color:var(--violet-lt); font-family:'Cinzel',serif; font-weight:bold;">💎 <span class="rune-balance-display">0</span></div>
       </div>
 
       <div style="display:flex; flex-direction:column; gap:12px;">
@@ -3112,8 +3235,12 @@
               <input id="admin-manage-amount" type="number" placeholder="Qty/Hrs" title="Quantity or Hours"
                 style="background:#000; border:1px solid var(--border); color:var(--text-lt); padding:8px; font-size:12px; border-radius:4px; width:100%;">
               <button class="btn btn-sm btn-gold" onclick="AdminSystem.doAction('GOLD')">Give Gold</button>
-              <button class="btn btn-sm btn-violet" onclick="AdminSystem.doAction('LEVEL')">Give Lv</button>
               <button class="btn btn-sm btn-blue" onclick="AdminSystem.doAction('RUNES')">Give Runes</button>
+              <button class="btn btn-sm btn-violet" onclick="AdminSystem.doAction('LEVEL')">Give Lv</button>
+              <div style="grid-column: span 3; background:#000; border:1px solid var(--violet-lt); border-radius:4px; padding:8px; text-align:center; margin-top:4px;">
+                <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase;">Player Runes</div>
+                <div style="font-size:16px; color:var(--violet-lt); font-family:'Cinzel',serif;">💎 <span id="admin-manage-target-runes">0</span></div>
+              </div>
               <button class="btn btn-sm btn-gold" style="grid-column: span 3;" onclick="AdminSystem.doAction('OWNERSHIP')">Grant Ownership License</button>
             </div>
 
@@ -5110,10 +5237,9 @@
         
         // Update Rune Balance Displays
         const runeBal = p.runes || 0;
-        const rbEl = document.getElementById('top-runes');
-        if (rbEl) rbEl.textContent = runeBal;
-        const rmbEl = document.getElementById('rune-modal-balance');
-        if (rmbEl) rmbEl.textContent = runeBal;
+        document.querySelectorAll('.rune-balance-display').forEach(el => el.textContent = runeBal);
+        const trv = document.getElementById('top-runes-val');
+        if (trv) trv.textContent = runeBal;
 
         const tf = document.getElementById('top-faction');
         tf.textContent = p.faction === 'saints' ? '☀ Covenant' : '💀 Dominion';
@@ -8237,6 +8363,9 @@
       showPurchase() {
         Game._show('screen-purchase');
       },
+      showStore() {
+        UI.openModal('modal-purchase-runes');
+      },
 
       async purchaseGame() {
         if (!AuthSystem.user) return;
@@ -8328,6 +8457,73 @@
     };
 
     /* ============================================================
+       LANDING PAGE SYSTEM
+       ============================================================ */
+    const Landing = {
+      activeSection: 'game',
+
+      showSection(sectionId) {
+        // Hide all sections
+        const sections = ['game', 'about', 'updates', 'contact'];
+        sections.forEach(s => {
+          const el = document.getElementById(`landing-section-${s}`);
+          if (el) el.style.display = 'none';
+          
+          // Reset navigation links color
+          const nav = document.getElementById(`nav-${s}`);
+          if (nav) nav.style.color = 'var(--text-dim)';
+        });
+
+        // Show target section
+        const target = document.getElementById(`landing-section-${sectionId}`);
+        if (target) target.style.display = (sectionId === 'game') ? 'block' : 'block'; // Match your layout (flex/block)
+        
+        // Highlight active nav
+        const activeNav = document.getElementById(`nav-${sectionId}`);
+        if (activeNav) activeNav.style.color = 'var(--gold-lt)';
+
+        this.activeSection = sectionId;
+      },
+
+      showLogin() {
+        const login = document.getElementById('screen-login');
+        if (login) {
+          login.style.display = 'flex';
+          login.classList.add('active');
+        }
+      },
+
+      hideLogin() {
+        const login = document.getElementById('screen-login');
+        if (login) {
+          login.style.display = 'none';
+          login.classList.remove('active');
+        }
+      },
+
+      updateAuthButtons(user) {
+        const container = document.getElementById('landing-auth-btns');
+        if (!container) return;
+
+        if (user) {
+          container.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+              <button class="btn btn-rh btn-lg" onclick="CharSelect.show()">&#127760; Play Rune Haven</button>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-size:10px; color:var(--text-dim);">Logged in as <span style="color:var(--gold-lt);">${user.email}</span></div>
+                <button class="btn btn-sm btn-red" style="font-size:9px; padding:2px 8px;" onclick="AuthSystem.logout()">Logout</button>
+              </div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <button class="btn btn-rh btn-lg" onclick="Landing.showLogin()">&#127760; Login to Play</button>
+          `;
+        }
+      }
+    };
+
+    /* ============================================================
        AUTH SYSTEM — Firebase Auth
        ============================================================ */
     const AuthSystem = {
@@ -8337,9 +8533,11 @@
       init() {
         firebase.auth().onAuthStateChanged(async user => {
           this.user = user;
+          Landing.updateAuthButtons(user);
+
           if (user) {
             // Check blacklist
-            const snap = await firebase.database().ref(`world/blacklist/${user.uid}`).once('value');
+            const snap = await firebase.database().get(firebase.database().ref(`world/blacklist/${user.uid}`));
             const ban = snap.val();
             if (ban && ban.expiry > Date.now()) {
               const date = new Date(ban.expiry).toLocaleString();
@@ -8349,12 +8547,13 @@
             }
             console.log("Firebase Auth Success:", user.email);
             CloudSave.handleAuth(user);
-            MonetizationSystem.checkOwnership();
+            
+            // If user is on landing, don't automatically redirect them away unless they click play
+            // But we do want to check ownership in the background
+            MonetizationSystem.checkOwnership(true); // Added flag to silent check
           } else {
             console.log("Firebase Auth: No user logged in.");
-            document.getElementById('screen-login').style.display = 'flex';
-            document.getElementById('screen-login').classList.add('active');
-            this.toggleMode('login');
+            // Don't force login screen on landing page anymore
           }
         });
       },
@@ -8409,9 +8608,13 @@
         }
       },
 
-      logout() {
-        if (typeof GlobalChat !== 'undefined') GlobalChat.stop();
-        firebase.auth().signOut();
+      async logout() {
+        try {
+          if (typeof GlobalChat !== 'undefined') GlobalChat.stop();
+          await firebase.auth().signOut();
+        } catch (e) {
+          console.error("Logout error:", e);
+        }
         location.reload();
       }
     };
@@ -8865,10 +9068,10 @@
           return `<div style="background:var(--bg-mid); border:1px solid var(--border); border-radius:4px; padding:10px; display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
             <div style="flex:1; min-width:0;">
               <div style="font-size:13px; color:var(--text-lt); font-family:'Cinzel',serif;">${p.name} <span style="font-size:10px;color:var(--text-dim);">[${p.uid.substring(0, 8)}...]</span></div>
-              <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Lv.${p.level} ${p.class} · Faction: ${p.faction}</div>
+              <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Lv.${p.level} ${p.class} · Faction: ${p.faction} · 💎 ${p.runes || 0}</div>
             </div>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-sm btn-gold" onclick="AdminSystem.promptManage('${p.uid}', '${p.name}')">Manage</button>
+              <button class="btn btn-sm btn-gold" onclick="AdminSystem.promptManage('${p.uid}', '${p.name}', ${p.runes || 0})">Manage</button>
             </div>
           </div>`;
         }).join('');
@@ -8879,12 +9082,13 @@
         }
       },
 
-      promptManage(uid, name) {
+      promptManage(uid, name, runes = 0) {
         const panel = document.getElementById('admin-manage-panel');
         if (!panel) return;
         panel.style.display = 'block';
         document.getElementById('admin-manage-target-name').textContent = name;
         document.getElementById('admin-manage-target-uid').value = uid;
+        document.getElementById('admin-manage-target-runes').textContent = runes;
         document.getElementById('admin-manage-amount').focus();
       },
 
@@ -9106,6 +9310,7 @@
             faction: p.faction,
             icon: CLASSES[p.classKey]?.icon || '❓',
             kills: p.kills || 0,
+            runes: p.runes || 0,
             ts: Date.now()
           });
         } catch (e) { }
